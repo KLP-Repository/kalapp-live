@@ -64,7 +64,7 @@
                 <div id="g_id_onload" data-client_id="714569037465-7ni0csmq193a0tl6sbne3g35entfj6ok.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-use_fedcm_for_prompt="true" data-auto_prompt="false"></div>
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
             </div>
-            <button onclick="devBypass()" class="btn-dev">⚠️ Developer Bypass: Skip Auth</button>
+            
         </div>
 
         <div id="signup-section">
@@ -199,10 +199,7 @@
             }).join('')));
         }
 
-        function devBypass() {
-            localStorage.setItem('kalapp_username', 'Test Citizen');
-            window.location.href = '/citizen-portal.html';
-        }
+    
     </script>
 </body>
 </html>
