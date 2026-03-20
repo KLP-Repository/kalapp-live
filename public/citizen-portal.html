@@ -1,260 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalapp - Citizen Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script> 
-    <style>
-        :root {
-            --color-primary: #ff8c00; --color-danger: #ff7782; --color-success: #41f1b6; --color-warning: #ffbb55;
-            --color-white: #fff; --color-info-dark: #7d8da1; --color-info-light: #dce1eb; --color-dark: #363949;
-            --color-light: rgba(132, 139, 200, 0.18); --color-background: #f6f6f9;
-            --card-border-radius: 2rem; --border-radius-1: 0.4rem; --card-padding: 1.8rem; --box-shadow: 0 2rem 3rem var(--color-light);
-        }
-        .dark-theme {
-            --color-background: #181a1e; --color-white: #202528; --color-dark: #edeffd;
-            --color-light: rgba(0, 0, 0, 0.4); --box-shadow: 0 2rem 3rem var(--color-light);
-        }
-        * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; background: var(--color-background); overflow-x: hidden; color: var(--color-dark); transition: all 300ms ease; }
-        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto 23rem; }
-        aside { height: 100vh; }
-        aside .top { display: flex; align-items: center; justify-content: space-between; margin-top: 1.4rem; }
-        aside .logo { display: flex; gap: 0.8rem; align-items: center; font-size: 1.2rem; font-weight: bold;}
-        aside .sidebar { display: flex; flex-direction: column; height: 86vh; position: relative; top: 3rem; }
-        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-        aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        aside .sidebar a:last-child { position: absolute; bottom: 2rem; width: 100%; }
-        aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before { content: ''; width: 6px; height: 100%; background: var(--color-primary); }
-        aside .sidebar a:hover { color: var(--color-primary); }
-        aside .sidebar a:hover span { margin-left: 1rem; }
-        main { margin-top: 1.4rem; }
-        .card { background: var(--color-white); padding: var(--card-padding); border-radius: var(--card-border-radius); margin-top: 1rem; margin-bottom: 2rem; box-shadow: var(--box-shadow); transition: all 300ms ease; }
-        .card:hover { box-shadow: none; }
-        main h1 { margin-bottom: 0.8rem; color: var(--color-dark); }
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-dark);}
-        .form-control { width: 100%; padding: 0.8rem; border-radius: var(--border-radius-1); border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); font-family: 'Poppins', sans-serif; }
-        .form-control:focus { border-color: var(--color-primary); }
-        .btn-submit { background: var(--color-primary); color: white; padding: 0.8rem 2rem; border-radius: var(--border-radius-1); cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: 0.3s; width: 100%; }
-        .btn-submit:hover { background: #e67e00; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 1rem; color: var(--color-dark); border-bottom: 2px solid var(--color-light);}
-        td { padding: 1rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); }
-        .photo-thumbnail { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-        .status-pending { color: var(--color-danger); font-weight: bold; }
-        .status-inprogress { color: var(--color-warning); font-weight: bold; }
-        .status-resolved { color: var(--color-success); font-weight: bold; }
-        .right { margin-top: 1.4rem; }
-        .right .top { display: flex; justify-content: end; gap: 2rem; }
-        .right .theme-toggler { background: var(--color-light); display: flex; justify-content: space-between; align-items: center; height: 1.6rem; width: 4.2rem; cursor: pointer; border-radius: var(--border-radius-1); }
-        .right .theme-toggler span { font-size: 1.2rem; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .right .theme-toggler span.active { background: var(--color-primary); color: white; border-radius: var(--border-radius-1); }
-        .right .profile { display: flex; gap: 2rem; text-align: right; }
-        @media screen and (max-width: 1200px) { .container { grid-template-columns: 7rem auto 23rem; } aside .sidebar h3 { display: none; } aside .sidebar a { width: 5.6rem; } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <aside>
-            <div class="top">
-                <div class="logo">
-                    <img src="logokalapp.png" alt="Logo" style="width: 40px; height: 40px; border-radius: 8px;"> KAL<span style="color:var(--color-primary)">APP</span></div>
-            </div>
-            <div class="sidebar">
-                <a href="#" class="active"><span class="material-icons-sharp">add_circle_outline</span><h3>File Complaint</h3></a>
-                <a href="#"><span class="material-icons-sharp">history</span><h3>My History</h3></a>
-                <a href="#"><span class="material-icons-sharp">settings</span><h3>Settings</h3></a>
-                <a href="#" onclick="logout()"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
-            </div>
-        </aside>
+// --- Updated loadMyHistory function ---
+function loadMyHistory() {
+    // Relative path works because we are on the same Render app
+    fetch('/api/complaints')
+    .then(res => res.json())
+    .then(data => {
+        const tbody = document.getElementById('history-body');
+        
+        // FIX: The server returns an array directly, not data.complaints
+        const allComplaints = Array.isArray(data) ? data : data.complaints || [];
+        
+        // Filter: Show only complaints belonging to the logged-in user
+        const myComplaints = allComplaints.filter(c => c.citizenName === username);
 
-        <main>
-            <h1>Submit a Complaint</h1>
-            <div class="card">
-                <form id="complaint-form">
-                    <div class="form-group">
-                        <label>Select Barangay</label>
-                        <select class="form-control" id="barangay" required>
-                            <option value="">-- Choose your Barangay --</option>
-                            <option value="Brgy 1">Barangay 1</option>
-                            <option value="Brgy 2">Barangay 2</option>
-                            <option value="Brgy 3">Barangay 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Issue Category</label>
-                        <select class="form-control" id="issue" required>
-                            <option value="">-- Choose Category --</option>
-                            <option value="Uncollected Garbage">Uncollected Garbage</option>
-                            <option value="Broken Streetlight">Broken Streetlight</option>
-                            <option value="Pothole/Road Damage">Pothole/Road Damage</option>
-                            <option value="Noise Disturbance">Noise Disturbance</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Detailed Description</label>
-                        <textarea class="form-control" id="description" rows="3" placeholder="Describe the issue in detail..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Upload Photo Evidence (Requires EXIF Location Data)</label>
-                        <input type="file" class="form-control" id="evidence" accept="image/*" required>
-                    </div>
-                    <div id="form-msg" style="margin-bottom: 15px; font-weight: 600; font-size: 13px; text-align: center;"></div>
-                    <button type="submit" class="btn-submit">Submit Complaint to LGU</button>
-                </form>
-            </div>
-
-            <h1>My Previous Complaints</h1>
-            <div class="card" style="padding: 0;">
-                <div style="overflow-x: auto; padding: var(--card-padding);">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Photo</th>
-                                <th>Date</th>
-                                <th>Issue</th>
-                                <th>Status</th>
-                                <th>Feedback from LGU</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-body">
-                            <tr><td colspan="5" style="text-align:center;">Loading history...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
-
-        <div class="right">
-            <div class="top">
-                <div class="theme-toggler" id="theme-toggler">
-                    <span class="material-icons-sharp active">light_mode</span>
-                    <span class="material-icons-sharp">dark_mode</span>
-                </div>
-                <div class="profile">
-                    <div class="info">
-                        <p>Hey, <b id="citizen-name-display">Citizen</b></p>
-                        <small class="text-muted">Verified Resident</small>
-                    </div>
-                    <div class="profile-photo"><img src="https://via.placeholder.com/40" style="border-radius:50%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        const themeToggler = document.querySelector("#theme-toggler");
-        const savedTheme = localStorage.getItem('kalapp-theme');
-        if (savedTheme === 'dark') {
-            document.body.classList.add('dark-theme');
-            themeToggler.querySelector('span:nth-child(1)').classList.remove('active');
-            themeToggler.querySelector('span:nth-child(2)').classList.add('active');
-        }
-        themeToggler.addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-            themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
-            themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
-            localStorage.setItem('kalapp-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
-        });
-
-        const username = localStorage.getItem('kalapp_username') || 'Anonymous';
-        document.getElementById('citizen-name-display').innerText = username;
-
-        function loadMyHistory() {
-            fetch('/api/complaints')
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById('history-body');
-                const myComplaints = data.complaints.filter(c => c.username === username);
-                if (myComplaints.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-info-dark);">No complaints filed yet. Start by submitting one above!</td></tr>`;
-                    return; 
-                }
-                tbody.innerHTML = ''; 
-                myComplaints.forEach(c => {
-                    const row = document.createElement('tr');
-                    let statusClass = 'status-pending';
-                    if (c.status === 'In Progress') statusClass = 'status-inprogress';
-                    if (c.status === 'Resolved') statusClass = 'status-resolved';
-                    const photo = c.imageUrl ? `<img src="${c.imageUrl}" class="photo-thumbnail">` : '-';
-                    const feedback = c.lguNote ? `<i>"${c.lguNote}"</i>` : 'Waiting for review...';
-                    row.innerHTML = `<td>${photo}</td><td>${c.date || 'Recent'}</td><td><strong>${c.issue}</strong><br><small>${c.barangay}</small></td><td class="${statusClass}">${c.status || 'Pending'}</td><td>${feedback}</td>`;
-                    tbody.appendChild(row);
-                });
-            })
-            .catch(() => document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error loading history.</td></tr>`);
+        if (myComplaints.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-info-dark);">No complaints filed yet. Start by submitting one above!</td></tr>`;
+            return; 
         }
 
-        // --- 4. Submit New Complaint (Real File Upload + Security) ---
-        document.getElementById('complaint-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const fileInput = document.getElementById('evidence');
-            const formMsg = document.getElementById('form-msg');
-            const submitBtn = document.querySelector('.btn-submit');
+        tbody.innerHTML = ''; 
+        myComplaints.forEach(c => {
+            const row = document.createElement('tr');
             
-            if (fileInput.files.length === 0) return;
-            const file = fileInput.files[0];
+            // Status Color Logic
+            let statusClass = 'status-pending';
+            const status = c.status || 'Pending';
+            if (status === 'In Progress') statusClass = 'status-inprogress';
+            if (status === 'Resolved') statusClass = 'status-resolved';
             
-            submitBtn.innerText = "Scanning Photo Security Data...";
-            submitBtn.disabled = true; formMsg.innerText = "";
+            const photo = c.imageUrl ? `<img src="${c.imageUrl}" class="photo-thumbnail">` : '-';
+            const feedback = c.lguNote || c.feedback || 'Waiting for review...';
+            const date = c.createdAt ? new Date(c.createdAt).toLocaleDateString() : 'Recent';
 
-            // STRICT SECURITY: We only check for physical Camera Hardware Fingerprints
-            EXIF.getData(file, function() {
-                const make = EXIF.getTag(this, "Make");
-                const model = EXIF.getTag(this, "Model");
-
-                // If EITHER of these are missing, it is a screenshot, social media save, or internet download!
-                if (!make || !model) {
-                    formMsg.style.color = "var(--color-danger)";
-                    formMsg.innerText = "❌ Security Check Failed: This appears to be a screenshot or downloaded image. Please take a real photo using your camera.";
-                    submitBtn.innerText = "Submit Complaint to LGU"; 
-                    submitBtn.disabled = false;
-                    return; // Stop the upload!
-                }
-
-                // If it has BOTH a Make and Model, it is a 100% real camera photo!
-                formMsg.style.color = "var(--color-success)";
-                formMsg.innerText = "✅ Authentic Camera Photo Verified! Uploading to server...";
-                
-                // Use FormData to safely send the physical file and text together
-                const formData = new FormData();
-                formData.append('username', username);
-                formData.append('barangay', document.getElementById('barangay').value);
-                formData.append('issue', document.getElementById('issue').value);
-                formData.append('description', document.getElementById('description').value);
-                formData.append('evidence', file); 
-
-                fetch('/api/complaints', {
-                    method: 'POST', 
-                    body: formData
-                })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        formMsg.style.color = "var(--color-success)";
-                        formMsg.innerText = "✅ Complaint Submitted Successfully!";
-                        document.getElementById('complaint-form').reset();
-                        loadMyHistory(); 
-                    }
-                })
-                .catch(() => {
-                    formMsg.style.color = "var(--color-danger)";
-                    formMsg.innerText = "⚠️ Server error.";
-                })
-                .finally(() => { 
-                    submitBtn.innerText = "Submit Complaint to LGU"; 
-                    submitBtn.disabled = false; 
-                });
-            });
+            row.innerHTML = `
+                <td>${photo}</td>
+                <td>${date}</td>
+                <td><strong>${c.title || c.issue}</strong><br><small>${c.category || c.barangay}</small></td>
+                <td class="${statusClass}">${status}</td>
+                <td><i>"${feedback}"</i></td>
+            `;
+            tbody.appendChild(row);
         });
+    })
+    .catch(err => {
+        console.error("Fetch Error:", err);
+        document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error connecting to database.</td></tr>`;
+    });
+}
 
-        function logout() { window.location.href = '/login.html'; }
-        loadMyHistory();
-    </script>
-</body>
-</html>
+// --- Updated Submit Function ---
+// (Ensure these fields match your HTML IDs: 'barangay', 'issue', 'description', 'evidence')
+document.getElementById('complaint-form').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const fileInput = document.getElementById('evidence');
+    const formMsg = document.getElementById('form-msg');
+    const submitBtn = document.querySelector('.btn-submit');
+    
+    if (fileInput.files.length === 0) return;
+    const file = fileInput.files[0];
+    
+    submitBtn.innerText = "Scanning Photo Security Data...";
+    submitBtn.disabled = true; 
+
+    EXIF.getData(file, function() {
+        const make = EXIF.getTag(this, "Make");
+        const model = EXIF.getTag(this, "Model");
+
+        // Photo Authenticity Check
+        if (!make || !model) {
+            formMsg.style.color = "var(--color-danger)";
+            formMsg.innerText = "❌ Security Check Failed: Please use a real camera photo (no screenshots).";
+            submitBtn.innerText = "Submit Complaint to LGU"; 
+            submitBtn.disabled = false;
+            return;
+        }
+
+        formMsg.style.color = "var(--color-success)";
+        formMsg.innerText = "✅ Authentic Photo Verified! Uploading...";
+        
+        const formData = new FormData();
+        formData.append('citizenName', username); // Changed from 'username' to 'citizenName' to match server.js
+        formData.append('title', document.getElementById('issue').value + " - " + document.getElementById('barangay').value);
+        formData.append('category', document.getElementById('issue').value);
+        formData.append('location', document.getElementById('barangay').value);
+        formData.append('description', document.getElementById('description').value);
+        formData.append('image', file); // Matches upload.single('image') in server.js
+
+        fetch('/api/complaints', {
+            method: 'POST', 
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            alert("Complaint Submitted Successfully!");
+            document.getElementById('complaint-form').reset();
+            formMsg.innerText = "";
+            loadMyHistory(); 
+        })
+        .catch(() => {
+            alert("Upload failed. Please check your connection.");
+        })
+        .finally(() => { 
+            submitBtn.innerText = "Submit Complaint to LGU"; 
+            submitBtn.disabled = false; 
+        });
+    });
+});
