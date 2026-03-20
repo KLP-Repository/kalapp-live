@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,14 +8,12 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
     <style>
       :root {
-        --color-primary: #ff8c00; /* Changed to Orange for consistency */
+        --color-primary: #ff8c00; 
         --color-danger: #ff7782; --color-success: #41f1b6; --color-warning: #ffbb55;
         --color-white: #fff; --color-info-dark: #7d8da1; --color-info-light: #dce1eb; --color-dark: #363949;
         --color-light: rgba(132, 139, 200, 0.18); --color-background: #f6f6f9;
         --card-border-radius: 2rem; --border-radius-1: 0.4rem; --card-padding: 1.8rem; --box-shadow: 0 2rem 3rem var(--color-light);
     }
-
-    /* Standardized Dark Mode Class */
     body.dark {
         --color-background: #181a1e; 
         --color-white: #202528; 
@@ -24,112 +21,83 @@
         --color-light: rgba(0, 0, 0, 0.4); 
         --box-shadow: 0 2rem 3rem var(--color-light);
     }
-
-    /* Style for the new single button */
     .mode-toggle-btn {
-        background: var(--color-light);
-        border: 1px solid var(--color-info-light);
-        color: var(--color-dark);
-        padding: 8px 12px;
-        border-radius: 10px;
-        cursor: pointer;
-        font-size: 1.2rem;
-        transition: all 300ms ease;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        background: var(--color-light); border: 1px solid var(--color-info-light); color: var(--color-dark);
+        padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: all 300ms ease;
+        display: flex; align-items: center; justify-content: center;
     }
-
-    .mode-toggle-btn:hover {
-        background: var(--color-primary);
-        color: white;
-        transform: scale(1.05);
-    }
-
-        * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; background: var(--color-background); user-select: none; overflow-x: hidden; color: var(--color-dark); transition: all 300ms ease; }
-        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto 23rem; }
-        aside { height: 100vh; }
-        aside .top { display: flex; align-items: center; justify-content: space-between; margin-top: 1.4rem; }
-        aside .logo { display: flex; gap: 0.8rem; align-items: center; }
-        aside .sidebar { display: flex; flex-direction: column; height: 86vh; position: relative; top: 3rem; }
-        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-        aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        aside .sidebar a:last-child { position: absolute; bottom: 2rem; width: 100%; }
-        aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before { content: ''; width: 6px; height: 100%; background: var(--color-primary); }
-        aside .sidebar a:hover { color: var(--color-primary); }
-        aside .sidebar a:hover span { margin-left: 1rem; }
-        main { margin-top: 1.4rem; }
-        main .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem; } 
-        main .insights > div { background: var(--color-white); padding: var(--card-padding); border-radius: var(--card-border-radius); margin-top: 1rem; box-shadow: var(--box-shadow); transition: all 300ms ease; }
-        main .insights > div:hover { box-shadow: none; }
-        main .insights .number { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; }
-        .recent-reports { margin-top: 2rem; }
-        .recent-reports h2 { margin-bottom: 0.8rem; }
-        .controls-bar { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center; }
-        .controls-bar select { padding: 0.5rem; border-radius: var(--border-radius-1); background: var(--color-white); color: var(--color-dark); border: 1px solid var(--color-info-light); font-family: 'Poppins', sans-serif;}
-        .btn-download { background: var(--color-primary); color: white; padding: 0.6rem 1.2rem; border-radius: var(--border-radius-1); cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 500;}
-        .recent-reports table { background: var(--color-white); width: 100%; border-radius: var(--card-border-radius); padding: var(--card-padding); text-align: left; box-shadow: var(--box-shadow); transition: all 300ms ease; border-collapse: collapse; }
-        .recent-reports table:hover { box-shadow: none; }
-        table th { padding: 1rem; color: var(--color-dark); }
-        table tbody td { padding: 1rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); }
-        .photo-thumbnail { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; cursor: pointer; transition: transform 0.2s;}
-        .photo-thumbnail:hover { transform: scale(1.2); }
-        .note-input { width: 100%; padding: 0.4rem; border-radius: var(--border-radius-1); border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem;}
-        .action-btn { padding: 0.4rem 0.8rem; border-radius: var(--border-radius-1); cursor: pointer; color: white; font-weight: 500; font-family: 'Poppins', sans-serif; margin-right: 0.2rem; font-size: 0.75rem;}
-        .btn-in-progress { background: var(--color-warning); }
-        .btn-resolve { background: var(--color-success); }
-        .btn-disabled { background: var(--color-info-dark); cursor: not-allowed; }
-        .status-pending { color: var(--color-danger); font-weight: bold; }
-        .status-inprogress { color: var(--color-warning); font-weight: bold; }
-        .status-resolved { color: var(--color-success); font-weight: bold; }
-        .right { margin-top: 1.4rem; }
-        .right .top { display: flex; justify-content: end; gap: 2rem; }
-        .right .theme-toggler { background: var(--color-light); display: flex; justify-content: space-between; align-items: center; height: 1.6rem; width: 4.2rem; cursor: pointer; border-radius: var(--border-radius-1); }
-        .right .theme-toggler span { font-size: 1.2rem; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .right .theme-toggler span.active { background: var(--color-primary); color: white; border-radius: var(--border-radius-1); }
-        .right .profile { display: flex; gap: 2rem; text-align: right; }
-        .modal { display: none; position: fixed; z-index: 1000; padding-top: 5vh; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow: auto; }
-        .modal-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain; }
-        .close-modal { position: absolute; top: 20px; right: 40px; color: #f1f1f1; font-size: 45px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-        .close-modal:hover { color: var(--color-danger); }
-        @media screen and (max-width: 1200px) { .container { grid-template-columns: 7rem auto 23rem; } aside .sidebar h3 { display: none; } aside .sidebar a { width: 5.6rem; } main .insights { grid-template-columns: repeat(2, 1fr); } }
+    .mode-toggle-btn:hover { background: var(--color-primary); color: white; transform: scale(1.05); }
+    * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
+    body { font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; background: var(--color-background); overflow-x: hidden; color: var(--color-dark); transition: all 300ms ease; }
+    .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto 23rem; }
+    aside { height: 100vh; }
+    aside .top { display: flex; align-items: center; justify-content: space-between; margin-top: 1.4rem; }
+    aside .logo { display: flex; gap: 0.8rem; align-items: center; }
+    aside .sidebar { display: flex; flex-direction: column; height: 86vh; position: relative; top: 3rem; }
+    aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
+    aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
+    aside .sidebar a:last-child { position: absolute; bottom: 2rem; width: 100%; }
+    aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
+    aside .sidebar a.active:before { content: ''; width: 6px; height: 100%; background: var(--color-primary); }
+    aside .sidebar a:hover { color: var(--color-primary); }
+    aside .sidebar a:hover span { margin-left: 1rem; }
+    main { margin-top: 1.4rem; }
+    main .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem; } 
+    main .insights > div { background: var(--color-white); padding: var(--card-padding); border-radius: var(--card-border-radius); margin-top: 1rem; box-shadow: var(--box-shadow); transition: all 300ms ease; }
+    main .insights > div:hover { box-shadow: none; }
+    main .insights .number { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; }
+    .recent-reports { margin-top: 2rem; }
+    .recent-reports h2 { margin-bottom: 0.8rem; }
+    .controls-bar { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center; }
+    .controls-bar select { padding: 0.5rem; border-radius: var(--border-radius-1); background: var(--color-white); color: var(--color-dark); border: 1px solid var(--color-info-light); font-family: 'Poppins', sans-serif;}
+    .btn-download { background: var(--color-primary); color: white; padding: 0.6rem 1.2rem; border-radius: var(--border-radius-1); cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 500;}
+    .recent-reports table { background: var(--color-white); width: 100%; border-radius: var(--card-border-radius); padding: var(--card-padding); text-align: left; box-shadow: var(--box-shadow); transition: all 300ms ease; border-collapse: collapse; }
+    .recent-reports table:hover { box-shadow: none; }
+    table th { padding: 1rem; color: var(--color-dark); }
+    table tbody td { padding: 1rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); }
+    .photo-thumbnail { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; cursor: pointer; transition: transform 0.2s;}
+    .photo-thumbnail:hover { transform: scale(1.2); }
+    .note-input { width: 100%; padding: 0.4rem; border-radius: var(--border-radius-1); border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem;}
+    .action-btn { padding: 0.4rem 0.8rem; border-radius: var(--border-radius-1); cursor: pointer; color: white; font-weight: 500; font-family: 'Poppins', sans-serif; margin-right: 0.2rem; font-size: 0.75rem;}
+    .btn-in-progress { background: var(--color-warning); }
+    .btn-resolve { background: var(--color-success); }
+    .btn-disabled { background: var(--color-info-dark); cursor: not-allowed; }
+    .status-pending { color: var(--color-danger); font-weight: bold; }
+    .status-inprogress { color: var(--color-warning); font-weight: bold; }
+    .status-resolved { color: var(--color-success); font-weight: bold; }
+    .right { margin-top: 1.4rem; }
+    .right .top { display: flex; justify-content: end; gap: 2rem; }
+    .profile { display: flex; gap: 2rem; text-align: right; }
+    .modal { display: none; position: fixed; z-index: 1000; padding-top: 5vh; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow: auto; }
+    .modal-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain; }
+    .close-modal { position: absolute; top: 20px; right: 40px; color: #f1f1f1; font-size: 45px; font-weight: bold; cursor: pointer; transition: 0.2s; }
+    .close-modal:hover { color: var(--color-danger); }
+    @media screen and (max-width: 1200px) { .container { grid-template-columns: 7rem auto 23rem; } aside .sidebar h3 { display: none; } aside .sidebar a { width: 5.6rem; } main .insights { grid-template-columns: repeat(2, 1fr); } }
     </style>
 </head>
 <body>
     <div class="container">
-
-
-
         <aside>
             <div class="top">
-    <div class="logo">
-        <span class="material-icons-sharp" style="color:var(--color-primary); font-size: 2rem;">analytics</span>
-        <h2 style="font-weight: 800; color: var(--color-dark);">KAL<span style="color:var(--color-primary)">APP</span></h2>
-    </div>
-</div>
+                <div class="logo">
+                    <span class="material-icons-sharp" style="color:var(--color-primary); font-size: 2rem;">analytics</span>
+                    <h2 style="font-weight: 800; color: var(--color-dark);">KAL<span style="color:var(--color-primary)">APP</span></h2>
+                </div>
+            </div>
 
-<div class="top">
-    <button id="mode-toggle" class="mode-toggle-btn">🌓</button>
-    
-    <div class="profile">
-        <div class="info">
-            <p>Hey, <b id="lgu-name-display">Admin</b></p>
-            <small class="text-muted">LGU Official</small>
-        </div>
-        <div class="profile-photo">
-            <img src="https://via.placeholder.com/40" style="border-radius:50%">
-        </div>
-    </div>
-</div>
-
+            <div class="top">
+                <button id="mode-toggle" class="mode-toggle-btn">🌓</button>
+                <div class="profile">
+                    <div class="info">
+                        <p>Hey, <b id="lgu-name-display">Admin</b></p>
+                        <small class="text-muted">LGU Official</small>
+                    </div>
+                    <div class="profile-photo"><img src="https://via.placeholder.com/40" style="border-radius:50%"></div>
+                </div>
+            </div>
 
             <div class="sidebar">
                 <a href="#" class="active"><span class="material-icons-sharp">grid_view</span><h3>Dashboard</h3></a>
-                <a href="#"><span class="material-icons-sharp">person_outline</span><h3>Citizens</h3></a>
-                <a href="#"><span class="material-icons-sharp">report_gmailerrorred</span><h3>Reports</h3></a>
-                <a href="#"><span class="material-icons-sharp">settings</span><h3>Settings</h3></a>
                 <a href="#" onclick="logout()"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
             </div>
         </aside>
@@ -182,22 +150,6 @@
                 </div>
             </div>
         </main>
-
-        <div class="right">
-            <div class="top">
-                <div class="theme-toggler" id="theme-toggler">
-                    <span class="material-icons-sharp active">light_mode</span>
-                    <span class="material-icons-sharp">dark_mode</span>
-                </div>
-                <div class="profile">
-                    <div class="info">
-                        <p>Hey, <b id="lgu-name-display">Admin</b></p>
-                        <small class="text-muted">LGU Official</small>
-                    </div>
-                    <div class="profile-photo"><img src="https://via.placeholder.com/40" style="border-radius:50%"></div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <div id="imageModal" class="modal" onclick="closeModal()">
@@ -206,35 +158,37 @@
     </div>
 
     <script>
-       const toggleBtn = document.getElementById('mode-toggle');
+        // --- Theme Toggle ---
+        const toggleBtn = document.getElementById('mode-toggle');
+        const savedTheme = localStorage.getItem('kalapp-theme');
+        if (savedTheme === 'dark') document.body.classList.add('dark');
+        
+        if (toggleBtn) {
+            toggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark');
+                localStorage.setItem('kalapp-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            });
+        }
 
-    // 1. Initial Sync: Check if the user set the theme on the Login/Index page
-    const savedTheme = localStorage.getItem('kalapp-theme');
-    if (savedTheme === 'dark') {
-        document.body.classList.add('dark');
-    }
-
-    // 2. Toggle Logic for the 🌓 button
-    if (toggleBtn) {
-        toggleBtn.addEventListener('click', () => {
-            // Toggle the 'dark' class on the body
-            document.body.classList.toggle('dark');
-            
-            // Save the choice so it persists across all pages
-            const isDark = document.body.classList.contains('dark');
-            localStorage.setItem('kalapp-theme', isDark ? 'dark' : 'light');
-        });
-    }
-        document.getElementById('lgu-name-display').innerText = localStorage.getItem('kalapp_username') || 'Admin';
+        // Set LGU Name
+        document.getElementById('lgu-name-display').innerText = localStorage.getItem('kalapp_username') || 'Official';
 
         let currentFilteredData = []; 
+
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
             fetch('/api/complaints')
             .then(res => res.json())
             .then(data => {
-                const todayString = new Date().toLocaleDateString('en-PH', { timeZone: 'Asia/Manila', month: 'short', day: 'numeric', year: 'numeric' });
-                const todaysComplaints = data.complaints.filter(c => c.date && c.date.includes(todayString));
+                // Safely determine "Today's" complaints
+                const today = new Date();
+                const isToday = (dateString) => {
+                    const d = new Date(dateString);
+                    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+                };
+
+                const todaysComplaints = data.complaints.filter(c => isToday(c.createdAt));
+                
                 document.getElementById('count-total').innerText = todaysComplaints.length;
                 document.getElementById('count-pending').innerText = todaysComplaints.filter(c => !c.status || c.status === 'Pending').length;
                 document.getElementById('count-progress').innerText = todaysComplaints.filter(c => c.status === 'In Progress').length;
@@ -243,8 +197,8 @@
                 const tableBody = document.getElementById('dashboard-table-body');
                 tableBody.innerHTML = ''; 
 
-                currentFilteredData = data.complaints.filter(complaint => {
-                    const currentStatus = complaint.status || 'Pending';
+                currentFilteredData = data.complaints.filter(c => {
+                    const currentStatus = c.status || 'Pending';
                     if (filterValue === 'All') return true;
                     return currentStatus === filterValue;
                 });
@@ -262,19 +216,36 @@
                     if (complaint.status === 'Resolved') statusClass = 'status-resolved';
 
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
-                    const noteHTML = `<input type="text" id="note-${complaint.id}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved ? 'disabled' : ''}>`;
+                    
+                    // We use complaint.trackingId to ensure updates map perfectly to the Master Backend
+                    const trackingId = complaint.trackingId;
+                    
+                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved ? 'disabled' : ''}>`;
                     
                     let actionButtons = '';
                     if (isResolved) {
                         actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
                     } else if (complaint.status === 'In Progress') {
-                        actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${complaint.id}', 'Resolved')">Resolve</button>`;
+                        actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     } else {
-                        actionButtons = noteHTML + `<button class="action-btn btn-in-progress" onclick="updateStatus('${complaint.id}', 'In Progress')">Accept</button><button class="action-btn btn-resolve" onclick="updateStatus('${complaint.id}', 'Resolved')">Resolve</button>`;
+                        actionButtons = noteHTML + `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button><button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     }
 
                     const photoDisplay = complaint.imageUrl ? `<img src="${complaint.imageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${complaint.imageUrl}')">` : `<span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>`;
-                    row.innerHTML = `<td>${photoDisplay}</td><td><strong>${complaint.id}</strong></td><td>${complaint.date || 'Older'}</td><td>${complaint.username || 'Anonymous'}</td><td>${complaint.barangay}</td><td>${complaint.issue}</td><td><small>${complaint.description}</small></td><td class="${statusClass}">${complaint.status || 'Pending'}</td><td>${actionButtons}</td>`;
+                    
+                    const formattedDate = new Date(complaint.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    row.innerHTML = `
+                        <td>${photoDisplay}</td>
+                        <td><strong>${trackingId}</strong></td>
+                        <td>${formattedDate}</td>
+                        <td>${complaint.citizenName || 'Anonymous'}</td>
+                        <td>${complaint.barangay}</td>
+                        <td>${complaint.category}</td>
+                        <td><small>${complaint.description}</small></td>
+                        <td class="${statusClass}">${complaint.status || 'Pending'}</td>
+                        <td>${actionButtons}</td>
+                    `;
                     tableBody.appendChild(row);
                 });
             })
@@ -288,18 +259,27 @@
                 body: JSON.stringify({ status: newStatus, note: noteValue })
             })
             .then(res => res.json())
-            .then(data => { if(data.success) loadComplaints(); })
+            .then(data => { 
+                if(data.success) {
+                    alert(`Complaint marked as ${newStatus}!`);
+                    loadComplaints(); 
+                } 
+            })
             .catch(err => console.error('Error:', err));
         }
 
         function downloadCSV() {
-            let csvContent = "Tracking ID,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note,Image URL\n";
+            let csvContent = "Tracking ID,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note\n";
             currentFilteredData.forEach(c => {
-                const id = c.id; const date = `"${c.date || ''}"`; const user = `"${c.username || 'Anonymous'}"`;
-                const brgy = `"${c.barangay || ''}"`; const issue = `"${c.issue || ''}"`; const desc = `"${(c.description || '').replace(/"/g, '""')}"`; 
-                const status = `"${c.status || 'Pending'}"`; const note = `"${(c.lguNote || '').replace(/"/g, '""')}"`; 
-                const imageLink = c.imageUrl ? `"${window.location.origin}${c.imageUrl}"` : '"None"';
-                csvContent += `${id},${date},${user},${brgy},${issue},${desc},${status},${note},${imageLink}\n`;
+                const id = c.trackingId; 
+                const date = `"${new Date(c.createdAt).toLocaleDateString()}"`; 
+                const user = `"${c.citizenName || 'Anonymous'}"`;
+                const brgy = `"${c.barangay || ''}"`; 
+                const issue = `"${c.category || ''}"`; 
+                const desc = `"${(c.description || '').replace(/"/g, '""')}"`; 
+                const status = `"${c.status || 'Pending'}"`; 
+                const note = `"${(c.lguNote || '').replace(/"/g, '""')}"`; 
+                csvContent += `${id},${date},${user},${brgy},${issue},${desc},${status},${note}\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
@@ -308,9 +288,14 @@
             link.click();
         }
 
-        function logout() { window.location.href = '/login.html'; }
+        function logout() { 
+            localStorage.removeItem('kalapp_username');
+            window.location.href = '/login.html'; 
+        }
+        
         function openModal(imageSrc) { document.getElementById("imageModal").style.display = "block"; document.getElementById("fullSizeImage").src = imageSrc; }
         function closeModal() { document.getElementById("imageModal").style.display = "none"; }
+        
         loadComplaints();
     </script>
 </body>
