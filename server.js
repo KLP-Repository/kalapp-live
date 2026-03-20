@@ -1,111 +1,116 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const SibApiV3Sdk = require('sib-api-v3-sdk'); // Brevo Library
+const SibApiV3Sdk = require('sib-api-v3-sdk'); // Brevo
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
+const fs = require('fs');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- Brevo (Sib) Configuration ---
-// The API key is now pulled from Render Environment Variables for security
-const defaultClient = SibApiV3Sdk.ApiClient.instance;
-const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY; 
+// --- Setup Image Upload Folder ---
+const uploadDir = path.join(__dirname, 'public/uploads');
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
 
-const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
-
-// Middleware
+// --- Middleware ---
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
 app.use('/uploads', express.static('public/uploads'));
 
-// MongoDB Connection
+// --- MongoDB Connection ---
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('✅ Connected to MongoDB Atlas!'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
-// --- Schemas ---
+// --- Schemas & Models ---
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    role: { type: String, default: 'citizen' },
-    isBlocked: { type: Boolean, default: false },
+    email: { type: String }, // Optional for LGU/Admins created manually
+    password: { type: String }, // Only used for LGU/Admins
+    role: { type: String, default: 'citizen' }, // 'citizen', 'lgu', 'superadmin'
+    status: { type: String, default: 'active' }, // 'active' or 'blocked'
     otp: String,
     otpExpires: Date
 });
 
 const complaintSchema = new mongoose.Schema({
+    trackingId: String,
     citizenName: String,
-    title: String,
-    description: String,
+    barangay: String,
     category: String,
-    location: String,
+    description: String,
     imageUrl: String,
     status: { type: String, default: 'Pending' },
+    lguNote: String,
     createdAt: { type: Date, default: Date.now }
 });
 
 const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
-// --- Multer Setup ---
-const storage = multer.diskStorage({
-    destination: './public/uploads/',
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+// --- SEED SUPERADMIN (Runs once to ensure you have a master key) ---
+async function seedAdmin() {
+    const admin = await User.findOne({ username: 'cityhall' });
+    if (!admin) {
+        await User.create({ username: 'cityhall', password: 'masterkey2026', role: 'superadmin' });
+        console.log("✅ SuperAdmin 'cityhall' created.");
     }
+}
+seedAdmin();
+
+// --- Brevo Configuration ---
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = process.env.BREVO_API_KEY; 
+const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+
+// --- Multer Setup (Basic Image Storage) ---
+const upload = multer({ 
+    storage: multer.diskStorage({
+        destination: './public/uploads/',
+        filename: (req, file, cb) => {
+            cb(null, Date.now() + path.extname(file.originalname));
+        }
+    })
 });
-const upload = multer({ storage });
 
-// --- ROUTES ---
+// ==========================================
+// 🚀 ROUTES
+// ==========================================
 
-// 1. Request OTP (Brevo Transactional API)
+// --- 1. AUTHENTICATION (CITIZEN OTP) ---
 app.post('/api/request-otp', async (req, res) => {
     const { email, username } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60000); 
 
     try {
         let user = await User.findOne({ email });
-        if (user && user.isBlocked) return res.status(403).json({ message: 'Account is blocked.' });
+        if (user && user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
 
-        if (!user) {
-            user = new User({ username: username || email.split('@')[0], email });
-        }
+        if (!user) user = new User({ username: username || email.split('@')[0], email, role: 'citizen' });
         
         user.otp = otp;
-        user.otpExpires = expires;
+        user.otpExpires = new Date(Date.now() + 10 * 60000);
         await user.save();
 
-        // Brevo Email Object
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.subject = "Your Kalapp Verification Code";
-        sendSmtpEmail.htmlContent = `
-            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
-                <h2 style="color: #ff8c00;">Kalapp Security</h2>
-                <p>Hello! Your 6-digit verification code is:</p>
-                <h1 style="letter-spacing: 5px; background: #f8f8f8; padding: 15px; display: inline-block; border-radius: 5px;">${otp}</h1>
-                <p>This code will expire in 10 minutes. Please do not share it with anyone.</p>
-            </div>`;
         sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
         sendSmtpEmail.to = [{ "email": email }];
+        sendSmtpEmail.subject = "Your Kalapp Verification Code";
+        sendSmtpEmail.htmlContent = `<h2>Your verification code is: <span style="background:#eee; padding:5px;">${otp}</span></h2>`;
 
         await tranEmailApi.sendTransacEmail(sendSmtpEmail);
-        
-        console.log(`✅ OTP sent to ${email}`);
         res.json({ message: 'OTP sent successfully!' });
 
     } catch (error) {
-        console.error('Brevo Error:', error);
-        res.status(500).json({ message: 'Email service error. Check logs.' });
+        console.error(error);
+        res.status(500).json({ message: 'Failed to send OTP.' });
     }
 });
 
-// 2. Verify OTP
 app.post('/api/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
     const user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
@@ -120,35 +125,84 @@ app.post('/api/verify-otp', async (req, res) => {
     }
 });
 
-// 3. Super Admin Login
-app.post('/api/super-login', (req, res) => {
+// --- 2. AUTHENTICATION (ADMIN / LGU PASSWORD) ---
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
-    if (username === 'cityhall' && password === 'masterkey2026') {
-        res.json({ message: 'Admin login successful!', role: 'superadmin' });
+    const user = await User.findOne({ username, password });
+    
+    if (user) {
+        if (user.status === 'blocked') return res.status(403).json({ message: "Account Suspended." });
+        res.json({ success: true, username: user.username, role: user.role });
     } else {
-        res.status(401).json({ message: 'Invalid admin credentials.' });
+        res.status(401).json({ message: "Invalid credentials." });
     }
 });
 
-// 4. Create Complaint
-app.post('/api/complaints', upload.single('image'), async (req, res) => {
+// --- 3. COMPLAINTS SYSTEM ---
+app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
     try {
-        const { citizenName, title, description, category, location } = req.body;
+        const { username, barangay, issue, description } = req.body;
         const newComplaint = new Complaint({
-            citizenName, title, description, category, location,
+            trackingId: 'KAL-' + Math.floor(1000 + Math.random() * 9000),
+            citizenName: username,
+            barangay: barangay,
+            category: issue,
+            description: description,
             imageUrl: req.file ? `/uploads/${req.file.filename}` : ''
         });
         await newComplaint.save();
-        res.json({ message: 'Complaint submitted successfully!' });
+        res.json({ success: true, message: 'Complaint submitted!' });
     } catch (error) {
-        res.status(500).json({ message: 'Submission failed.' });
+        res.status(500).json({ success: false, message: 'Submission failed.' });
     }
 });
 
-// 5. Get Complaints
 app.get('/api/complaints', async (req, res) => {
     const complaints = await Complaint.find().sort({ createdAt: -1 });
-    res.json(complaints);
+    res.json({ complaints }); // Wrapped in an object to match your frontend logic
 });
 
-app.listen(PORT, () => console.log(`🚀 Kalapp Server running on port ${PORT}`));
+app.patch('/api/complaints/:id/status', async (req, res) => {
+    try {
+        await Complaint.findOneAndUpdate(
+            { trackingId: req.params.id }, 
+            { status: req.body.status, lguNote: req.body.note }
+        );
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to update status" });
+    }
+});
+
+// --- 4. SUPERADMIN IAM SYSTEM ---
+app.get('/api/admin/users', async (req, res) => {
+    const users = await User.find({ role: { $ne: 'superadmin' } });
+    res.json({ users });
+});
+
+app.post('/api/admin/create-lgu', async (req, res) => {
+    try {
+        const { username, email, password } = req.body;
+        const newUser = new User({ username, email, password, role: 'lgu' });
+        await newUser.save();
+        res.json({ success: true });
+    } catch (error) {
+        res.status(500).json({ success: false });
+    }
+});
+
+app.patch('/api/admin/users/:id/toggle-block', async (req, res) => {
+    const user = await User.findById(req.params.id);
+    if (user) {
+        user.status = user.status === 'blocked' ? 'active' : 'blocked';
+        await user.save();
+        res.json({ success: true });
+    }
+});
+
+app.patch('/api/admin/users/:id/reset-password', async (req, res) => {
+    await User.findByIdAndUpdate(req.params.id, { password: req.body.newPassword });
+    res.json({ success: true });
+});
+
+app.listen(PORT, () => console.log(`🚀 Master Server running on port ${PORT}`));
