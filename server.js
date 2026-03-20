@@ -10,9 +10,11 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // --- Brevo (Sib) Configuration ---
+// The API key is now pulled from Render Environment Variables for security
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = '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';
+apiKey.apiKey = process.env.BREVO_API_KEY; 
+
 const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // Middleware
@@ -63,7 +65,7 @@ const upload = multer({ storage });
 
 // 1. Request OTP (Brevo Transactional API)
 app.post('/api/request-otp', async (req, res) => {
-    const { email } = req.body;
+    const { email, username } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
     const expires = new Date(Date.now() + 10 * 60000); 
 
@@ -72,7 +74,7 @@ app.post('/api/request-otp', async (req, res) => {
         if (user && user.isBlocked) return res.status(403).json({ message: 'Account is blocked.' });
 
         if (!user) {
-            user = new User({ username: email.split('@')[0], email });
+            user = new User({ username: username || email.split('@')[0], email });
         }
         
         user.otp = otp;
