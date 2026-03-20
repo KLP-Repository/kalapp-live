@@ -43,22 +43,36 @@
             const id = document.getElementById('exec-id').value;
             const pass = document.getElementById('exec-pass').value;
             const errorMsg = document.getElementById('error-msg');
+            const btn = document.querySelector('button');
 
-            fetch('/api/super-login', {
+            btn.innerText = "Authenticating...";
+            btn.disabled = true;
+
+            // Connected to the new master backend route!
+            fetch('/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ username: id, password: pass })
             })
-            .then(res => res.json())
+            .then(async res => {
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.message || "Invalid credentials.");
+                return data;
+            })
             .then(data => {
-                if (data.success) {
+                // Ensure the user logging in actually has Executive powers
+                if (data.success && data.role === 'superadmin') {
                     localStorage.setItem('kalapp_superadmin', 'Verified');
                     window.location.href = '/superadmin-dashboard.html';
                 } else {
-                    errorMsg.innerText = "ACCESS DENIED.";
+                    throw new Error("ACCESS DENIED: Insufficient privileges.");
                 }
             })
-            .catch(() => errorMsg.innerText = "SYSTEM ERROR.");
+            .catch(err => {
+                errorMsg.innerText = err.message || "SYSTEM ERROR.";
+                btn.innerText = "Authenticate Session";
+                btn.disabled = false;
+            });
         });
     </script>
 </body>
