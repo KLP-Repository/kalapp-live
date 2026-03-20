@@ -114,6 +114,11 @@ app.post('/api/request-otp', async (req, res) => {
             if (user.authMethod === 'google') {
                 return res.status(400).json({ message: 'This email is registered via Google. Please use the Google Sign-In button below.' });
             }
+
+            // NEW: Block existing OTP users who have already verified their account
+            if (user.authMethod === 'local' && !user.otp) {
+                return res.status(400).json({ message: 'Email already in use. Please go back to Login and enter your password.' });
+            }
         }
 
         if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen', authMethod: 'local' });
