@@ -7,13 +7,14 @@ const path = require('path');
 const cors = require('cors');
 
 const app = express();
+// Render assigns a random port, so we MUST use process.env.PORT
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static('public/uploads'));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
@@ -24,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URI)
 const userSchema = new mongoose.Schema({
     username: { type: String, required: true },
     email: { type: String, required: true, unique: true },
-    role: { type: String, default: 'citizen' }, // citizen, lgu, superadmin
+    role: { type: String, default: 'citizen' },
     isBlocked: { type: Boolean, default: false },
     otp: String,
     otpExpires: Date
@@ -60,11 +61,11 @@ const transporter = nodemailer.createTransport({
     port: 465,
     secure: true,
     auth: {
-        user: process.env.EMAIL_USER, // Ensure this is in your Render Environment Variables
-        pass: process.env.EMAIL_PASS, // Ensure this is the 16-char App Password
+        user: process.env.EMAIL_USER, // Will be kalappscc@gmail.com from Render
+        pass: process.env.EMAIL_PASS, // Will be hiqookgbyihyecbb from Render
     },
     tls: {
-        rejectUnauthorized: false // This bypasses Render's port restrictions
+        rejectUnauthorized: false // CRITICAL: This allows Render to bypass SMTP blocks
     }
 });
 
@@ -74,7 +75,7 @@ const transporter = nodemailer.createTransport({
 app.post('/api/request-otp', async (req, res) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const expires = new Date(Date.now() + 10 * 60000); // 10 mins
+    const expires = new Date(Date.now() + 10 * 60000); 
 
     try {
         let user = await User.findOne({ email });
@@ -97,8 +98,8 @@ app.post('/api/request-otp', async (req, res) => {
 
         res.json({ message: 'OTP sent successfully!' });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to send OTP.' });
+        console.error('Email Error:', error);
+        res.status(500).json({ message: 'Failed to send OTP. Check server logs.' });
     }
 });
 
