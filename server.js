@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { Resend } = require('resend'); 
+const SibApiV3Sdk = require('sib-api-v3-sdk'); // Brevo Library
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
@@ -9,8 +9,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// --- FIXED: Key added directly to the code ---
-const resend = new Resend('re_bm1auAi7_C9TXoDnPBcnsJaCUHkoJE8Mf');
+// --- Brevo (Sib) Configuration ---
+const defaultClient = SibApiV3Sdk.ApiClient.instance;
+const apiKey = defaultClient.authentications['api-key'];
+apiKey.apiKey = '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';
+const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
 // Middleware
 app.use(express.json());
@@ -58,7 +61,7 @@ const upload = multer({ storage });
 
 // --- ROUTES ---
 
-// 1. Request OTP (Powered by Resend API)
+// 1. Request OTP (Brevo Transactional API)
 app.post('/api/request-otp', async (req, res) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -76,30 +79,27 @@ app.post('/api/request-otp', async (req, res) => {
         user.otpExpires = expires;
         await user.save();
 
-        // Send Email via Resend
-        const { error } = await resend.emails.send({
-            from: 'onboarding@resend.dev', 
-            to: email,
-            subject: 'Your Kalapp Verification Code',
-            html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-                    <h2 style="color: #ff8c00;">Welcome to Kalapp</h2>
-                    <p>Your 6-digit verification code is:</p>
-                    <h1 style="letter-spacing: 5px; background: #f4f4f4; padding: 10px; display: inline-block;">${otp}</h1>
-                    <p>This code will expire in 10 minutes.</p>
-                </div>
-            `
-        });
+        // Brevo Email Object
+        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
+        sendSmtpEmail.subject = "Your Kalapp Verification Code";
+        sendSmtpEmail.htmlContent = `
+            <div style="font-family: sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                <h2 style="color: #ff8c00;">Kalapp Security</h2>
+                <p>Hello! Your 6-digit verification code is:</p>
+                <h1 style="letter-spacing: 5px; background: #f8f8f8; padding: 15px; display: inline-block; border-radius: 5px;">${otp}</h1>
+                <p>This code will expire in 10 minutes. Please do not share it with anyone.</p>
+            </div>`;
+        sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
+        sendSmtpEmail.to = [{ "email": email }];
 
-        if (error) {
-            console.error('Resend API Error:', error);
-            return res.status(500).json({ message: 'Email service error.' });
-        }
-
+        await tranEmailApi.sendTransacEmail(sendSmtpEmail);
+        
+        console.log(`✅ OTP sent to ${email}`);
         res.json({ message: 'OTP sent successfully!' });
+
     } catch (error) {
-        console.error('Server Error:', error);
-        res.status(500).json({ message: 'Internal server error.' });
+        console.error('Brevo Error:', error);
+        res.status(500).json({ message: 'Email service error. Check logs.' });
     }
 });
 
@@ -149,7 +149,4 @@ app.get('/api/complaints', async (req, res) => {
     res.json(complaints);
 });
 
-// Start Server
-app.listen(PORT, () => {
-    console.log(`🚀 Kalapp Server running on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Kalapp Server running on port ${PORT}`));
