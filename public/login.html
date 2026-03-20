@@ -190,11 +190,26 @@
         try {
             const responsePayload = decodeJwtResponse(response.credential);
             const realName = responsePayload.name; 
-            document.getElementById('success-msg').innerText = `✅ Verified via Google as ${realName}`;
-            localStorage.setItem('kalapp_username', realName);
-            setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1000);
+            const email = responsePayload.email; // We need their email now!
+
+            // Send it to our new smart backend
+            fetch('/api/google-login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, name: realName })
+            })
+            .then(safeFetch)
+            .then(data => {
+                document.getElementById('success-msg').innerText = `✅ Verified via Google as ${data.username}`;
+                localStorage.setItem('kalapp_username', data.username);
+                setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1000);
+            })
+            .catch(err => { 
+                document.getElementById('error-msg').innerText = `❌ ${err.message}`; 
+            });
+
         } catch (error) { 
-            document.getElementById('error-msg').innerText = "⚠️ Google Login blocked."; 
+            document.getElementById('error-msg').innerText = "⚠️ Google Login blocked by browser."; 
         }
     }
 

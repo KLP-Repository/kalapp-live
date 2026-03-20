@@ -66,6 +66,8 @@ const userSchema = new mongoose.Schema({
 
     status: { type: String, default: 'active' }, 
 
+    authMethod: { type: String, default: 'local' },
+
     otp: String,
 
     otpExpires: Date
@@ -224,7 +226,9 @@ app.post('/api/request-otp', async (req, res) => {
 
         if (user && user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
 
-
+        if (user.authMethod === 'google') {
+            return res.status(400).json({ message: 'This email is registered via Google. Please use the Google Sign-In button.' });
+        }
 
         if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen' });
 
@@ -299,6 +303,39 @@ app.post('/api/verify-otp', async (req, res) => {
 // --- 2. AUTHENTICATION (ADMIN / LGU PASSWORD) ---
 
 app.post('/api/login', async (req, res) => {
+
+    // --- NEW: GOOGLE AUTHENTICATION ROUTE ---
+app.post('/api/google-login', async (req, res) => {
+    
+    const { email, name } = req.body;
+    try {
+        let user = await User.findOne({ email });
+
+        if (user) {
+            if (user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
+            
+            // SECURITY CHECK: If they exist but didn't use Google originally
+            if (user.authMethod !== 'google') {
+                return res.status(400).json({ message: 'This email is registered via OTP. Please use the standard login.' });
+            }
+            // Valid Google user logging back in
+            return res.json({ success: true, username: user.username, role: user.role });
+        }
+
+        // Brand new Google user! Save them to the database.
+        user = new User({
+            username: name,
+            email: email,
+            role: 'citizen',
+            authMethod: 'google'
+        });
+        await user.save();
+        res.json({ success: true, username: user.username, role: user.role });
+
+    } catch (error) {
+        res.status(500).json({ message: 'Google login failed on server.' });
+    }
+});
 
     const { username, password } = req.body;
 
