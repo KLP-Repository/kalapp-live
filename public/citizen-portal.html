@@ -116,8 +116,8 @@
                         <thead>
                             <tr>
                                 <th>Photo</th>
-                                <th>Date</th>
-                                <th>Issue</th>
+                                <th>Date & ID</th>
+                                <th>Issue & Location</th>
                                 <th>Status</th>
                                 <th>Feedback from LGU</th>
                             </tr>
@@ -148,6 +148,7 @@
     </div>
 
     <script>
+        // --- Theme Toggler ---
         const themeToggler = document.querySelector("#theme-toggler");
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') {
@@ -162,35 +163,52 @@
             localStorage.setItem('kalapp-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
         });
 
+        // Get Username from Login
         const username = localStorage.getItem('kalapp_username') || 'Anonymous';
         document.getElementById('citizen-name-display').innerText = username;
 
+        // --- Load History ---
         function loadMyHistory() {
             fetch('/api/complaints')
             .then(res => res.json())
             .then(data => {
                 const tbody = document.getElementById('history-body');
-                const myComplaints = data.complaints.filter(c => c.username === username);
+                
+                // Filter by the new schema field 'citizenName'
+                const myComplaints = data.complaints.filter(c => c.citizenName === username);
+                
                 if (myComplaints.length === 0) {
                     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-info-dark);">No complaints filed yet. Start by submitting one above!</td></tr>`;
                     return; 
                 }
+                
                 tbody.innerHTML = ''; 
                 myComplaints.forEach(c => {
                     const row = document.createElement('tr');
                     let statusClass = 'status-pending';
                     if (c.status === 'In Progress') statusClass = 'status-inprogress';
                     if (c.status === 'Resolved') statusClass = 'status-resolved';
-                    const photo = c.imageUrl ? `<img src="${c.imageUrl}" class="photo-thumbnail">` : '-';
+                    
+                    const photo = c.imageUrl ? `<img src="${c.imageUrl}" class="photo-thumbnail">` : '<span style="color:gray; font-size:12px;">No Photo</span>';
                     const feedback = c.lguNote ? `<i>"${c.lguNote}"</i>` : 'Waiting for review...';
-                    row.innerHTML = `<td>${photo}</td><td>${c.date || 'Recent'}</td><td><strong>${c.issue}</strong><br><small>${c.barangay}</small></td><td class="${statusClass}">${c.status || 'Pending'}</td><td>${feedback}</td>`;
+                    
+                    // Format the MongoDB Date correctly
+                    const formattedDate = new Date(c.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+
+                    row.innerHTML = `
+                        <td>${photo}</td>
+                        <td>${formattedDate}<br><small style="font-weight:bold; color:var(--color-primary)">${c.trackingId}</small></td>
+                        <td><strong>${c.category}</strong><br><small>${c.barangay}</small></td>
+                        <td class="${statusClass}">${c.status || 'Pending'}</td>
+                        <td>${feedback}</td>
+                    `;
                     tbody.appendChild(row);
                 });
             })
-            .catch(() => document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error loading history.</td></tr>`);
+            .catch(() => document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error loading history. Check connection.</td></tr>`);
         }
 
-        // --- 4. Submit New Complaint (Real File Upload + Security) ---
+        // --- Submit New Complaint (Real File Upload + EXIF Security) ---
         document.getElementById('complaint-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const fileInput = document.getElementById('evidence');
@@ -203,25 +221,24 @@
             submitBtn.innerText = "Scanning Photo Security Data...";
             submitBtn.disabled = true; formMsg.innerText = "";
 
-            // STRICT SECURITY: We only check for physical Camera Hardware Fingerprints
+            // STRICT SECURITY: Check for physical Camera Hardware Fingerprints
             EXIF.getData(file, function() {
                 const make = EXIF.getTag(this, "Make");
                 const model = EXIF.getTag(this, "Model");
 
-                // If EITHER of these are missing, it is a screenshot, social media save, or internet download!
+                // Reject screenshots/downloads
                 if (!make || !model) {
                     formMsg.style.color = "var(--color-danger)";
                     formMsg.innerText = "❌ Security Check Failed: This appears to be a screenshot or downloaded image. Please take a real photo using your camera.";
                     submitBtn.innerText = "Submit Complaint to LGU"; 
                     submitBtn.disabled = false;
-                    return; // Stop the upload!
+                    return; 
                 }
 
-                // If it has BOTH a Make and Model, it is a 100% real camera photo!
                 formMsg.style.color = "var(--color-success)";
                 formMsg.innerText = "✅ Authentic Camera Photo Verified! Uploading to server...";
                 
-                // Use FormData to safely send the physical file and text together
+                // Pack the data for the server
                 const formData = new FormData();
                 formData.append('username', username);
                 formData.append('barangay', document.getElementById('barangay').value);
@@ -240,11 +257,13 @@
                         formMsg.innerText = "✅ Complaint Submitted Successfully!";
                         document.getElementById('complaint-form').reset();
                         loadMyHistory(); 
+                    } else {
+                        throw new Error("Upload Failed");
                     }
                 })
                 .catch(() => {
                     formMsg.style.color = "var(--color-danger)";
-                    formMsg.innerText = "⚠️ Server error.";
+                    formMsg.innerText = "⚠️ Server error. Please try again.";
                 })
                 .finally(() => { 
                     submitBtn.innerText = "Submit Complaint to LGU"; 
@@ -253,7 +272,11 @@
             });
         });
 
-        function logout() { window.location.href = '/login.html'; }
+        function logout() { 
+            localStorage.removeItem('kalapp_username'); // Clear login state
+            window.location.href = '/login.html'; 
+        }
+        
         loadMyHistory();
     </script>
 </body>
