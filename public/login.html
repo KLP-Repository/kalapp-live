@@ -33,7 +33,6 @@
         .divider { display: flex; align-items: center; text-align: center; margin: 25px 0; }
         .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--input-border); }
         .divider span { padding: 0 10px; color: var(--text-muted); font-size: 11px; font-weight: 800; text-transform: uppercase; }
-        .btn-dev { background: transparent; border: 1px dashed var(--text-muted); color: var(--text-muted); font-size: 11px; padding: 10px; border-radius: 8px; margin-top: 10px; width: 100%; cursor: pointer; }
         #error-msg { color: #ef4444; font-size: 13px; margin-bottom: 10px; font-weight: 600; min-height: 18px; }
         #success-msg { color: #10b981; font-size: 13px; margin-bottom: 10px; font-weight: 600; min-height: 18px; }
         #signup-section, #otp-section { display: none; }
@@ -64,7 +63,6 @@
                 <div id="g_id_onload" data-client_id="714569037465-7ni0csmq193a0tl6sbne3g35entfj6ok.apps.googleusercontent.com" data-callback="handleGoogleLogin" data-use_fedcm_for_prompt="true" data-auto_prompt="false"></div>
                 <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline"></div>
             </div>
-            
         </div>
 
         <div id="signup-section">
@@ -114,6 +112,16 @@
         if(view === 'otp') document.getElementById('otp-section').style.display = 'block';
     }
 
+    // --- Helper function to safely parse JSON ---
+    async function safeFetch(response) {
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+        if (!response.ok) {
+            throw new Error((data && data.message) ? data.message : "Server endpoint error (404/500).");
+        }
+        return data;
+    }
+
     // --- 1. LOGIN HANDLER ---
     document.getElementById('login-form').addEventListener('submit', function(e) {
         e.preventDefault();
@@ -126,20 +134,19 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: user, password: pass })
         })
-        .then(res => res.json())
+        .then(safeFetch)
         .then(data => {
-            if (data.username) { // Assuming success returns user data
-                localStorage.setItem('kalapp_username', data.username);
-                if (data.role === 'superadmin') window.location.href = '/superadmin-dashboard.html';
-                else if (data.role === 'lgu') window.location.href = '/lgu-dashboard.html';
-                else window.location.href = '/citizen-portal.html';
-            } else { 
-                errorMsg.innerText = `❌ ${data.message || 'Invalid credentials.'}`; 
-            }
+            localStorage.setItem('kalapp_username', data.username);
+            if (data.role === 'superadmin') window.location.href = '/superadmin-dashboard.html';
+            else if (data.role === 'lgu') window.location.href = '/lgu-dashboard.html';
+            else window.location.href = '/citizen-portal.html';
+        })
+        .catch(err => {
+            errorMsg.innerText = `❌ ${err.message}`; 
         });
     });
 
-    // --- 2. SIGN UP / REQUEST OTP (Updated for Resend) ---
+    // --- 2. SIGN UP / REQUEST OTP ---
     document.getElementById('signup-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-request-otp');
@@ -151,7 +158,7 @@
         const pass = document.getElementById('reg-password').value;
 
         btn.disabled = true; 
-        btn.innerText = "Sending..."; 
+        btn.innerText = "Sending via Brevo..."; 
         errorMsg.innerText = "";
         successMsg.innerText = "";
 
@@ -160,22 +167,17 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email, username: user, password: pass })
         })
-        .then(async res => {
-            const data = await res.json();
+        .then(safeFetch)
+        .then(data => {
             btn.disabled = false; 
             btn.innerText = "Send Verification Code";
-
-            if(res.ok) { // This checks for Status 200 (Success)
-                successMsg.innerText = "✅ " + data.message;
-                setTimeout(() => toggleView('otp'), 500); // Switch to OTP screen
-            } else { 
-                errorMsg.innerText = "❌ " + (data.message || "Failed to send OTP."); 
-            }
+            successMsg.innerText = "✅ " + data.message;
+            setTimeout(() => toggleView('otp'), 500); 
         })
-        .catch(() => { 
+        .catch(err => {
             btn.disabled = false; 
             btn.innerText = "Send Verification Code"; 
-            errorMsg.innerText = "⚠️ Server connection error."; 
+            errorMsg.innerText = `❌ ${err.message}`; 
         });
     });
 
@@ -192,17 +194,15 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ email: email, otp: code })
         })
-        .then(async res => {
-            const data = await res.json();
-            if(res.ok) {
-                successMsg.innerText = "✅ Account Verified!";
-                localStorage.setItem('kalapp_username', data.username);
-                setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1500);
-            } else { 
-                errorMsg.innerText = "❌ " + (data.message || "Invalid or expired code."); 
-            }
+        .then(safeFetch)
+        .then(data => {
+            successMsg.innerText = "✅ Account Verified!";
+            localStorage.setItem('kalapp_username', data.username);
+            setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1500);
         })
-        .catch(() => errorMsg.innerText = "⚠️ Verification failed.");
+        .catch(err => {
+            errorMsg.innerText = `❌ ${err.message}`;
+        });
     });
 
     // --- 4. GOOGLE LOGIN ---
@@ -226,7 +226,6 @@
         }).join('')));
     }
     
-</script>
-
+    </script>
 </body>
 </html>
