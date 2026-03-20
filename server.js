@@ -82,32 +82,33 @@ const upload = multer({
 // ==========================================
 
 // --- 1. AUTHENTICATION (CITIZEN OTP) ---
-app.post('/api/request-otp', async (req, res) => {
-    const { email, username, password } = req.body;
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
+// ==========================================
+// 🚨 TEMPORARY: DATABASE WIPE ROUTE 🚨
+// ==========================================
+app.get('/api/nuke-database', async (req, res) => {
     try {
-        let user = await User.findOne({ email });
-        if (user && user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
-
-        if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen' });
+        // 1. Delete everything
+        await User.deleteMany({});
+        await Complaint.deleteMany({});
         
-        user.otp = otp;
-        user.otpExpires = new Date(Date.now() + 10 * 60000);
-        await user.save();
+        // 2. Rebuild the Super Admin
+        await User.create({ 
+            username: 'cityhall', 
+            password: 'masterkey2026', 
+            role: 'superadmin',
+            status: 'active'
+        });
 
-        const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
-        sendSmtpEmail.to = [{ "email": email }];
-        sendSmtpEmail.subject = "Your Kalapp Verification Code";
-        sendSmtpEmail.htmlContent = `<h2>Your verification code is: <span style="background:#eee; padding:5px;">${otp}</span></h2>`;
-
-        await tranEmailApi.sendTransacEmail(sendSmtpEmail);
-        res.json({ message: 'OTP sent successfully!' });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Failed to send OTP.' });
+        res.send(`
+            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
+                <h1 style="color: red;">💥 DATABASE WIPED 💥</h1>
+                <p>All old citizens, LGUs, and complaints have been permanently deleted.</p>
+                <p><strong>Super Admin Restored:</strong> cityhall / masterkey2026</p>
+                <a href="/superadmin-access.html" style="padding: 10px 20px; background: #ef4444; color: white; text-decoration: none; border-radius: 5px;">Go to Command Center</a>
+            </div>
+        `);
+    } catch (err) {
+        res.status(500).send('Error wiping database.');
     }
 });
 
