@@ -58,8 +58,18 @@ const upload = multer({ storage: storage });
 // --- 4. EMAIL SETUP (Secured via .env) ---
 const otpStore = {}; 
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: { user: 'kalappscc@gmail.com', pass: process.env.EMAIL_PASS }
+    service: 'gmail', // Adding this helps Render identify the route
+    host: 'smtp.gmail.com',
+    port: 465,
+    secure: true, 
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS,
+    },
+    tls: {
+        // This is the "magic" line that helps bypass server restrictions
+        rejectUnauthorized: false 
+    }
 });
 
 // --- 5. PUBLIC AUTHENTICATION ROUTES ---
