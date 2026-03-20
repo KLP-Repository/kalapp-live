@@ -1,14 +1,16 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend'); // Use Resend API instead of Nodemailer
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
 
 const app = express();
-// Render assigns a random port, so we MUST use process.env.PORT
 const PORT = process.env.PORT || 3001;
+
+// Initialize Resend with your API Key
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Middleware
 app.use(express.json());
@@ -18,7 +20,7 @@ app.use('/uploads', express.static('public/uploads'));
 
 // MongoDB Connection
 mongoose.connect(process.env.MONGODB_URI)
-    .then(() => console.log('✅ Connected to MongoDB Atlas permanently!'))
+    .then(() => console.log('✅ Connected to MongoDB Atlas!'))
     .catch(err => console.error('❌ MongoDB Connection Error:', err));
 
 // --- Schemas ---
@@ -54,24 +56,9 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-
-// --- Email Setup (The Final Render Port Fix) ---
-// --- Email Setup (The Cloud Bypass Fix) ---
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-        // This is still critical to bypass the certificate blocks on Render
-        rejectUnauthorized: false
-    }
-});
-
 // --- ROUTES ---
 
-// 1. Request OTP
+// 1. Request OTP (Powered by Resend API)
 app.post('/api/request-otp', async (req, res) => {
     const { email } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -89,17 +76,30 @@ app.post('/api/request-otp', async (req, res) => {
         user.otpExpires = expires;
         await user.save();
 
-        await transporter.sendMail({
-            from: `"Kalapp System" <${process.env.EMAIL_USER}>`,
+        // Send Email via Resend
+        const { error } = await resend.emails.send({
+            from: 'onboarding@resend.dev', // Default for free accounts
             to: email,
-            subject: "Your Kalapp Verification Code",
-            text: `Your 6-digit verification code is: ${otp}`
+            subject: 'Your Kalapp Verification Code',
+            html: `
+                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
+                    <h2>Welcome to Kalapp</h2>
+                    <p>Your 6-digit verification code is:</p>
+                    <h1 style="color: #ff8c00;">${otp}</h1>
+                    <p>This code will expire in 10 minutes.</p>
+                </div>
+            `
         });
+
+        if (error) {
+            console.error('Resend API Error:', error);
+            return res.status(500).json({ message: 'Email service error. Check Render logs.' });
+        }
 
         res.json({ message: 'OTP sent successfully!' });
     } catch (error) {
-        console.error('Email Error:', error);
-        res.status(500).json({ message: 'Failed to send OTP. Check server logs.' });
+        console.error('Server Error:', error);
+        res.status(500).json({ message: 'Internal server error.' });
     }
 });
 
