@@ -89,7 +89,6 @@
     </div>
 
     <script>
-    // --- Theme Toggle ---
     const savedTheme = localStorage.getItem('kalapp-theme');
     if (savedTheme === 'dark') document.body.classList.add('dark');
     const toggleBtn = document.getElementById('mode-toggle');
@@ -100,7 +99,6 @@
         });
     }
 
-    // --- View Toggling ---
     function toggleView(view) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('signup-section').style.display = 'none';
@@ -113,23 +111,22 @@
         if(view === 'otp') document.getElementById('otp-section').style.display = 'block';
     }
 
-    // --- Helper function for fetch ---
+    // --- The CRASH-PROOF Fetch Helper ---
     async function safeFetch(response) {
-        const data = await response.json();
-        if (!response.ok) throw new Error(data.message || "Server error.");
+        const isJson = response.headers.get('content-type')?.includes('application/json');
+        const data = isJson ? await response.json() : null;
+        if (!response.ok) {
+            throw new Error((data && data.message) ? data.message : "Waiting for Server to load. Please try again in 30 seconds.");
+        }
         return data;
     }
 
-    // --- 1. LOGIN HANDLER ---
+    // 1. LOGIN HANDLER
     document.getElementById('login-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        const user = document.getElementById('login-username').value;
-        const pass = document.getElementById('login-password').value;
-
         fetch('/api/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username: user, password: pass })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: document.getElementById('login-username').value, password: document.getElementById('login-password').value })
         })
         .then(safeFetch)
         .then(data => {
@@ -141,20 +138,19 @@
         .catch(err => { document.getElementById('error-msg').innerText = `❌ ${err.message}`; });
     });
 
-    // --- 2. SIGN UP / REQUEST OTP ---
+    // 2. SIGN UP / REQUEST OTP
     document.getElementById('signup-form').addEventListener('submit', function(e) {
         e.preventDefault();
         const btn = document.getElementById('btn-request-otp');
-        const email = document.getElementById('reg-email').value;
-        const user = document.getElementById('reg-username').value;
-        const pass = document.getElementById('reg-password').value; // Sending password to server
-
         btn.disabled = true; btn.innerText = "Sending via Brevo..."; 
 
         fetch('/api/request-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email, username: user, password: pass })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+                email: document.getElementById('reg-email').value, 
+                username: document.getElementById('reg-username').value, 
+                password: document.getElementById('reg-password').value 
+            })
         })
         .then(safeFetch)
         .then(data => {
@@ -165,16 +161,12 @@
         .finally(() => { btn.disabled = false; btn.innerText = "Send Verification Code"; });
     });
 
-    // --- 3. VERIFY OTP ---
+    // 3. VERIFY OTP
     document.getElementById('otp-form').addEventListener('submit', function(e) {
         e.preventDefault();
-        const email = document.getElementById('reg-email').value;
-        const code = document.getElementById('otp-code').value;
-
         fetch('/api/verify-otp', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: email, otp: code })
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: document.getElementById('reg-email').value, otp: document.getElementById('otp-code').value })
         })
         .then(safeFetch)
         .then(data => {
@@ -185,18 +177,13 @@
         .catch(err => { document.getElementById('error-msg').innerText = `❌ ${err.message}`; });
     });
 
-    // --- 4. GOOGLE LOGIN ---
+    // 4. GOOGLE LOGIN HANDLER
     function handleGoogleLogin(response) {
         try {
             const responsePayload = decodeJwtResponse(response.credential);
-            const realName = responsePayload.name; 
-            const email = responsePayload.email; // We need their email now!
-
-            // Send it to our new smart backend
             fetch('/api/google-login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email, name: realName })
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: responsePayload.email, name: responsePayload.name })
             })
             .then(safeFetch)
             .then(data => {
@@ -204,10 +191,7 @@
                 localStorage.setItem('kalapp_username', data.username);
                 setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1000);
             })
-            .catch(err => { 
-                document.getElementById('error-msg').innerText = `❌ ${err.message}`; 
-            });
-
+            .catch(err => { document.getElementById('error-msg').innerText = `❌ ${err.message}`; });
         } catch (error) { 
             document.getElementById('error-msg').innerText = "⚠️ Google Login blocked by browser."; 
         }
