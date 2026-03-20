@@ -56,18 +56,18 @@ const upload = multer({ storage });
 
 
 // --- Email Setup (The Final Render Port Fix) ---
+// We switch to port 587 (STARTTLS) because Render often blocks 465.
 const transporter = nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587, // Change from 465 to 587
-    secure: false, // Must be false for port 587
+    port: 587,
+    secure: false, // MUST be false for port 587
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS,
     },
     tls: {
         rejectUnauthorized: false,
-        minVersion: 'TLSv1.2' // Forces a modern secure connection
+        minVersion: 'TLSv1.2'
     }
 });
 
