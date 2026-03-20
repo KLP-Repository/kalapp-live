@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
-const { Resend } = require('resend'); // Use Resend API instead of Nodemailer
+const { Resend } = require('resend'); 
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
@@ -9,8 +9,8 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// Initialize Resend with your API Key
-const resend = new Resend(process.env.RESEND_API_KEY);
+// --- FIXED: Key added directly to the code ---
+const resend = new Resend('re_bm1auAi7_C9TXoDnPBcnsJaCUHkoJE8Mf');
 
 // Middleware
 app.use(express.json());
@@ -47,7 +47,7 @@ const complaintSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
-// --- Multer Setup (File Uploads) ---
+// --- Multer Setup ---
 const storage = multer.diskStorage({
     destination: './public/uploads/',
     filename: (req, file, cb) => {
@@ -78,14 +78,14 @@ app.post('/api/request-otp', async (req, res) => {
 
         // Send Email via Resend
         const { error } = await resend.emails.send({
-            from: 'onboarding@resend.dev', // Default for free accounts
+            from: 'onboarding@resend.dev', 
             to: email,
             subject: 'Your Kalapp Verification Code',
             html: `
-                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee;">
-                    <h2>Welcome to Kalapp</h2>
+                <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+                    <h2 style="color: #ff8c00;">Welcome to Kalapp</h2>
                     <p>Your 6-digit verification code is:</p>
-                    <h1 style="color: #ff8c00;">${otp}</h1>
+                    <h1 style="letter-spacing: 5px; background: #f4f4f4; padding: 10px; display: inline-block;">${otp}</h1>
                     <p>This code will expire in 10 minutes.</p>
                 </div>
             `
@@ -93,7 +93,7 @@ app.post('/api/request-otp', async (req, res) => {
 
         if (error) {
             console.error('Resend API Error:', error);
-            return res.status(500).json({ message: 'Email service error. Check Render logs.' });
+            return res.status(500).json({ message: 'Email service error.' });
         }
 
         res.json({ message: 'OTP sent successfully!' });
@@ -128,7 +128,7 @@ app.post('/api/super-login', (req, res) => {
     }
 });
 
-// 4. Create Complaint (Citizen)
+// 4. Create Complaint
 app.post('/api/complaints', upload.single('image'), async (req, res) => {
     try {
         const { citizenName, title, description, category, location } = req.body;
@@ -143,7 +143,7 @@ app.post('/api/complaints', upload.single('image'), async (req, res) => {
     }
 });
 
-// 5. Get Complaints (LGU)
+// 5. Get Complaints
 app.get('/api/complaints', async (req, res) => {
     const complaints = await Complaint.find().sort({ createdAt: -1 });
     res.json(complaints);
