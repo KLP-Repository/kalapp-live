@@ -83,14 +83,14 @@ const upload = multer({
 
 // --- 1. AUTHENTICATION (CITIZEN OTP) ---
 app.post('/api/request-otp', async (req, res) => {
-    const { email, username } = req.body;
+    const { email, username, password } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
     try {
         let user = await User.findOne({ email });
         if (user && user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
 
-        if (!user) user = new User({ username: username || email.split('@')[0], email, role: 'citizen' });
+        if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen' });
         
         user.otp = otp;
         user.otpExpires = new Date(Date.now() + 10 * 60000);
