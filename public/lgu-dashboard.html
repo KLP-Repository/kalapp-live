@@ -22,6 +22,35 @@
         --color-light: rgba(0, 0, 0, 0.4); 
         --box-shadow: 0 2rem 3rem var(--color-light);
     }
+    
+    /* --- NEW: City Background Animation --- */
+    .city-background {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        width: 100vw;
+        height: 35vh; /* Covers the bottom 35% of the screen */
+        /* SVG Data URI for a blocky city skyline */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 200'%3E%3Cpath fill='%237d8da1' d='M0,200 V120 h40 v-40 h50 v60 h40 v-80 h60 v30 h40 v-70 h70 v50 h50 v-30 h60 v100 h40 v-120 h80 v60 h50 v-40 h70 v80 h50 v-50 h60 v70 h40 v-90 h70 v110 h40 v-60 h40 V200 Z'/%3E%3C/svg%3E");
+        background-repeat: repeat-x;
+        background-size: 1000px 100%;
+        opacity: 0.35; /* 35% Transparency */
+        z-index: -1; /* Keeps it behind all content */
+        pointer-events: none; /* Prevents it from blocking clicks */
+        animation: scrollCity 45s linear infinite;
+    }
+
+    body.dark .city-background {
+        opacity: 0.15; /* Dimmer in dark mode */
+        filter: brightness(0.7);
+    }
+
+    @keyframes scrollCity {
+        from { background-position: 0 100%; }
+        to { background-position: -1000px 100%; }
+    }
+    /* -------------------------------------- */
+
     .mode-toggle-btn {
         background: var(--color-light); border: 1px solid var(--color-info-light);
         color: var(--color-dark);
@@ -122,6 +151,9 @@
     </style>
 </head>
 <body>
+    
+    <div class="city-background"></div>
+
     <div class="container">
         <aside>
             <div class="top">
@@ -227,7 +259,6 @@
             fetch('/api/complaints')
             .then(res => res.json())
             .then(data => {
-                // Safely determine "Today's" complaints
                 const today = new Date();
                 const isToday = (dateString) => {
                     const d = new Date(dateString);
@@ -264,8 +295,6 @@
                     if (complaint.status === 'Resolved') statusClass = 'status-resolved';
 
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
-                    
-                    // We use complaint.trackingId to ensure updates map perfectly to the Master Backend
                     const trackingId = complaint.trackingId;
                     
                     const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved ? 'disabled' : ''}>`;
