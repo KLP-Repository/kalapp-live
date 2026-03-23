@@ -194,7 +194,6 @@
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
             
-            // 🔧 Use BACKEND_URL for the API call
             fetch(`${BACKEND_URL}/api/complaints`)
             .then(res => res.json())
             .then(data => {
@@ -246,8 +245,9 @@
                         actionButtons = noteHTML + `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button><button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     }
 
-                    // 🔧 Use BACKEND_URL for the Image Source
-                    const fullImageUrl = complaint.imageUrl ? `${BACKEND_URL}${complaint.imageUrl}` : '';
+                    // 🔧 FIX: Smart URL Check prevents the "Double Link" glitch with Cloudinary
+                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
+                    
                     const photoDisplay = complaint.imageUrl ?
                         `<img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')">` : 
                         `<span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>`;
@@ -274,7 +274,6 @@
         function updateStatus(trackingId, newStatus) {
             const noteValue = document.getElementById(`note-${trackingId}`).value;
             
-            // 🔧 Use BACKEND_URL for the API call
             fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
