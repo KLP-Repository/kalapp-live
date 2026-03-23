@@ -5,26 +5,40 @@ const SibApiV3Sdk = require('sib-api-v3-sdk');
 const multer = require('multer');
 const path = require('path');
 const cors = require('cors');
-const fs = require('fs');
 
-// 🤖 ADDED: Google Generative AI Requirement
+// 🤖 Google Generative AI
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// ☁️ Cloudinary Configuration for Permanent Storage
+const cloudinary = require('cloudinary').v2;
+const { CloudinaryStorage } = require('multer-storage-cloudinary');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// 🤖 ADDED: AI Configuration using your API Key from .env
+// --- API Configurations ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// --- Setup Image Upload Folder ---
-const uploadDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
 
 // --- Middleware ---
 app.use(express.json());
 app.use(cors());
-app.use(express.static('public'));
-app.use('/uploads', express.static('public/uploads'));
+app.use(express.static(path.join(__dirname, 'public'))); 
+
+// --- Cloudinary Multer Storage ---
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'evidence_uploads', 
+    allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
+  },
+});
+const upload = multer({ storage: storage });
 
 // --- MongoDB Connection ---
 mongoose.connect(process.env.MONGODB_URI)
@@ -52,6 +66,13 @@ const complaintSchema = new mongoose.Schema({
     imageUrl: String,
     status: { type: String, default: 'Pending' },
     lguNote: String,
+    // 📊 The Audit Trail Array
+    history: [{
+        status: String,
+        note: String,
+        updatedBy: String,
+        updatedAt: { type: Date, default: Date.now }
+    }],
     createdAt: { type: Date, default: Date.now }
 });
 
@@ -74,12 +95,6 @@ const apiKey = defaultClient.authentications['api-key'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
-const upload = multer({ 
-    storage: multer.diskStorage({
-        destination: './public/uploads/',
-        filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); }
-    })
-});
 
 // --- 1. CITIZEN OTP LOGIN ---
 app.post('/api/request-otp', async (req, res) => {
@@ -98,9 +113,9 @@ app.post('/api/request-otp', async (req, res) => {
         await user.save();
    
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
-        sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
+        sendSmtpEmail.sender = { "name": "System Admin", "email": "kalappscc@gmail.com" };
         sendSmtpEmail.to = [{ "email": email }];
-        sendSmtpEmail.subject = "Your Kalapp Verification Code";
+        sendSmtpEmail.subject = "Your Verification Code";
         sendSmtpEmail.htmlContent = `<h2>Code: ${otp}</h2>`;
         await tranEmailApi.sendTransacEmail(sendSmtpEmail);
         res.json({ message: 'OTP sent!' });
@@ -147,14 +162,25 @@ app.post('/api/login', async (req, res) => {
 app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
     try {
         const { username, barangay, issue, description } = req.body;
+        
+        // ☁️ The image is now uploaded to Cloudinary, and req.file.path holds the secure URL
         const newComplaint = new Complaint({
             trackingId: 'KAL-' + Math.floor(1000 + Math.random() * 9000),
-            citizenName: username, barangay, category: issue, description,
-            imageUrl: req.file ? `/uploads/${req.file.filename}` : ''
+            citizenName: username, 
+            barangay, 
+            category: issue, 
+            description,
+            imageUrl: req.file ? req.file.path : '', 
+            status: 'Pending',
+            history: [{
+                status: 'Pending',
+                note: 'Complaint officially filed by citizen.',
+                updatedBy: username || 'System'
+            }]
         });
         await newComplaint.save();
         res.json({ success: true, message: 'Complaint submitted!' });
-    } catch (error) { res.status(500).json({ success: false }); }
+    } catch (error) { res.status(500).json({ success: false, error: error.message }); }
 });
 
 app.get('/api/complaints', async (req, res) => {
@@ -164,9 +190,24 @@ app.get('/api/complaints', async (req, res) => {
 
 app.patch('/api/complaints/:id/status', async (req, res) => {
     try {
-        await Complaint.findOneAndUpdate({ trackingId: req.params.id }, { status: req.body.status, lguNote: req.body.note });
+        const { status, note, adminName } = req.body;
+
+        await Complaint.findOneAndUpdate(
+            { trackingId: req.params.id }, 
+            { 
+                status: status, 
+                lguNote: note,
+                $push: {
+                    history: {
+                        status: status,
+                        note: note || 'Status updated',
+                        updatedBy: adminName || 'LGU Admin'
+                    }
+                }
+            }
+        );
         res.json({ success: true });
-    } catch (error) { res.status(500).json({ error: "Failed" }); }
+    } catch (error) { res.status(500).json({ error: "Failed to update status." }); }
 });
 
 // --- 5. SUPERADMIN IAM ---
@@ -188,7 +229,7 @@ app.patch('/api/admin/users/:id/toggle-block', async (req, res) => {
 });
 
 // ==========================================
-// 🤖 NEW: SUMBONG-BOT AI ROUTE
+// SUMBONG-BOT AI ROUTE
 // ==========================================
 app.post('/api/ai-chat', async (req, res) => {
     try {
@@ -201,7 +242,6 @@ app.post('/api/ai-chat', async (req, res) => {
         const result = await chat.sendMessage(message);
         res.json({ reply: result.response.text() });
     } catch (error) { 
-        // 👇 THIS IS THE FIX: It will print the exact reason to your terminal
         console.error("❌ GEMINI AI ERROR:", error); 
         res.status(500).json({ error: "AI Error" }); 
     }
