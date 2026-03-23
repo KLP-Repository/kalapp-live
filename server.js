@@ -7,23 +7,29 @@ const path = require('path');
 const cors = require('cors');
 const fs = require('fs');
 
+// 🤖 ADDED: Google Generative AI Requirement
+const { GoogleGenerativeAI } = require("@google/generative-ai"); [cite: 1, 2]
+
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3001; [cite: 3]
+
+// 🤖 ADDED: AI Configuration using your API Key from .env
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // --- Setup Image Upload Folder ---
 const uploadDir = path.join(__dirname, 'public/uploads');
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true }); [cite: 4]
 
 // --- Middleware ---
 app.use(express.json());
 app.use(cors());
 app.use(express.static('public'));
-app.use('/uploads', express.static('public/uploads'));
+app.use('/uploads', express.static('public/uploads')); [cite: 5]
 
 // --- MongoDB Connection ---
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('✅ Connected to MongoDB Atlas!'))
-    .catch(err => console.error('❌ MongoDB Connection Error:', err));
+    .catch(err => console.error('❌ MongoDB Connection Error:', err)); [cite: 5]
 
 // --- Schemas & Models ---
 const userSchema = new mongoose.Schema({
@@ -32,10 +38,10 @@ const userSchema = new mongoose.Schema({
     password: { type: String }, 
     role: { type: String, default: 'citizen' }, 
     status: { type: String, default: 'active' }, 
-    authMethod: { type: String, default: 'local' }, // Tracks OTP vs Google
+    authMethod: { type: String, default: 'local' },
     otp: String,
     otpExpires: Date
-});
+}); [cite: 6]
 
 const complaintSchema = new mongoose.Schema({
     trackingId: String,
@@ -47,10 +53,10 @@ const complaintSchema = new mongoose.Schema({
     status: { type: String, default: 'Pending' },
     lguNote: String,
     createdAt: { type: Date, default: Date.now }
-});
+}); [cite: 7]
 
 const User = mongoose.model('User', userSchema);
-const Complaint = mongoose.model('Complaint', complaintSchema);
+const Complaint = mongoose.model('Complaint', complaintSchema); [cite: 8]
 
 // --- SEED SUPERADMIN ---
 async function seedAdmin() {
@@ -59,140 +65,82 @@ async function seedAdmin() {
         await User.create({ username: 'cityhall', password: 'masterkey2026', role: 'superadmin', authMethod: 'local' });
         console.log("✅ SuperAdmin 'cityhall' created.");
     }
-}
+} [cite: 9, 10, 11]
 seedAdmin();
 
 // --- Brevo Configuration ---
 const defaultClient = SibApiV3Sdk.ApiClient.instance;
 const apiKey = defaultClient.authentications['api-key'];
-apiKey.apiKey = process.env.BREVO_API_KEY; 
-const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
+apiKey.apiKey = process.env.BREVO_API_KEY;
+const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi(); [cite: 12]
 
 const upload = multer({ 
     storage: multer.diskStorage({
         destination: './public/uploads/',
         filename: (req, file, cb) => { cb(null, Date.now() + path.extname(file.originalname)); }
     })
-});
-
-// ==========================================
-// 🚨 DATABASE WIPE ROUTE 🚨
-// ==========================================
-app.get('/api/nuke-database', async (req, res) => {
-    try {
-        await User.deleteMany({});
-        await Complaint.deleteMany({});
-        await User.create({ username: 'cityhall', password: 'masterkey2026', role: 'superadmin', status: 'active', authMethod: 'local' });
-
-        res.send(`
-            <div style="font-family: sans-serif; text-align: center; margin-top: 50px;">
-                <h1 style="color: red;">💥 DATABASE WIPED 💥</h1>
-                <p>All old citizens, LGUs, and complaints have been permanently deleted.</p>
-                <a href="/superadmin-access.html" style="padding: 10px 20px; background: #ef4444; color: white; text-decoration: none; border-radius: 5px;">Go to Command Center</a>
-            </div>
-        `);
-    } catch (err) {
-        res.status(500).send('Error wiping database.');
-    }
-});
-
-// ==========================================
-// 🚀 ROUTES
-// ==========================================
+}); [cite: 12]
 
 // --- 1. CITIZEN OTP LOGIN ---
 app.post('/api/request-otp', async (req, res) => {
     const { email, username, password } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
     try {
         let user = await User.findOne({ email });
-        
-        // Strict Identity Protection Check
         if (user) {
             if (user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
-            if (user.authMethod === 'google') {
-                return res.status(400).json({ message: 'This email is registered via Google. Please use the Google Sign-In button below.' });
-            }
-
-            // NEW: Block existing OTP users who have already verified their account
-            if (user.authMethod === 'local' && !user.otp) {
-                return res.status(400).json({ message: 'Email already in use. Please go back to Login and enter your password.' });
-            }
+            if (user.authMethod === 'google') return res.status(400).json({ message: 'Registered via Google.' });
+            if (user.authMethod === 'local' && !user.otp) return res.status(400).json({ message: 'Email already in use.' });
         }
-
         if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen', authMethod: 'local' });
-        
         user.otp = otp;
         user.otpExpires = new Date(Date.now() + 10 * 60000);
         await user.save();
-
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
         sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
         sendSmtpEmail.to = [{ "email": email }];
         sendSmtpEmail.subject = "Your Kalapp Verification Code";
-        sendSmtpEmail.htmlContent = `<h2>Your verification code is: <span style="background:#eee; padding:5px;">${otp}</span></h2>`;
-
+        sendSmtpEmail.htmlContent = `<h2>Code: ${otp}</h2>`;
         await tranEmailApi.sendTransacEmail(sendSmtpEmail);
-        res.json({ message: 'OTP sent successfully!' });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Failed to send OTP.' });
-    }
-});
+        res.json({ message: 'OTP sent!' });
+    } catch (error) { res.status(500).json({ message: 'Failed to send OTP.' }); }
+}); [cite: 15, 16, 17, 18, 19, 20, 21, 22, 23, 24]
 
 app.post('/api/verify-otp', async (req, res) => {
     const { email, otp } = req.body;
     const user = await User.findOne({ email, otp, otpExpires: { $gt: Date.now() } });
-
     if (user) {
-        user.otp = undefined;
-        user.otpExpires = undefined;
+        user.otp = undefined; user.otpExpires = undefined;
         await user.save();
         res.json({ message: 'Login successful!', username: user.username, role: user.role });
-    } else {
-        res.status(400).json({ message: 'Invalid or expired OTP.' });
-    }
-});
+    } else { res.status(400).json({ message: 'Invalid OTP.' }); }
+}); [cite: 24, 25]
 
-// --- 2. GOOGLE LOGIN ROUTE ---
+// --- 2. GOOGLE LOGIN ---
 app.post('/api/google-login', async (req, res) => {
     const { email, name } = req.body;
     try {
         let user = await User.findOne({ email });
-
         if (user) {
-            if (user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
-            
-            // Strict Identity Protection Check
-            if (user.authMethod !== 'google') {
-                return res.status(400).json({ message: 'This email is registered via OTP Email. Please use the standard login.' });
-            }
+            if (user.status === 'blocked') return res.status(403).json({ message: 'Suspended.' });
+            if (user.authMethod !== 'google') return res.status(400).json({ message: 'Use OTP Login.' });
             return res.json({ success: true, username: user.username, role: user.role });
         }
-
-        // New Google User
         user = new User({ username: name, email: email, role: 'citizen', authMethod: 'google' });
         await user.save();
         res.json({ success: true, username: user.username, role: user.role });
-
-    } catch (error) {
-        res.status(500).json({ message: 'Google login failed on server.' });
-    }
-});
+    } catch (error) { res.status(500).json({ message: 'Google login failed.' }); }
+}); [cite: 25, 26, 27, 28]
 
 // --- 3. LGU/ADMIN LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
-    
     if (user) {
-        if (user.status === 'blocked') return res.status(403).json({ message: "Account Suspended." });
+        if (user.status === 'blocked') return res.status(403).json({ message: "Suspended." });
         res.json({ success: true, username: user.username, role: user.role });
-    } else {
-        res.status(401).json({ message: "Invalid credentials." });
-    }
-});
+    } else { res.status(401).json({ message: "Invalid credentials." }); }
+}); [cite: 28]
 
 // --- 4. COMPLAINTS SYSTEM ---
 app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
@@ -205,43 +153,54 @@ app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
         });
         await newComplaint.save();
         res.json({ success: true, message: 'Complaint submitted!' });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Submission failed.' });
-    }
-});
+    } catch (error) { res.status(500).json({ success: false }); }
+}); [cite: 29, 30]
 
 app.get('/api/complaints', async (req, res) => {
     const complaints = await Complaint.find().sort({ createdAt: -1 });
     res.json({ complaints }); 
-});
+}); [cite: 31]
 
 app.patch('/api/complaints/:id/status', async (req, res) => {
     try {
         await Complaint.findOneAndUpdate({ trackingId: req.params.id }, { status: req.body.status, lguNote: req.body.note });
         res.json({ success: true });
-    } catch (error) {
-        res.status(500).json({ error: "Failed to update status" });
-    }
-});
+    } catch (error) { res.status(500).json({ error: "Failed" }); }
+}); [cite: 32]
 
-// --- 5. SUPERADMIN IAM SYSTEM ---
+// --- 5. SUPERADMIN IAM ---
 app.get('/api/admin/users', async (req, res) => {
     const users = await User.find({ role: { $ne: 'superadmin' } });
     res.json({ users });
-});
+}); [cite: 33]
+
 app.post('/api/admin/create-lgu', async (req, res) => {
     try {
         await new User({ username: req.body.username, email: req.body.email, password: req.body.password, role: 'lgu', authMethod: 'local' }).save();
         res.json({ success: true });
     } catch (error) { res.status(500).json({ success: false }); }
-});
+}); [cite: 34]
+
 app.patch('/api/admin/users/:id/toggle-block', async (req, res) => {
     const user = await User.findById(req.params.id);
     if (user) { user.status = user.status === 'blocked' ? 'active' : 'blocked'; await user.save(); res.json({ success: true }); }
-});
-app.patch('/api/admin/users/:id/reset-password', async (req, res) => {
-    await User.findByIdAndUpdate(req.params.id, { password: req.body.newPassword });
-    res.json({ success: true });
+}); [cite: 35]
+
+// ==========================================
+// 🤖 NEW: SUMBONG-BOT AI ROUTE
+// ==========================================
+app.post('/api/ai-chat', async (req, res) => {
+    try {
+        const { message, history } = req.body;
+        const model = genAI.getGenerativeModel({ 
+            model: "gemini-1.5-flash",
+            systemInstruction: `You are 'Sumbong-Bot', the official AI assistant of 'Sumbungan ng Bayan'. Tone: Empathetic, uses 'Po/Opo', Taglish. Ask for What, Who, Where, When. Direct them to the complaint form.`
+        });
+        const chat = model.startChat({ history: history || [] });
+        const result = await chat.sendMessage(message);
+        res.json({ reply: result.response.text() });
+    } catch (error) { res.status(500).json({ error: "AI Error" }); }
 });
 
-app.listen(PORT, () => console.log(`🚀 Master Server running on port ${PORT}`));
+// --- Start Server ---
+app.listen(PORT, () => console.log(`🚀 Master Server running on port ${PORT}`)); [cite: 37]
