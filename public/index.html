@@ -3,85 +3,476 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalapp - Home</title>
+    <title>Kalapp - Secure Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+
     <style>
         :root {
             --bg-body: #f8fafc;
-            --bg-card: #ffffff;
-            --bg-nav: #1e293b;
-            --hero-grad: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
+            --bg-card: rgba(255, 255, 255, 0.9);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --orange: #ff8c00;
             --orange-hover: #e67e00;
+            --orange-glow: rgba(255, 140, 0, 0.3);
+            --input-bg: transparent;
+            --input-border: #e2e8f0;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --facebook-blue: #1877F2;
+            --error-red: #ef4444;
+            --success-green: #10b981;
+            --dropdown-text: #1e293b;
+            --gradient-1: #f8fafc;
+            --gradient-2: #e2e8f0;
+            --gradient-3: #f1f5f9;
         }
+
         body.dark {
             --bg-body: #0f172a;
-            --bg-card: #1e293b;
-            --bg-nav: #020617;
-            --hero-grad: linear-gradient(135deg, #020617 0%, #1e293b 100%);
+            --bg-card: rgba(30, 41, 59, 0.7);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
+            --input-border: #334155;
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            --orange-glow: rgba(255, 140, 0, 0.5);
+            --dropdown-text: #ffffff;
+            --gradient-1: #0f172a;
+            --gradient-2: #1e293b;
+            --gradient-3: #111827;
         }
-        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s ease; overflow-x: hidden; }
-        nav { background-color: var(--bg-nav); padding: 1rem 8%; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 100; }
-        .logo { font-size: 1.6rem; font-weight: 800; color: white; letter-spacing: -1px; }
-        #mode-toggle { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        #mode-toggle:hover { background: var(--orange); }
-        .hero { background: var(--hero-grad); color: white; text-align: center; padding: 100px 20px 160px 20px; clip-path: ellipse(150% 100% at 50% 0%); position: relative; z-index: 1; }
-        .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; }
-        .hero p { max-width: 650px; margin: 0 auto 40px; font-size: 1.2rem; opacity: 0.8; }
-        .btn-orange { background-color: var(--orange); color: white; padding: 18px 45px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; display: inline-block; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3); transition: transform 0.3s ease; }
-        .btn-orange:hover { transform: scale(1.05); background-color: var(--orange-hover); }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: -80px auto 60px; padding: 0 20px; position: relative; z-index: 10; }
-        .feature-card { background: var(--bg-card); padding: 50px 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; border-bottom: 4px solid var(--orange); transition: transform 0.3s ease; }
-        .feature-card:hover { transform: translateY(-10px); }
-        .feature-card h3 { color: var(--orange); margin-bottom: 15px; font-weight: 700; font-size: 1.5rem; }
-        .feature-card p { color: var(--text-muted); line-height: 1.6; font-size: 1rem; margin: 0; }
-        footer { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-main);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-1));
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Floating Bubbles */
+        .bubbles { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+        .bubble {
+            position: absolute; border-radius: 50%; background: rgba(255, 255, 255, 0.05);
+            animation: floatBubble 25s infinite linear; opacity: 0; bottom: -150px;
+        }
+
+        @keyframes floatBubble {
+            0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+            10% { opacity: 0.5; }
+            90% { opacity: 0.5; }
+            100% { transform: translateY(-1200px) rotate(720deg); opacity: 0; }
+        }
+
+        /* Bubble Placements */
+        .bubble:nth-child(1) { width: 80px; height: 80px; left: 10%; animation-delay: 0s; }
+        .bubble:nth-child(2) { width: 60px; height: 60px; left: 20%; animation-delay: 5s; animation-duration: 20s; }
+        .bubble:nth-child(3) { width: 100px; height: 100px; left: 35%; animation-delay: 2s; }
+        .bubble:nth-child(4) { width: 50px; height: 50px; left: 50%; animation-delay: 8s; animation-duration: 15s; }
+        .bubble:nth-child(5) { width: 120px; height: 120px; left: 65%; animation-delay: 3s; }
+
+        .login-card {
+            background: var(--bg-card); padding: 40px; border-radius: 24px;
+            box-shadow: var(--card-shadow); width: 100%; max-width: 400px;
+            text-align: center; position: relative; border-top: 6px solid var(--orange);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 10;
+        }
+
+        #mode-toggle {
+            position: absolute; top: 15px; right: 15px; background: none;
+            border: 1px solid var(--text-muted); color: var(--text-muted);
+            padding: 4px 10px; border-radius: 20px; cursor: pointer;
+            font-size: 10px; font-weight: 800; transition: 0.3s;
+        }
+        #mode-toggle:hover { border-color: var(--orange); color: var(--orange); }
+
+        .login-card h1 { font-weight: 800; letter-spacing: -1.5px; margin: 0 0 5px 0; font-size: 32px; }
+        .login-card p.subtitle { color: var(--text-muted); margin-bottom: 25px; font-size: 14px; }
+
+        /* Form Styling */
+        .form-group { position: relative; margin-bottom: 20px; text-align: left; }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+        .form-group input:not([type="checkbox"]), .form-group select {
+            width: 100%; padding: 14px 15px; background-color: var(--input-bg);
+            border: 2px solid var(--input-border); border-radius: 12px;
+            box-sizing: border-box; font-size: 14px; color: var(--text-main);
+            transition: all 0.3s ease; outline: none;
+        }
+
+        .form-group label:not(.terms-label) {
+            position: absolute; left: 15px; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 14px; pointer-events: none;
+            transition: all 0.2s ease; padding: 0 5px;
+        }
+
+        /* Label Float Logic */
+        .form-group input:focus ~ label:not(.terms-label),
+        .form-group input:not(:placeholder-shown) ~ label:not(.terms-label),
+        .form-group select:focus ~ label:not(.terms-label),
+        .form-group select:not([value=""]) ~ label:not(.terms-label),
+        .form-group input[type="date"] ~ label:not(.terms-label) {
+            top: 0; font-size: 11px; color: var(--orange); font-weight: 800; background-color: var(--bg-card);
+        }
+
+        .form-group input:focus:not([type="checkbox"]), .form-group select:focus {
+            border-color: var(--orange); box-shadow: 0 0 0 4px rgba(255, 140, 0, 0.1);
+        }
+
+        select {
+            appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 12px center; background-size: 14px;
+        }
+
+        /* Terms of Agreement Styling */
+        .terms-container { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 20px; text-align: left; }
+        .terms-container input[type="checkbox"] { width: 16px; height: 16px; margin-top: 2px; cursor: pointer; accent-color: var(--orange); }
+        .terms-container .terms-label { font-size: 12px; color: var(--text-muted); line-height: 1.4; cursor: pointer; }
+        .terms-container a { text-decoration: none; }
+
+        .btn {
+            width: 100%; padding: 14px; color: white; border: none; border-radius: 14px;
+            font-size: 16px; cursor: pointer; font-weight: 700; transition: 0.3s;
+            margin-top: 10px; margin-bottom: 15px;
+        }
+
+        .btn-orange {
+            background-color: var(--orange); box-shadow: 0 4px 12px var(--orange-glow);
+            position: relative; overflow: hidden;
+        }
+        .btn-orange::after {
+            content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); transition: all 0.5s ease;
+        }
+        .btn-orange:hover {
+            background-color: var(--orange-hover); transform: translateY(-3px); box-shadow: 0 6px 15px var(--orange-glow);
+        }
+        .btn-orange:hover::after { left: 125%; transition: all 0.7s ease-in-out; }
+
+        .toggle-text { color: var(--orange); cursor: pointer; font-weight: 700; }
+        .divider { display: flex; align-items: center; text-align: center; margin: 20px 0; }
+        .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid var(--input-border); }
+        .divider span { padding: 0 10px; color: var(--text-muted); font-size: 10px; font-weight: 800; text-transform: uppercase; }
+
+        .social-btn-wrapper { display: flex; justify-content: center; gap: 15px; }
+
+        .facebook-btn {
+            width: 40px; height: 40px; border-radius: 50%; background: white;
+            border: 1px solid #ddd; display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: var(--facebook-blue); font-size: 18px;
+        }
+
+        .facebook-btn, .g_id_signin {
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease !important; border-radius: 50%;
+        }
+        .facebook-btn:hover, .g_id_signin:hover {
+            transform: translateY(-5px) scale(1.15) !important; box-shadow: 0 10px 15px rgba(0,0,0,0.15);
+        }
+        .facebook-btn:hover i { transform: rotate(10deg); transition: transform 0.3s ease; }
+
+        #error-msg { color: var(--error-red); font-size: 12px; margin-bottom: 10px; font-weight: 600; min-height: 18px; }
+        #password-hint { font-size: 11px; margin-top: 5px; font-weight: 600; display: none; }
+        #signup-section { display: none; }
+
+        .password-container { position: relative; }
+        .toggle-password {
+            position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+            cursor: pointer; color: var(--text-muted); font-size: 20px; z-index: 5;
+        }
+
+        /* OTP Section Styling */
+        #otp-section { display: none; margin-top: 10px; }
+        .otp-back { text-align: left; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; }
+        .otp-back:hover { color: var(--orange); }
+        #reg-otp { text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; }
     </style>
 </head>
-<body id="page-body">
-    <nav>
-        <div class="logo" style="display: flex; align-items: center; gap: 15px;">
-            <img src="logokalapp.png" alt="Kalapp Logo" style="height: 60px; width: 60px; border-radius: 12px; image-rendering: pixelated;">
-            <span style="font-weight: 800; letter-spacing: -1px;">
-                KAL<span style="color: #ff8c00;">APP</span>
-            </span>
-        </div><button id="mode-toggle">🌓</button>
-    </nav>
-    <section class="hero">
-        <h1>Empowering the Community</h1>
-        <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
-        <a href="login.html" class="btn-orange">Access Kalapp Portal</a>
-    </section>
-    <section class="features">
-        <div class="feature-card">
-            <h3>Real-Time Tracking</h3>
-            <p>Transparency at your fingertips. Every complaint is tracked via a unique ID for instant status updates.</p>
+<body>
+    <div class="bubbles">
+        <div class="bubble"></div><div class="bubble"></div><div class="bubble"></div>
+        <div class="bubble"></div><div class="bubble"></div>
+    </div>
+
+    <div class="login-card">
+        <button id="mode-toggle">DARK MODE</button>
+        <img src="logokalapp.png" alt="Kalapp Logo" style="width: 60px; height: auto; margin-bottom: 10px;">
+        <h1>Kalapp</h1>
+        <p class="subtitle">Smart Barangay Complaint System</p>
+
+        <div id="error-msg"></div>
+
+        <div id="login-section">
+            <form id="login-form">
+                <div class="form-group">
+                    <input type="text" id="login-username" placeholder=" " required>
+                    <label>Username</label>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 5px;">
+                    <div class="password-container">
+                        <input type="password" id="login-password" placeholder=" " required>
+                        <label>Password</label>
+                        <span class="material-icons-sharp toggle-password" onclick="toggleVisibility('login-password', this)">visibility_off</span>
+                    </div>
+                </div>
+
+                <div style="text-align: right; margin-bottom: 20px;">
+                    <span class="toggle-text" style="font-size: 12px; font-weight: 600;" onclick="alert('Forgot password feature coming soon!')">Forgot Password?</span>
+                </div>
+
+                <button type="submit" class="btn btn-orange">Sign In</button>
+            </form>
+
+            <p style="font-size: 13px; color: var(--text-muted);">No account? <span class="toggle-text" onclick="toggleView('signup')">Sign Up</span></p>
+            <div class="divider"><span>Or continue with</span></div>
+            <div class="social-btn-wrapper">
+                <div id="g_id_onload" data-client_id="YOUR_GOOGLE_ID" data-callback="handleGoogleLogin"></div>
+                <div class="g_id_signin" data-type="icon" data-shape="circle" data-theme="outline"></div>
+                <div class="facebook-btn" onclick="handleFacebookLogin()"><i class="fa-brands fa-facebook-f"></i></div>
+            </div>
         </div>
-        <div class="feature-card">
-            <h3>Admin Efficiency</h3>
-            <p>City officials get a unified dashboard to manage and assign tasks without email clutter.</p>
+
+        <div id="signup-section">
+            <form id="signup-form">
+
+                <div id="signup-fields">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="text" id="reg-fname" placeholder=" " required>
+                            <label>First Name</label>
+                        </div>
+                        <div class="form-group">
+                            <input type="text" id="reg-lname" placeholder=" " required>
+                            <label>Last Name</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="reg-email" placeholder=" " required>
+                        <label>Email Address</label>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <input type="date" id="reg-birthdate" required>
+                            <label>Birthdate</label>
+                        </div>
+                        <div class="form-group">
+                            <select id="reg-sex" required value="">
+                                <option value="" disabled selected hidden></option>
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                            <label>Sex</label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="reg-username" placeholder=" " required>
+                        <label>Username</label>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="password-container">
+                            <input type="password" id="reg-password" placeholder=" " required oninput="checkPasswordStrength()">
+                            <label>Password</label>
+                            <span class="material-icons-sharp toggle-password" onclick="toggleVisibility('reg-password', this)">visibility_off</span>
+                        </div>
+                        <div id="password-hint">Requires: A-Z, a-z, 0-9, & special character</div>
+                    </div>
+
+                    <div class="form-group">
+                        <div class="password-container">
+                            <input type="password" id="reg-confirm-password" placeholder=" " required>
+                            <label>Confirm Password</label>
+                            <span class="material-icons-sharp toggle-password" onclick="toggleVisibility('reg-confirm-password', this)">visibility_off</span>
+                        </div>
+                    </div>
+
+                    <div class="terms-container">
+                        <input type="checkbox" id="reg-terms" required>
+                        <label for="reg-terms" class="terms-label">
+                            I agree to the <a href="#" class="toggle-text">Terms of Agreement</a> & <a href="#" class="toggle-text">Privacy Policy</a>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="otp-section">
+                    <div class="otp-back" onclick="backToSignup()">
+                        <i class="fa-solid fa-arrow-left" style="margin-right: 5px;"></i> Back to Details
+                    </div>
+                    <p class="subtitle" style="margin-bottom: 20px;">We sent a 6-digit code to your email. Please enter it below to verify.</p>
+                    <div class="form-group">
+                        <input type="text" id="reg-otp" placeholder=" " maxlength="6">
+                        <label>Verification Code</label>
+                    </div>
+                </div>
+
+                <button type="submit" id="main-submit-btn" class="btn btn-orange">Send Verification Code</button>
+            </form>
+            <p style="font-size: 13px; color: var(--text-muted);" id="back-to-login-text">Back to <span class="toggle-text" onclick="toggleView('login')">Login</span></p>
         </div>
-        <div class="feature-card">
-            <h3>Responsive Local Govt</h3>
-            <p>Empowering each barangay with dedicated tools to resolve community issues faster than ever.</p>
-        </div>
-    </section>
-    <footer>&copy; 2026 Group 7 &bull; Citywide Centralized Barangay Complaint Center</footer>
+    </div>
+
     <script>
-        const savedTheme = localStorage.getItem('kalapp-theme');
-        if (savedTheme === 'dark') document.body.classList.add('dark');
-        const toggleBtn = document.getElementById('mode-toggle');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
-                localStorage.setItem('kalapp-theme', isDark ? 'dark' : 'light');
-            });
+        const errorMsg = document.getElementById('error-msg');
+        const modeToggle = document.getElementById('mode-toggle');
+
+        let currentSignupStep = 1;
+
+        function toggleView(view) {
+            document.getElementById('login-section').style.display = view === 'login' ? 'block' : 'none';
+            document.getElementById('signup-section').style.display = view === 'signup' ? 'block' : 'none';
+            errorMsg.innerText = '';
+
+            if (view === 'login') {
+                backToSignup();
+                document.getElementById('signup-form').reset();
+            }
         }
+
+        function toggleVisibility(inputId, icon) {
+            const input = document.getElementById(inputId);
+            const isPassword = input.type === "password";
+            input.type = isPassword ? "text" : "password";
+            icon.innerText = isPassword ? "visibility" : "visibility_off";
+        }
+
+        function checkPasswordStrength() {
+            const password = document.getElementById('reg-password').value;
+            const hint = document.getElementById('password-hint');
+            const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
+
+            if (password.length > 0) {
+                hint.style.display = 'block';
+                if (regex.test(password) && password.length >= 8) {
+                    hint.style.color = 'var(--success-green)';
+                    hint.innerText = 'Strong Password! ✓';
+                } else {
+                    hint.style.color = 'var(--error-red)';
+                    hint.innerText = 'Requires: A-Z, a-z, 0-9, special character (min 8 chars)';
+                }
+            } else {
+                hint.style.display = 'none';
+            }
+        }
+
+        function backToSignup() {
+            currentSignupStep = 1;
+            document.getElementById('signup-fields').style.display = 'block';
+            document.getElementById('otp-section').style.display = 'none';
+            document.getElementById('main-submit-btn').innerText = 'Send Verification Code';
+            document.getElementById('reg-otp').removeAttribute('required');
+            errorMsg.innerText = '';
+        }
+
+        document.getElementById('signup-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const submitBtn = document.getElementById('main-submit-btn');
+
+            if (currentSignupStep === 1) {
+                const password = document.getElementById('reg-password').value;
+                const confirmPassword = document.getElementById('reg-confirm-password').value;
+                const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
+
+                if (!regex.test(password) || password.length < 8) {
+                    errorMsg.style.color = 'var(--error-red)';
+                    errorMsg.innerText = 'Please ensure your password meets all requirements.';
+                    return;
+                }
+                if (password !== confirmPassword) {
+                    errorMsg.style.color = 'var(--error-red)';
+                    errorMsg.innerText = 'Passwords do not match!';
+                    return;
+                }
+
+                errorMsg.style.color = 'var(--text-muted)';
+                errorMsg.innerText = 'Sending code to your email...';
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Sending...';
+
+                // Simulation: Switches to OTP section after 1.5s
+                setTimeout(() => {
+                    document.getElementById('signup-fields').style.display = 'none';
+                    document.getElementById('otp-section').style.display = 'block';
+                    document.getElementById('reg-otp').setAttribute('required', 'true');
+
+                    submitBtn.innerText = 'Verify & Create Account';
+                    currentSignupStep = 2;
+
+                    errorMsg.style.color = 'var(--success-green)';
+                    errorMsg.innerText = 'Verification code sent (Simulation)!';
+                    submitBtn.disabled = false;
+                }, 1500);
+
+            }
+            else if (currentSignupStep === 2) {
+                errorMsg.style.color = 'var(--text-muted)';
+                errorMsg.innerText = 'Verifying your code...';
+                submitBtn.disabled = true;
+                submitBtn.innerText = 'Verifying...';
+
+                // Simulation: Verifies if code is 6 digits long
+                setTimeout(() => {
+                    const otpValue = document.getElementById('reg-otp').value;
+
+                    if(otpValue.length === 6) {
+                        errorMsg.style.color = 'var(--success-green)';
+                        errorMsg.innerText = 'Account successfully created & verified! Redirecting to login...';
+
+                        setTimeout(() => {
+                            toggleView('login');
+                            submitBtn.disabled = false;
+                        }, 2000);
+
+                    } else {
+                        errorMsg.style.color = 'var(--error-red)';
+                        errorMsg.innerText = 'Invalid OTP. Please enter 6 digits.';
+                        submitBtn.innerText = 'Verify & Create Account';
+                        submitBtn.disabled = false;
+                    }
+                }, 1500);
+            }
+        });
+
+        const updateThemeUI = () => {
+            const isDark = document.body.classList.contains('dark');
+            modeToggle.innerText = isDark ? 'LIGHT MODE' : 'DARK MODE';
+        };
+
+        modeToggle.onclick = () => {
+            document.body.classList.toggle('dark');
+            localStorage.setItem('kalapp-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeUI();
+        };
+
+        document.getElementById('reg-sex').addEventListener('change', function() {
+            this.setAttribute('value', this.value);
+        });
+
+        window.onload = () => {
+            if (localStorage.getItem('kalapp-theme') === 'dark') {
+                document.body.classList.add('dark');
+            }
+            updateThemeUI();
+        };
+
+        function handleGoogleLogin(response) { console.log("Google Auth:", response); }
+        function handleFacebookLogin() { alert("Redirecting to Facebook Login..."); }
     </script>
 </body>
 </html>
