@@ -96,6 +96,7 @@ app.post('/api/request-otp', async (req, res) => {
         user.otp = otp;
         user.otpExpires = new Date(Date.now() + 10 * 60000);
         await user.save();
+   
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
         sendSmtpEmail.sender = { "name": "Kalapp System", "email": "kalappscc@gmail.com" };
         sendSmtpEmail.to = [{ "email": email }];
@@ -199,7 +200,11 @@ app.post('/api/ai-chat', async (req, res) => {
         const chat = model.startChat({ history: history || [] });
         const result = await chat.sendMessage(message);
         res.json({ reply: result.response.text() });
-    } catch (error) { res.status(500).json({ error: "AI Error" }); }
+    } catch (error) { 
+        // 👇 THIS IS THE FIX: It will print the exact reason to your terminal
+        console.error("❌ GEMINI AI ERROR:", error); 
+        res.status(500).json({ error: "AI Error" }); 
+    }
 });
 
 // --- Start Server ---
