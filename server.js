@@ -194,7 +194,7 @@ app.post('/api/ai-chat', async (req, res) => {
     try {
         const { message, history } = req.body;
         const model = genAI.getGenerativeModel({ 
-            model: "gemini-1.5-flash",
+            model: "gemini-2.5-flash",
             systemInstruction: `You are 'Sumbong-Bot', the official AI assistant of 'Sumbungan ng Bayan'. Tone: Empathetic, uses 'Po/Opo', Taglish. Ask for What, Who, Where, When. Direct them to the complaint form.`
         });
         const chat = model.startChat({ history: history || [] });
