@@ -12,22 +12,26 @@
     <style>
         :root {
             --bg-body: #f8fafc;
-            --bg-card: rgba(255, 255, 255, 0.9); 
-            --text-main: #1e293b; 
-            --text-muted: #64748b;
+           /* 🔵 Pinalitan ang card background ng Royal Blue na may 0.9 transparency */
+            --bg-card: rgba(0, 50, 98, 0.9);
+            --text-main: #ffffff;                --text-muted: #e2e8f0;
             --orange: #ff8c00; 
             --orange-hover: #e67e00; 
             --orange-glow: rgba(255, 140, 0, 0.3);
             --input-bg: transparent;
             --input-border: #e2e8f0;
-            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --input-border: rgba(255, 255, 255, 0.2);
+            --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
             --facebook-blue: #1877F2;
             --error-red: #ef4444;
             --success-green: #10b981;
             --dropdown-text: #1e293b;
-            --gradient-1: #f8fafc;
-            --gradient-2: #e2e8f0;
-            --gradient-3: #f1f5f9;
+            --bg-body: #1e3a8a;           /* Dark Blue Base */
+            --gradient-1: #1e3a8a;        /* Deep Royal Blue */
+            --gradient-2: #1e40af;        /* Blue accent */
+            --gradient-3: #172554;        /* Midnight Blue shadow */
+            
+            
         }
         
         body.dark {
@@ -205,6 +209,27 @@
         .otp-back { text-align: left; margin-bottom: 15px; cursor: pointer; color: var(--text-muted); font-size: 12px; display: flex; align-items: center; }
         .otp-back:hover { color: var(--orange); }
         #reg-otp { text-align: center; letter-spacing: 15px; font-size: 24px; font-weight: bold; }
+        /* 🚻 Fix para sa Sex Dropdown */
+#reg-sex {
+    background-color: rgba(255, 255, 255, 0.1) !important; /* Transparent glass look */
+    color: white !important;
+    appearance: none; /* Tinatanggal ang default styling ng Windows/Chrome */
+    cursor: pointer;
+}
+
+/* Ito ang para sa listahan na lumalabas (Male/Female) */
+#reg-sex option {
+    background-color: #003262; /* Marine Blue para mabasa ang text */
+    color: white;
+    padding: 10px;
+}
+
+/* Fix para sa Floating Label ng Sex */
+.form-group select:focus ~ label:not(.terms-label),
+.form-group select:not([value=""]) ~ label:not(.terms-label) {
+    background-color: #003262 !important; /* Itapat sa kulay ng card para hindi maging white block */
+    padding: 0 5px;
+}
     </style>
 </head>
 <body>
