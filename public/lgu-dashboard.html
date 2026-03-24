@@ -76,6 +76,13 @@
       .close-modal { position: absolute; top: 20px; right: 40px; color: #f1f1f1; font-size: 45px; font-weight: bold; cursor: pointer; transition: 0.2s; }
       .close-modal:hover { color: var(--color-danger); }
       
+      /* 🚩 NEW: Pulse Animation for Critical Priorities */
+      @keyframes pulse-critical {
+          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+          70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
+          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      }
+
       @media screen and (max-width: 1200px) { 
           .container { grid-template-columns: 7rem auto 23rem; } 
           aside .sidebar h3 { display: none; } 
@@ -134,7 +141,7 @@
 
             <div class="recent-reports">
                 <div class="controls-bar">
-                    <h2>Recent Complaints</h2>
+                    <h2>Recent Complaints (Priority Sorted)</h2>
                     <div>
                         <select id="statusFilter" onchange="loadComplaints()">
                             <option value="All">All Statuses</option>
@@ -149,7 +156,14 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Photo</th><th>ID</th><th>Date</th><th>Citizen</th><th>Barangay</th><th>Issue</th><th>Description</th><th>Status</th><th style="min-width: 250px;">Action / Notes</th>
+                                <th>Photo</th>
+                                <th>ID & Priority</th> <th>Date</th>
+                                <th>Citizen</th>
+                                <th>Barangay</th>
+                                <th>Issue</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th style="min-width: 250px;">Action / Notes</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
@@ -190,7 +204,7 @@
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
             
-            fetch(`${BACKEND_URL}/api/complaints`)
+            fetch(${BACKEND_URL}/api/complaints)
             .then(res => res.json())
             .then(data => {
                 const today = new Date();
@@ -215,8 +229,24 @@
                     return currentStatus === filterValue;
                 });
 
+                // 🚩 NEW: AI Priority Sorting Logic
+                const priorityWeights = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
+                
+                currentFilteredData.sort((a, b) => {
+                    // Sort by Priority first if they are not yet resolved
+                    if (a.status !== 'Resolved' && b.status !== 'Resolved') {
+                         const weightA = priorityWeights[a.priority || 'MEDIUM'] || 2;
+                         const weightB = priorityWeights[b.priority || 'MEDIUM'] || 2;
+                         if (weightA !== weightB) {
+                             return weightB - weightA; // Higher weight goes first
+                         }
+                    }
+                    // If priorities are equal (or resolved), sort by Date (Newest first)
+                    return new Date(b.createdAt) - new Date(a.createdAt);
+                });
+
                 if (currentFilteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>`;
+                    tableBody.innerHTML = <tr><td colspan="9" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>;
                     return;
                 }
 
@@ -231,34 +261,46 @@
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
                     const trackingId = complaint.trackingId;
                     
-                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>`;
+                    const noteHTML = <input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>;
                     
-                    // 🚩 NEW: Action Buttons with Manual Troll Flagger
                     let actionButtons = '';
                     if (isResolved) {
-                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
+                        actionButtons = noteHTML + <button class="action-btn btn-disabled" disabled>Resolved ✓</button>;
                     } else if (complaint.status === 'Rejected & Flagged') {
-                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Flagged & Closed</button>`;
+                        actionButtons = noteHTML + <button class="action-btn btn-disabled" disabled>Flagged & Closed</button>;
                     } else if (complaint.status === 'In Progress') {
-                        actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
+                        actionButtons = noteHTML + <button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>;
                     } else {
                         actionButtons = noteHTML + 
-                        `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button>` +
-                        `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>` +
-                        `<button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>`;
+                        <button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button> +
+                        <button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button> +
+                        <button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>;
                     }
 
-                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
+                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : ${BACKEND_URL}${complaint.imageUrl}) : '';
                     
                     const photoDisplay = complaint.imageUrl ?
-                        `<img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')">` : 
-                        `<span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>`;
+                        <img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')"> : 
+                        <span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>;
                         
                     const formattedDate = new Date(complaint.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
                     
+                    // 🚩 NEW: Priority Badge Display
+                    let priorityBadge = '';
+                    const priorityValue = complaint.priority || 'MEDIUM';
+                    if (priorityValue === 'CRITICAL') {
+                        priorityBadge = <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; animation: pulse-critical 1.5s infinite; display: inline-block; margin-top: 5px;">CRITICAL</span>;
+                    } else if (priorityValue === 'HIGH') {
+                        priorityBadge = <span style="background: #f97316; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">HIGH</span>;
+                    } else if (priorityValue === 'MEDIUM') {
+                        priorityBadge = <span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">MEDIUM</span>;
+                    } else {
+                        priorityBadge = <span style="background: #94a3b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">LOW</span>;
+                    }
+
                     row.innerHTML = `
                         <td>${photoDisplay}</td>
-                        <td><strong>${trackingId}</strong></td>
+                        <td><strong>${trackingId}</strong><br>${priorityBadge}</td>
                         <td>${formattedDate}</td>
                         <td>${complaint.citizenName || 'Anonymous'}</td>
                         <td>${complaint.barangay}</td>
@@ -274,9 +316,9 @@
         }
 
         function updateStatus(trackingId, newStatus) {
-            const noteValue = document.getElementById(`note-${trackingId}`).value;
+            const noteValue = document.getElementById(note-${trackingId}).value;
             
-            fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
+            fetch(${BACKEND_URL}/api/complaints/${trackingId}/status, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
@@ -288,7 +330,7 @@
             .then(res => res.json())
             .then(data => { 
                 if(data.success) {
-                    alert(`Complaint marked as ${newStatus}!`);
+                    alert(Complaint marked as ${newStatus}!);
                     loadComplaints(); 
                 } 
             })
@@ -296,22 +338,23 @@
         }
 
         function downloadCSV() {
-            let csvContent = "Tracking ID,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note\n";
+            let csvContent = "Tracking ID,Priority,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note\n";
             currentFilteredData.forEach(c => {
                 const id = c.trackingId; 
-                const date = `"${new Date(c.createdAt).toLocaleDateString()}"`; 
-                const user = `"${c.citizenName || 'Anonymous'}"`;
-                const brgy = `"${c.barangay || ''}"`; 
-                const issue = `"${c.category || ''}"`; 
-                const desc = `"${(c.description || '').replace(/"/g, '""')}"`; 
-                const status = `"${c.status || 'Pending'}"`; 
-                const note = `"${(c.lguNote || '').replace(/"/g, '""')}"`; 
-                csvContent += `${id},${date},${user},${brgy},${issue},${desc},${status},${note}\n`;
+                const priority = "${c.priority || 'MEDIUM'}";
+                const date = "${new Date(c.createdAt).toLocaleDateString()}"; 
+                const user = "${c.citizenName || 'Anonymous'}";
+                const brgy = "${c.barangay || ''}"; 
+                const issue = "${c.category || ''}"; 
+                const desc = "${(c.description || '').replace(/"/g, '""')}"; 
+                const status = "${c.status || 'Pending'}"; 
+                const note = "${(c.lguNote || '').replace(/"/g, '""')}"; 
+                csvContent += ${id},${priority},${date},${user},${brgy},${issue},${desc},${status},${note}\n;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", `Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv);
             link.click();
         }
 
