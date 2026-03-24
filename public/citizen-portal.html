@@ -230,15 +230,17 @@
                 const make = EXIF.getTag(this, "Make");
                 const model = EXIF.getTag(this, "Model");
 
-                // 🔧 FIX: Temporarily bypass the block for testing downloaded images
+                // 🔒 RESTORED: Reject screenshots/downloads missing camera hardware data
                 if (!make || !model) {
-                    formMsg.style.color = "var(--color-warning)";
-                    formMsg.innerText = "⚠️ EXIF Missing: Allowed for testing, but will be blocked in production.";
-                    // return;  <--- This line is commented out so it proceeds anyway
-                } else {
-                    formMsg.style.color = "var(--color-success)";
-                    formMsg.innerText = "✅ Authentic Camera Photo Verified! Uploading to server...";
+                    formMsg.style.color = "var(--color-danger)";
+                    formMsg.innerText = "❌ Security Check Failed: This appears to be a screenshot or downloaded image. Please take a real photo using your camera.";
+                    submitBtn.innerText = "Submit Complaint to LGU"; 
+                    submitBtn.disabled = false;
+                    return; // <--- The block is back in action! Upload stops here.
                 }
+
+                formMsg.style.color = "var(--color-success)";
+                formMsg.innerText = "✅ Authentic Camera Photo Verified! Uploading to server...";
                 
                 // Pack the data for the server
                 const formData = new FormData();
