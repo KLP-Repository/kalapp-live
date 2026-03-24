@@ -9,195 +9,182 @@
         :root {
             --bg-body: #f8fafc;
             --bg-card: #ffffff;
-            --bg-nav: #1e293b;
+            --bg-nav: #ffffff;
             --hero-grad: linear-gradient(135deg, #0f172a 0%, #2563eb 100%);
             --text-main: #1e293b;
             --text-muted: #64748b;
             --orange: #ff8c00;
-            --orange-hover: #e67e00;
+            --chat-blue: #2563eb;
         }
+        
         body.dark {
-            --bg-body: #0f172a;
-            --bg-card: #1e293b;
+            --bg-body: #020617;
+            --bg-card: #0f172a;
             --bg-nav: #020617;
-            --hero-grad: linear-gradient(135deg, #020617 0%, #1e293b 100%);
+            --hero-grad: linear-gradient(135deg, #020617 0%, #0f172a 100%);
             --text-main: #f1f5f9;
             --text-muted: #94a3b8;
         }
-        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg-body); color: var(--text-main); transition: background 0.3s ease; overflow-x: hidden; }
-        
-        /* --- Landing Page Styles --- */
-        nav { background-color: var(--bg-nav); padding: 1rem 8%; display: flex; justify-content: space-between; align-items: center; position: relative; z-index: 100; }
-        .logo { font-size: 1.6rem; font-weight: 800; color: white; letter-spacing: -1px; }
-        #mode-toggle { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        #mode-toggle:hover { background: var(--orange); }
-        .hero { background: var(--hero-grad); color: white; text-align: center; padding: 100px 20px 160px 20px; clip-path: ellipse(150% 100% at 50% 0%); position: relative; z-index: 1; }
-        .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; }
-        .hero p { max-width: 650px; margin: 0 auto 40px; font-size: 1.2rem; opacity: 0.8; }
-        .btn-orange { background-color: var(--orange); color: white; padding: 18px 45px; border-radius: 12px; text-decoration: none; font-weight: 700; font-size: 1.1rem; display: inline-block; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3); transition: transform 0.3s ease; }
-        .btn-orange:hover { transform: scale(1.05); background-color: var(--orange-hover); }
-        .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; max-width: 1200px; margin: -80px auto 60px; padding: 0 20px; position: relative; z-index: 10; }
-        .feature-card { background: var(--bg-card); padding: 50px 35px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); text-align: center; border-bottom: 4px solid var(--orange); transition: transform 0.3s ease; }
-        .feature-card:hover { transform: translateY(-10px); }
-        .feature-card h3 { color: var(--orange); margin-bottom: 15px; font-weight: 700; font-size: 1.5rem; }
-        .feature-card p { color: var(--text-muted); line-height: 1.6; font-size: 1rem; margin: 0; }
-        footer { text-align: center; padding: 60px 20px; color: var(--text-muted); font-size: 0.9rem; }
 
-        /* --- AI Chatbot Styles --- */
-        #chatbot-toggle { position: fixed; bottom: 30px; right: 30px; width: 60px; height: 60px; border-radius: 50%; background-color: var(--orange); color: white; border: none; font-size: 28px; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 140, 0, 0.3); z-index: 1000; transition: transform 0.3s ease; display: flex; justify-content: center; align-items: center; }
-        #chatbot-toggle:hover { transform: scale(1.1); }
-        #chatbot-window { position: fixed; bottom: 100px; right: 30px; width: 350px; height: 450px; background-color: var(--bg-card); border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.2); display: flex; flex-direction: column; z-index: 1000; overflow: hidden; transform: translateY(20px); opacity: 0; pointer-events: none; transition: all 0.3s ease; border: 1px solid rgba(128,128,128,0.2); }
-        #chatbot-window.active { transform: translateY(0); opacity: 1; pointer-events: auto; }
-        .chat-header { background: var(--hero-grad); color: white; padding: 15px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
-        .close-btn { background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: bold; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; font-size: 0.9rem; }
-        .chat-bubble { max-width: 80%; padding: 10px 15px; border-radius: 15px; line-height: 1.4; word-wrap: break-word; }
-        .user-bubble { background-color: var(--orange); color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .ai-bubble { background-color: var(--bg-body); color: var(--text-main); align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid rgba(128,128,128,0.2); }
-        .chat-input-area { display: flex; padding: 15px; border-top: 1px solid rgba(128,128,128,0.2); background: var(--bg-card); }
-        #chat-input { flex: 1; padding: 10px; border: 1px solid var(--text-muted); border-radius: 8px; background: var(--bg-body); color: var(--text-main); font-family: 'Inter', sans-serif; }
-        #chat-input:focus { outline: none; border-color: var(--orange); }
-        #send-chat { background: var(--orange); color: white; border: none; padding: 0 15px; margin-left: 10px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: 0.2s; }
-        #send-chat:hover { background: var(--orange-hover); }
+        body { font-family: 'Inter', sans-serif; margin: 0; background-color: var(--bg-body); color: var(--text-main); transition: all 0.3s ease; overflow-x: hidden; }
+
+        /* --- NAVIGATION --- */
+        nav { 
+            background-color: var(--bg-nav); padding: 1rem 8%; display: flex; 
+            justify-content: space-between; align-items: center; position: fixed; 
+            top: 0; left: 0; right: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .logo { font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -1px; }
+        #mode-toggle { background: var(--bg-body); border: 1px solid var(--text-muted); padding: 10px; border-radius: 50%; cursor: pointer; color: var(--text-main); }
+
+        /* --- HERO SECTION --- */
+        .hero { 
+            background: var(--hero-grad); color: white; padding: 160px 8% 100px; 
+            display: flex; align-items: center; justify-content: space-between;
+            text-align: left; position: relative; z-index: 1; min-height: 400px;
+        }
+        .hero-content { max-width: 600px; z-index: 2; }
+        .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; line-height: 1.1; color: white; }
+        .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 40px; color: white; }
+
+        /* ANIMATED GLASS BUTTON */
+        .btn-orange {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3); color: white; padding: 18px 45px; 
+            border-radius: 50px; text-decoration: none; font-weight: 700; position: relative; 
+            overflow: hidden; transition: 0.4s; display: inline-block;
+        }
+        .btn-orange:hover { transform: translateY(-5px); color: #ff8c00; box-shadow: 0 0 20px rgba(255, 140, 0, 0.4); }
+
+        .hero-visual { width: 350px; height: 350px; animation: float 4s ease-in-out infinite; }
+        .hero-visual img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
+
+        /* --- INFOGRAPHIC FLOW DESIGN (Features) --- */
+        .features { display: flex; flex-direction: column; gap: 20px; max-width: 850px; margin: 60px auto; padding: 0 20px; }
+        .feature-card { 
+            background: var(--bg-card); display: flex; align-items: center; padding: 25px 35px; 
+            border-radius: 20px; gap: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s ease; 
+        }
+        .feature-card:hover { transform: translateX(15px); }
+        .feature-number { font-size: 5rem; font-weight: 800; line-height: 1; opacity: 0.8; min-width: 70px; }
+        .card-1 .feature-number { color: #5b5fc7; }
+        .card-2 .feature-number { color: #8b5cf6; }
+        .card-3 .feature-number { color: #ec4899; }
+        .feature-info { flex: 1; }
+        .feature-info h3 { margin: 0 0 5px; font-size: 1.4rem; color: var(--text-main); font-weight: 800; }
+        .feature-info p { margin: 0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
+        .feature-icon-box { width: 70px; height: 70px; border-radius: 18px; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.5rem; flex-shrink: 0; }
+        .card-1 .feature-icon-box { background: #5b5fc7; }
+        .card-2 .feature-icon-box { background: #8b5cf6; }
+        .card-3 .feature-icon-box { background: #ec4899; }
+
+        /* --- RESPONSIVE FIX (Para sa Mobile) --- */
+        @media (max-width: 768px) {
+            .hero { flex-direction: column; text-align: center; padding-top: 120px; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-visual { width: 250px; height: 250px; margin-top: 30px; }
+            .feature-card { flex-direction: column; text-align: center; padding: 30px; }
+            .feature-number { font-size: 4rem; min-width: auto; }
+            .feature-icon-box { order: -1; margin: 0 auto; }
+        }
+
+        /* --- CHATBOX --- */
+        #chatbot-toggle { position: fixed; bottom: 30px; right: 30px; width: 85px; height: 85px; cursor: pointer; z-index: 1000; background: transparent; border: none; animation: float 3s ease-in-out infinite; }
+        #chatbot-toggle img { width: 100%; height: 100%; object-fit: contain; }
+        #chatbot-window { position: fixed; bottom: 130px; right: 30px; width: 380px; max-width: calc(100vw - 60px); height: 550px; background: var(--bg-card); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); display: flex; flex-direction: column; z-index: 1000; overflow: hidden; transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s; border: 1px solid rgba(128,128,128,0.1); }
+        #chatbot-window.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
+        .chat-header { background: #2563eb; color: white; padding: 18px 24px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: var(--bg-body); }
+        .chat-bubble { max-width: 80%; padding: 12px 18px; border-radius: 20px; font-size: 0.95rem; }
+        .user-bubble { background: #2563eb; color: white; align-self: flex-end; }
+        .ai-bubble { background: var(--bg-card); color: var(--text-main); align-self: flex-start; border: 1px solid rgba(128,128,128,0.2); }
+        .chat-input-area { padding: 20px; background: var(--bg-card); display: flex; gap: 10px; border-top: 1px solid rgba(128,128,128,0.1); }
+        #chat-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid rgba(128,128,128,0.2); background: var(--bg-body); color: var(--text-main); outline: none; }
+        #send-chat { background: #2563eb; color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; }
+
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     </style>
 </head>
-<body id="page-body">
+<body>
     <nav>
-        <div class="logo" style="display: flex; align-items: center; gap: 15px;">
-            <img src="logokalapp.png" alt="Kalapp Logo" style="height: 60px; width: 60px; border-radius: 12px; image-rendering: pixelated;">
-            <span style="font-weight: 800; letter-spacing: -1px;">
-                KAL<span style="color: #ff8c00;">APP</span>
-            </span>
-        </div>
+        <div class="logo">KALAPP</div>
         <button id="mode-toggle">🌓</button>
     </nav>
 
     <section class="hero">
-        <h1>Empowering the Community</h1>
-        <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
-        <a href="login.html" class="btn-orange">Access Kalapp Portal</a>
+        <div class="hero-content">
+            <h1>Empowering the Community</h1>
+            <p>Ang Citywide Centralized Barangay Complaint Center. Organized, secure, at binuo para sa real-time resolution.</p>
+            <a href="login.html" class="btn-orange">Access Kalapp Portal</a>
+        </div>
+        <div class="hero-visual">
+            <img src="image_c578fb.png" alt="3D Robot">
+        </div>
     </section>
 
     <section class="features">
-        <div class="feature-card">
-            <h3>Real-Time Tracking</h3>
-            <p>Transparency at your fingertips. Every complaint is tracked via a unique ID for instant status updates.</p>
+        <div class="feature-card card-1">
+            <div class="feature-number">1</div>
+            <div class="feature-info">
+                <h3>Real-Time Tracking</h3>
+                <p>Transparency sa iyong mga kamay. Bawat reklamo ay sinusubaybayan gamit ang unique ID.</p>
+            </div>
+            <div class="feature-icon-box">🔍</div>
         </div>
-        <div class="feature-card">
-            <h3>Admin Efficiency</h3>
-            <p>City officials get a unified dashboard to manage and assign tasks without email clutter.</p>
+        <div class="feature-card card-2">
+            <div class="feature-number">2</div>
+            <div class="feature-info">
+                <h3>Admin Efficiency</h3>
+                <p>Ang mga opisyal ay may unified dashboard upang pamahalaan at i-assign ang mga gawain.</p>
+            </div>
+            <div class="feature-icon-box">⚙️</div>
         </div>
-        <div class="feature-card">
-            <h3>Responsive Local Govt</h3>
-            <p>Empowering each barangay with dedicated tools to resolve community issues faster than ever.</p>
+        <div class="feature-card card-3">
+            <div class="feature-number">3</div>
+            <div class="feature-info">
+                <h3>Responsive Govt</h3>
+                <p>Binibigyan ang bawat barangay ng tool para maresolba ang isyu nang mas mabilis.</p>
+            </div>
+            <div class="feature-icon-box">🚀</div>
         </div>
     </section>
 
-    <button id="chatbot-toggle">💬</button>
+    <button id="chatbot-toggle"><img src="image_c578fb.png" alt="Toggle Chat"></button>
+
     <div id="chatbot-window">
         <div class="chat-header">
-            <span>Sumbong-Bot</span>
-            <button class="close-btn" id="close-chat">✕</button>
+            <span>Sumbong-Bot 🤖</span>
+            <button id="close-chat" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
         </div>
         <div id="chat-messages">
-            <div class="chat-bubble ai-bubble">Hello! I am Sumbong-Bot, your AI assistant. Do you have any questions about the system or how to file a complaint?</div>
+            <div class="chat-bubble ai-bubble">Hello! Ako si Sumbong-Bot. May maitutulong ba ako?</div>
         </div>
         <div class="chat-input-area">
-            <input type="text" id="chat-input" placeholder="Type your message..." autocomplete="off">
-            <button id="send-chat">Send</button>
+            <input type="text" id="chat-input" placeholder="Type here..." autocomplete="off">
+            <button id="send-chat">✓</button>
         </div>
     </div>
 
-    <footer>&copy; 2026 Group 7 &bull; Citywide Centralized Barangay Complaint Center</footer>
-
     <script>
-        // 1. Theme Toggle Logic
-        const savedTheme = localStorage.getItem('kalapp-theme');
-        if (savedTheme === 'dark') document.body.classList.add('dark');
-        
+        // Simplified Logic [cite: 64, 67, 71]
         const toggleBtn = document.getElementById('mode-toggle');
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                const isDark = document.body.classList.contains('dark');
-                localStorage.setItem('kalapp-theme', isDark ? 'dark' : 'light');
-            });
-        }
-
-        // 2. AI Chatbot Logic
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
-        const closeChat = document.getElementById('close-chat');
-        const chatInput = document.getElementById('chat-input');
-        const sendChat = document.getElementById('send-chat');
-        const chatMessages = document.getElementById('chat-messages');
 
-        // Store chat history to maintain conversation context
-        let chatHistory = [];
+        // Dark Mode
+        toggleBtn.addEventListener('click', () => {
+            document.body.classList.toggle('dark');
+        });
 
-        // Open/Close Window
-        chatbotToggle.addEventListener('click', () => chatbotWindow.classList.add('active'));
-        closeChat.addEventListener('click', () => chatbotWindow.classList.remove('active'));
+        // Chat Toggle
+        chatbotToggle.addEventListener('click', () => {
+            const isActive = chatbotWindow.classList.toggle('active');
+            chatbotToggle.style.opacity = isActive ? '0' : '1';
+        });
 
-        // Helper function to create chat bubbles
-        function appendMessage(text, className) {
-            const bubble = document.createElement('div');
-            bubble.className = `chat-bubble ${className}`;
-            bubble.textContent = text;
-            const id = 'msg-' + Date.now();
-            bubble.id = id;
-            chatMessages.appendChild(bubble);
-            chatMessages.scrollTop = chatMessages.scrollHeight; // Auto-scroll to bottom
-            return id;
-        }
-
-        // Handle Sending Messages
-        async function handleSendMessage() {
-            const message = chatInput.value.trim();
-            if (!message) return;
-
-            // Show user's message
-            appendMessage(message, 'user-bubble');
-            chatInput.value = '';
-            
-            // Show a temporary "Thinking..." indicator
-            const typingId = appendMessage('Thinking...', 'ai-bubble');
-
-            try {
-                // Send the request to your newly fixed backend route
-                const response = await fetch('/api/ai-chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        message: message,
-                        history: chatHistory 
-                    }) 
-                });
-                
-                const data = await response.json();
-                
-                // Remove "Thinking..."
-                document.getElementById(typingId).remove();
-                
-                if (response.ok) {
-                    appendMessage(data.reply || "Message received.", 'ai-bubble'); 
-                    
-                    // Update history so the AI remembers the conversation
-                    chatHistory.push({ role: "user", parts: [{ text: message }] });
-                    chatHistory.push({ role: "model", parts: [{ text: data.reply }] });
-                } else {
-                    appendMessage("Error: Could not reach Sumbong-Bot.", 'ai-bubble');
-                }
-            } catch (error) {
-                document.getElementById(typingId).remove();
-                appendMessage("Connection error. Is the Master Server running?", 'ai-bubble');
-            }
-        }
-
-        // Trigger send on button click or Enter key
-        sendChat.addEventListener('click', handleSendMessage);
-        chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleSendMessage();
+        document.getElementById('close-chat').addEventListener('click', () => {
+            chatbotWindow.classList.remove('active');
+            chatbotToggle.style.opacity = '1';
         });
     </script>
 </body>
