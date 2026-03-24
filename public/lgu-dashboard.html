@@ -26,8 +26,7 @@
           background: var(--color-light); border: 1px solid var(--color-info-light);
           color: var(--color-dark);
           padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: all 300ms ease;
-          display: flex; align-items: center;
-          justify-content: center;
+          display: flex; align-items: center; justify-content: center;
       }
       .mode-toggle-btn:hover { background: var(--color-primary); color: white; transform: scale(1.05); }
       * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
@@ -68,6 +67,7 @@
       .status-pending { color: var(--color-danger); font-weight: bold; }
       .status-inprogress { color: var(--color-warning); font-weight: bold; }
       .status-resolved { color: var(--color-success); font-weight: bold; }
+      .status-flagged { color: var(--color-danger); font-weight: bold; font-style: italic; }
       .right { margin-top: 1.4rem; }
       .right .top { display: flex; justify-content: end; gap: 2rem; }
       .profile { display: flex; gap: 2rem; text-align: right; }
@@ -149,7 +149,7 @@
                     <table>
                         <thead>
                             <tr>
-                                <th>Photo</th><th>ID</th><th>Date</th><th>Citizen</th><th>Barangay</th><th>Issue</th><th>Description</th><th>Status</th><th style="min-width: 180px;">Action / Notes</th>
+                                <th>Photo</th><th>ID</th><th>Date</th><th>Citizen</th><th>Barangay</th><th>Issue</th><th>Description</th><th>Status</th><th style="min-width: 250px;">Action / Notes</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
@@ -167,10 +167,8 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🔧 CONFIGURATION FIX
-        // ==========================================
         const BACKEND_URL = 'https://kalapp-system.onrender.com';
+        const currentAdminName = localStorage.getItem('kalapp_username') || 'Official';
 
         // --- Theme Toggle ---
         const toggleBtn = document.getElementById('mode-toggle');
@@ -185,7 +183,7 @@
         }
 
         // Set LGU Name
-        document.getElementById('lgu-name-display').innerText = localStorage.getItem('kalapp_username') || 'Official';
+        document.getElementById('lgu-name-display').innerText = currentAdminName;
 
         let currentFilteredData = []; 
 
@@ -228,22 +226,28 @@
                     let statusClass = 'status-pending';
                     if (complaint.status === 'In Progress') statusClass = 'status-inprogress';
                     if (complaint.status === 'Resolved') statusClass = 'status-resolved';
+                    if (complaint.status === 'Rejected & Flagged') statusClass = 'status-flagged';
 
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
                     const trackingId = complaint.trackingId;
                     
-                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved ? 'disabled' : ''}>`;
+                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>`;
                     
+                    // 🚩 NEW: Action Buttons with Manual Troll Flagger
                     let actionButtons = '';
                     if (isResolved) {
                         actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
+                    } else if (complaint.status === 'Rejected & Flagged') {
+                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Flagged & Closed</button>`;
                     } else if (complaint.status === 'In Progress') {
                         actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     } else {
-                        actionButtons = noteHTML + `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button><button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
+                        actionButtons = noteHTML + 
+                        `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button>` +
+                        `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>` +
+                        `<button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>`;
                     }
 
-                    // 🔧 FIX: Smart URL Check prevents the "Double Link" glitch with Cloudinary
                     const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
                     
                     const photoDisplay = complaint.imageUrl ?
@@ -261,7 +265,7 @@
                         <td>${complaint.category}</td>
                         <td><small>${complaint.description}</small></td>
                         <td class="${statusClass}">${complaint.status || 'Pending'}</td>
-                        <td>${actionButtons}</td>
+                        <td style="display:flex; flex-wrap:wrap; gap:5px;">${actionButtons}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -275,7 +279,11 @@
             fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus, note: noteValue })
+                body: JSON.stringify({ 
+                    status: newStatus, 
+                    note: noteValue,
+                    adminName: currentAdminName 
+                })
             })
             .then(res => res.json())
             .then(data => { 

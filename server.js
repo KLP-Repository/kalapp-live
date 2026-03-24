@@ -54,7 +54,9 @@ const userSchema = new mongoose.Schema({
     status: { type: String, default: 'active' }, 
     authMethod: { type: String, default: 'local' },
     otp: String,
-    otpExpires: Date
+    otpExpires: Date,
+    // 🚩 NEW: 3-Strike System Counter
+    strikes: { type: Number, default: 0 }
 });
 
 const complaintSchema = new mongoose.Schema({
@@ -78,6 +80,39 @@ const complaintSchema = new mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
+
+
+// --- AI IMAGE MODERATOR LOGIC ---
+async function scanImageWithAI(imageUrl) {
+    try {
+        // Fetch the uploaded image from Cloudinary to pass to Gemini
+        const response = await fetch(imageUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const buffer = Buffer.from(arrayBuffer);
+
+        const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+        
+        // The strict instruction for the AI Bouncer
+        const prompt = "You are a strict content moderator for a city complaint system. Look at this image. Does it depict a legitimate community issue such as uncollected garbage, broken infrastructure, potholes, stray animals, hazards, or disturbances? Answer strictly with one word: YES or NO.";
+
+        const imagePart = {
+            inlineData: {
+                data: buffer.toString("base64"),
+                mimeType: response.headers.get("content-type") || "image/jpeg"
+            }
+        };
+
+        const result = await model.generateContent([prompt, imagePart]);
+        const text = result.response.text().trim().toUpperCase();
+        
+        console.log(`🤖 AI Scan Result: ${text}`);
+        return text.includes("YES"); 
+    } catch (error) {
+        console.error("AI Scan Error:", error);
+        return true; // Fallback to true so we don't accidentally block real complaints if AI fails
+    }
+}
+
 
 // --- SEED SUPERADMIN ---
 async function seedAdmin() {
@@ -153,30 +188,48 @@ app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
     if (user) {
-        if (user.status === 'blocked') return res.status(403).json({ message: "Suspended." });
+        if (user.status === 'blocked') return res.status(403).json({ message: "Account suspended due to multiple policy violations." });
         res.json({ success: true, username: user.username, role: user.role });
     } else { res.status(401).json({ message: "Invalid credentials." }); }
 });
 
-// --- 4. COMPLAINTS SYSTEM ---
+// --- 4. COMPLAINTS SYSTEM (Upgraded with AI Bouncer) ---
 app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
     try {
         const { username, barangay, issue, description } = req.body;
-        
-        // ☁️ The image is now uploaded to Cloudinary, and req.file.path holds the secure URL
+        const imageUrl = req.file ? req.file.path : '';
+
+        // 1. Check if user is already blocked
+        const user = await User.findOne({ username });
+        if (user && user.status === 'blocked') {
+            return res.status(403).json({ success: false, message: "Your account is BLOCKED due to multiple policy violations." });
+        }
+
+        // 2. Call the Gemini AI Bouncer
+        if (imageUrl) {
+            const isApproved = await scanImageWithAI(imageUrl);
+            
+            if (!isApproved) {
+                if (user) {
+                    user.strikes += 1; 
+                    if (user.strikes >= 3) {
+                        user.status = 'blocked';
+                        await user.save();
+                        return res.status(403).json({ success: false, message: "❌ AI Rejected: Irrelevant photo. You have reached 3 strikes. Your account is now BLOCKED." });
+                    }
+                    await user.save();
+                    return res.status(400).json({ success: false, message: `❌ AI Rejected: Irrelevant photo detected. This is Strike ${user.strikes} of 3.` });
+                }
+                return res.status(400).json({ success: false, message: "❌ AI Rejected: Photo does not depict a valid complaint." });
+            }
+        }
+
+        // 3. If AI approves, save it normally
         const newComplaint = new Complaint({
             trackingId: 'KAL-' + Math.floor(1000 + Math.random() * 9000),
-            citizenName: username, 
-            barangay, 
-            category: issue, 
-            description,
-            imageUrl: req.file ? req.file.path : '', 
+            citizenName: username, barangay, category: issue, description, imageUrl,
             status: 'Pending',
-            history: [{
-                status: 'Pending',
-                note: 'Complaint officially filed by citizen.',
-                updatedBy: username || 'System'
-            }]
+            history: [{ status: 'Pending', note: 'Complaint officially filed by citizen.', updatedBy: username || 'System' }]
         });
         await newComplaint.save();
         res.json({ success: true, message: 'Complaint submitted!' });
@@ -188,9 +241,23 @@ app.get('/api/complaints', async (req, res) => {
     res.json({ complaints }); 
 });
 
+// --- UPDATED: LGU Status Route (Handles Manual Reject & Flag) ---
 app.patch('/api/complaints/:id/status', async (req, res) => {
     try {
         const { status, note, adminName } = req.body;
+        
+        // If an LGU Official manually flags a complaint
+        if (status === 'Rejected & Flagged') {
+            const complaint = await Complaint.findOne({ trackingId: req.params.id });
+            if (complaint) {
+                const user = await User.findOne({ username: complaint.citizenName });
+                if (user) {
+                    user.strikes += 1;
+                    if (user.strikes >= 3) user.status = 'blocked';
+                    await user.save();
+                }
+            }
+        }
 
         await Complaint.findOneAndUpdate(
             { trackingId: req.params.id }, 
