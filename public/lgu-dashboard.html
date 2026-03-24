@@ -204,7 +204,7 @@
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
             
-            fetch(${BACKEND_URL}/api/complaints)
+            fetch(`${BACKEND_URL}/api/complaints`)
             .then(res => res.json())
             .then(data => {
                 const today = new Date();
@@ -318,7 +318,7 @@
         function updateStatus(trackingId, newStatus) {
             const noteValue = document.getElementById(note-${trackingId}).value;
             
-            fetch(${BACKEND_URL}/api/complaints/${trackingId}/status, {
+            fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ 
