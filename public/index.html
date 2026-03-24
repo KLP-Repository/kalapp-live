@@ -311,7 +311,10 @@
             const bubble = document.createElement('div');
             bubble.className = `chat-bubble ${className}`;
             bubble.textContent = text;
-            const id = 'msg-' + Date.now();
+            
+            // 🔧 FIX: Added Math.random() so bubbles created at the exact same millisecond get unique IDs!
+            const id = 'msg-' + Date.now() + '-' + Math.floor(Math.random() * 10000);
+            
             bubble.id = id;
             chatMessages.appendChild(bubble);
             chatMessages.scrollTop = chatMessages.scrollHeight; 
