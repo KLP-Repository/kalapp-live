@@ -203,7 +203,6 @@
 
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
-            // FIXED: Using backticks for fetch URL
             fetch(`${BACKEND_URL}/api/complaints`)
             .then(res => res.json())
             .then(data => {
@@ -242,7 +241,6 @@
                 });
 
                 if (currentFilteredData.length === 0) {
-                    // FIXED: Using backticks for HTML string
                     tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>`;
                     return;
                 }
@@ -255,36 +253,46 @@
                     if (complaint.status === 'Resolved') statusClass = 'status-resolved';
                     if (complaint.status === 'Rejected & Flagged') statusClass = 'status-flagged';
 
+                    const priorityValue = complaint.priority || 'MEDIUM';
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
                     const trackingId = complaint.trackingId;
                     
-                    // FIXED: Wrap HTML inside backticks
                     const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>`;
                     
+                    // 🚀 NEW: The Priority Override UI
+                    const prioritySelectHTML = `
+                        <div style="margin-bottom: 8px; display: flex; gap: 5px;">
+                            <select id="priority-${trackingId}" class="note-input" style="width: auto; margin-bottom: 0; padding: 0.2rem;" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>
+                                <option value="CRITICAL" ${priorityValue === 'CRITICAL' ? 'selected' : ''}>CRITICAL</option>
+                                <option value="HIGH" ${priorityValue === 'HIGH' ? 'selected' : ''}>HIGH</option>
+                                <option value="MEDIUM" ${priorityValue === 'MEDIUM' ? 'selected' : ''}>MEDIUM</option>
+                                <option value="LOW" ${priorityValue === 'LOW' ? 'selected' : ''}>LOW</option>
+                            </select>
+                            <button class="action-btn" style="background: var(--color-dark);" onclick="overridePriority('${trackingId}', '${complaint.status || 'Pending'}')" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>Override</button>
+                        </div>
+                    `;
+
+                    // Update action buttons to include the new Priority UI
                     let actionButtons = '';
                     if (isResolved) {
-                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
+                        actionButtons = prioritySelectHTML + noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
                     } else if (complaint.status === 'Rejected & Flagged') {
-                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Flagged & Closed</button>`;
+                        actionButtons = prioritySelectHTML + noteHTML + `<button class="action-btn btn-disabled" disabled>Flagged & Closed</button>`;
                     } else if (complaint.status === 'In Progress') {
-                        actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
+                        actionButtons = prioritySelectHTML + noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     } else {
-                        actionButtons = noteHTML + 
+                        actionButtons = prioritySelectHTML + noteHTML + 
                         `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button>` +
                         `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>` +
                         `<button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>`;
                     }
 
-                    // FIXED: Wrap URL and template variables inside backticks
                     const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
-                    
                     const photoDisplay = complaint.imageUrl ? `<img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')">` : `<span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>`;
-                    
                     const formattedDate = new Date(complaint.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
                     
                     // Priority Badge Display
                     let priorityBadge = '';
-                    const priorityValue = complaint.priority || 'MEDIUM';
                     if (priorityValue === 'CRITICAL') {
                         priorityBadge = `<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; animation: pulse-critical 1.5s infinite; display: inline-block; margin-top: 5px;">CRITICAL</span>`;
                     } else if (priorityValue === 'HIGH') {
@@ -304,7 +312,7 @@
                         <td>${complaint.category}</td>
                         <td><small>${complaint.description}</small></td>
                         <td class="${statusClass}">${complaint.status || 'Pending'}</td>
-                        <td style="display:flex; flex-wrap:wrap; gap:5px;">${actionButtons}</td>
+                        <td style="display:flex; flex-direction: column; gap:5px;">${actionButtons}</td>
                     `;
                     tableBody.appendChild(row);
                 });
@@ -313,9 +321,7 @@
         }
 
         function updateStatus(trackingId, newStatus) {
-            // FIXED: Using backticks for getting the element ID
             const noteValue = document.getElementById(`note-${trackingId}`).value;
-            // FIXED: Using backticks for fetch URL
             fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
@@ -328,8 +334,32 @@
             .then(res => res.json())
             .then(data => { 
                 if(data.success) {
-                    // FIXED: Using backticks for alert string
                     alert(`Complaint marked as ${newStatus}!`);
+                    loadComplaints(); 
+                } 
+            })
+            .catch(err => console.error('Error:', err));
+        }
+
+        // 🚀 NEW: Override Priority Function
+        function overridePriority(trackingId, currentStatus) {
+            const newPriority = document.getElementById(`priority-${trackingId}`).value;
+            const noteValue = document.getElementById(`note-${trackingId}`).value;
+
+            fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
+                method: 'PATCH', 
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    status: currentStatus, 
+                    note: noteValue,
+                    priority: newPriority, 
+                    adminName: currentAdminName 
+                })
+            })
+            .then(res => res.json())
+            .then(data => { 
+                if(data.success) {
+                    alert(`Priority successfully overridden to ${newPriority}!`);
                     loadComplaints(); 
                 } 
             })
@@ -348,13 +378,11 @@
                 const desc = (c.description || '').replace(/"/g, '""'); 
                 const status = c.status || 'Pending'; 
                 const note = (c.lguNote || '').replace(/"/g, '""'); 
-                // FIXED: String literal format
                 csvContent += `"${id}","${priority}","${date}","${user}","${brgy}","${issue}","${desc}","${status}","${note}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.setAttribute("href", URL.createObjectURL(blob));
-            // FIXED: Filename string literal format
             link.setAttribute("download", `Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv`);
             link.click();
         }
