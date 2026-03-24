@@ -46,8 +46,9 @@
             top: 0; left: 0; right: 0; 
             z-index: 1000;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: padding 0.3s ease;
         }
-        .logo { font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -1px; display: flex; align-items: center; gap: 15px;}
+        .logo { font-size: 1.6rem; font-weight: 800; color: var(--text-main); letter-spacing: -1px; display: flex; align-items: center; gap: 15px; transition: 0.3s ease;}
         
         #mode-toggle { 
             background: var(--bg-body);
@@ -72,10 +73,11 @@
             position: relative; 
             z-index: 1; 
             min-height: 400px;
+            transition: 0.3s ease;
         }
-        .hero-content { max-width: 600px; z-index: 2; }
-        .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; line-height: 1.1; color: white; }
-        .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 40px; color: white; }
+        .hero-content { max-width: 600px; z-index: 2; transition: 0.3s ease;}
+        .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; line-height: 1.1; color: white; transition: 0.3s ease;}
+        .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 40px; color: white; transition: 0.3s ease;}
 
         .btn-orange {
             background: rgba(255, 255, 255, 0.1);
@@ -92,6 +94,7 @@
             transition: 0.4s; 
             display: inline-block;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
         }
         .btn-orange:hover { 
             transform: translateY(-5px) scale(1.05);
@@ -100,24 +103,24 @@
             box-shadow: 0 0 20px rgba(255, 140, 0, 0.4);
         }
 
-        .hero-visual { width: 350px; height: 350px; animation: float 4s ease-in-out infinite; }
+        .hero-visual { width: 350px; height: 350px; animation: float 4s ease-in-out infinite; transition: 0.3s ease;}
         .hero-visual img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); }
 
         /* --- FEATURES SECTION --- */
         .features { display: flex; flex-direction: column; gap: 20px; max-width: 850px; margin: 60px auto; padding: 0 20px; }
         .feature-card { background: var(--bg-card); display: flex; align-items: center; padding: 25px 35px; border-radius: 20px; gap: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); transition: 0.3s ease; }
         .feature-card:hover { transform: translateX(15px); }
-        .feature-number { font-size: 5rem; font-weight: 800; line-height: 1; opacity: 0.8; min-width: 70px; }
+        .feature-number { font-size: 5rem; font-weight: 800; line-height: 1; opacity: 0.8; min-width: 70px; transition: 0.3s ease;}
         
         .card-1 .feature-number { color: #5b5fc7; }
         .card-2 .feature-number { color: #8b5cf6; }
         .card-3 .feature-number { color: #ec4899; }
         
         .feature-info { flex: 1; }
-        .feature-info h3 { margin: 0 0 5px; font-size: 1.4rem; color: var(--text-main); font-weight: 800; }
+        .feature-info h3 { margin: 0 0 5px; font-size: 1.4rem; color: var(--text-main); font-weight: 800; transition: 0.3s ease;}
         .feature-info p { margin: 0; font-size: 0.95rem; color: var(--text-muted); line-height: 1.5; }
         
-        .feature-icon-box { width: 70px; height: 70px; border-radius: 18px; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.5rem; flex-shrink: 0; }
+        .feature-icon-box { width: 70px; height: 70px; border-radius: 18px; display: flex; justify-content: center; align-items: center; color: white; font-size: 1.5rem; flex-shrink: 0; transition: 0.3s ease;}
         .card-1 .feature-icon-box { background: #5b5fc7; }
         .card-2 .feature-icon-box { background: #8b5cf6; }
         .card-3 .feature-icon-box { background: #ec4899; }
@@ -127,7 +130,7 @@
             position: fixed; bottom: 30px; right: 30px; 
             width: 85px; height: 85px; cursor: pointer; z-index: 1000; 
             background: transparent; border: none; animation: float 3s ease-in-out infinite; 
-            transition: opacity 0.3s ease;
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
         #chatbot-toggle img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.2)); }
         
@@ -136,7 +139,7 @@
             width: 380px; max-width: calc(100vw - 60px); height: 550px; 
             background: var(--bg-card); border-radius: 24px; box-shadow: 0 20px 50px rgba(0,0,0,0.15); 
             display: flex; flex-direction: column; z-index: 1000; overflow: hidden; 
-            transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s; 
+            transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s ease; 
             border: 1px solid rgba(128,128,128,0.1); 
         }
         #chatbot-window.active { transform: translateY(0) scale(1); opacity: 1; pointer-events: auto; }
@@ -156,6 +159,43 @@
         #send-chat:hover { background: var(--orange); transform: scale(1.05);}
 
         .site-footer { text-align: center; padding: 60px; color: var(--text-muted); }
+
+        /* ==========================================
+           📱 MOBILE RESPONSIVENESS OVERRIDES
+           ========================================== */
+        @media screen and (max-width: 768px) {
+            nav { padding: 1rem 5%; }
+            .logo { font-size: 1.3rem; gap: 10px; }
+            .logo img { height: 32px !important; width: 32px !important; }
+            
+            /* Stack the Hero Section */
+            .hero { padding: 110px 5% 60px; flex-direction: column; text-align: center; }
+            .hero-content { display: flex; flex-direction: column; align-items: center; }
+            .hero h1 { font-size: 2.3rem; margin-bottom: 15px; }
+            .hero p { font-size: 1rem; margin-bottom: 25px; }
+            .btn-orange { width: 100%; box-sizing: border-box; padding: 16px 20px; font-size: 1.05rem;}
+            .hero-visual { width: 260px; height: 260px; margin-top: 30px; }
+
+            /* Compact Feature Cards */
+            .features { margin: 40px auto; gap: 15px; }
+            .feature-card { padding: 20px 15px; gap: 15px; border-radius: 16px; }
+            .feature-number { font-size: 3.2rem; min-width: 45px; }
+            .feature-info h3 { font-size: 1.1rem; }
+            .feature-info p { font-size: 0.85rem; }
+            .feature-icon-box { width: 55px; height: 55px; font-size: 1.2rem; }
+
+            /* Responsive Chatbot */
+            #chatbot-toggle { width: 70px; height: 70px; bottom: 20px; right: 20px; }
+            #chatbot-window { 
+                width: calc(100vw - 30px); 
+                right: 15px; 
+                bottom: 100px; 
+                height: 65vh; /* Dynamically scales to phone height */
+                max-height: 500px;
+                border-radius: 18px;
+            }
+            .chat-input-area { padding: 15px; }
+        }
 
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
     </style>
@@ -230,7 +270,7 @@
     </footer>
 
     <script>
-        // 1. Theme Toggle Logic (RESTORED FUNCTIONALITY)
+        // 1. Theme Toggle Logic
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
         
@@ -243,7 +283,7 @@
             });
         }
 
-        // 2. AI Chatbot Logic (RESTORED FUNCTIONALITY)
+        // 2. AI Chatbot Logic 
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
         const closeChat = document.getElementById('close-chat');
@@ -253,20 +293,20 @@
 
         let chatHistory = [];
 
-        // Open/Close Window (With designer's fade effect)
         chatbotToggle.addEventListener('click', () => {
             chatbotWindow.classList.add('active');
             chatbotToggle.style.opacity = '0';
+            chatbotToggle.style.transform = 'scale(0.8)';
             chatbotToggle.style.pointerEvents = 'none';
         });
         
         closeChat.addEventListener('click', () => {
             chatbotWindow.classList.remove('active');
             chatbotToggle.style.opacity = '1';
+            chatbotToggle.style.transform = 'scale(1)';
             chatbotToggle.style.pointerEvents = 'auto';
         });
 
-        // Helper function to create chat bubbles
         function appendMessage(text, className) {
             const bubble = document.createElement('div');
             bubble.className = `chat-bubble ${className}`;
@@ -278,7 +318,6 @@
             return id;
         }
 
-        // Handle Sending Messages to your Master Server API
         async function handleSendMessage() {
             const message = chatInput.value.trim();
             if (!message) return;
@@ -289,7 +328,6 @@
             const typingId = appendMessage('Thinking...', 'ai-bubble');
 
             try {
-                // Ensure this connects to Render if running locally, or use relative path if live
                 const response = await fetch('https://kalapp-system.onrender.com/api/ai-chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
