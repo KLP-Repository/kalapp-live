@@ -18,7 +18,6 @@ const PORT = process.env.PORT || 3001;
 
 // --- API Configurations ---
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
   api_key: process.env.CLOUDINARY_API_KEY,
@@ -38,7 +37,6 @@ const storage = new CloudinaryStorage({
     allowed_formats: ['jpg', 'png', 'jpeg', 'webp']
   },
 });
-
 const upload = multer({ storage: storage });
 
 // --- MongoDB Connection ---
@@ -56,7 +54,6 @@ const userSchema = new mongoose.Schema({
     authMethod: { type: String, default: 'local' },
     otp: String,
     otpExpires: Date,
-    // 🚩 3-Strike System Counter
     strikes: { type: Number, default: 0 }
 });
 
@@ -68,9 +65,8 @@ const complaintSchema = new mongoose.Schema({
     description: String,
     imageUrl: String,
     status: { type: String, default: 'Pending' },
-    priority: { type: String, default: 'MEDIUM' }, // 🚩 NEW: Priority field
+    priority: { type: String, default: 'MEDIUM' },
     lguNote: String,
-    // 📊 Audit Trail Array
     history: [{
         status: String,
         note: String,
@@ -83,7 +79,7 @@ const complaintSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
-// --- AI IMAGE MODERATOR LOGIC (UPGRADED) ---
+// --- AI IMAGE MODERATOR LOGIC ---
 async function scanImageWithAI(imageUrl, category) {
     try {
         const response = await fetch(imageUrl);
@@ -91,8 +87,6 @@ async function scanImageWithAI(imageUrl, category) {
         const buffer = Buffer.from(arrayBuffer);
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
-        // 🧠 The AI now checks if the photo matches the exact category chosen by the user
         const prompt = `You are a strict content moderator for a city complaint system.
         The citizen claims this image is evidence of a "${category}". Does the image explicitly show a ${category}?
         Answer strictly with one word: YES or NO.`;
@@ -103,16 +97,14 @@ async function scanImageWithAI(imageUrl, category) {
                 mimeType: response.headers.get("content-type") || "image/jpeg"
             }
         };
-
         const result = await model.generateContent([prompt, imagePart]);
         const text = result.response.text().trim().toUpperCase();
         
         console.log(`🤖 AI Scan Result for [${category}]: ${text}`);
         return text.includes("YES");
-
     } catch (error) {
         console.error("AI Scan Error:", error);
-        return true; // Fallback to true so we don't accidentally block real complaints if AI fails
+        return true; 
     }
 }
 
@@ -120,12 +112,10 @@ async function scanImageWithAI(imageUrl, category) {
 async function analyzePriority(category, description) {
     try {
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-        
         const prompt = `
-            You are an emergency dispatcher AI for a local government. 
+            You are an emergency dispatcher AI for a local government.
             Analyze the following citizen complaint based on its category and description.
             Determine the urgency and priority level based on sentiment, potential danger, and community impact.
-
             Category: "${category}"
             Description: "${description}"
 
@@ -138,8 +128,6 @@ async function analyzePriority(category, description) {
 
         const result = await model.generateContent(prompt);
         const text = result.response.text().trim();
-        
-        // Clean up formatting in case AI adds markdown
         const cleanJson = text.replace(/```json|```/g, '').trim();
         const parsedResult = JSON.parse(cleanJson);
         
@@ -147,7 +135,7 @@ async function analyzePriority(category, description) {
         return parsedResult.priority;
     } catch (error) {
         console.error("AI Priority Scan Error:", error);
-        return "MEDIUM"; // Fallback kung pumalya ang AI
+        return "MEDIUM";
     }
 }
 
@@ -167,8 +155,8 @@ const apiKey = defaultClient.authentications['api-key'];
 apiKey.apiKey = process.env.BREVO_API_KEY;
 const tranEmailApi = new SibApiV3Sdk.TransactionalEmailsApi();
 
+// --- API ROUTES ---
 
-// --- 1. CITIZEN OTP LOGIN ---
 app.post('/api/request-otp', async (req, res) => {
     const { email, username, password } = req.body;
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -176,14 +164,12 @@ app.post('/api/request-otp', async (req, res) => {
         let user = await User.findOne({ email });
         if (user) {
             if (user.status === 'blocked') return res.status(403).json({ message: 'Account is suspended.' });
-           
             if (user.authMethod === 'google') return res.status(400).json({ message: 'Registered via Google.' });
             if (user.authMethod === 'local' && !user.otp) return res.status(400).json({ message: 'Email already in use.' });
         }
         if (!user) user = new User({ username: username || email.split('@')[0], email, password, role: 'citizen', authMethod: 'local' });
         user.otp = otp;
         user.otpExpires = new Date(Date.now() + 10 * 60000);
-       
         await user.save();
    
         const sendSmtpEmail = new SibApiV3Sdk.SendSmtpEmail();
@@ -207,7 +193,6 @@ app.post('/api/verify-otp', async (req, res) => {
     } else { res.status(400).json({ message: 'Invalid OTP.' }); }
 });
 
-// --- 2. GOOGLE LOGIN ---
 app.post('/api/google-login', async (req, res) => {
     const { email, name } = req.body;
     try {
@@ -215,7 +200,6 @@ app.post('/api/google-login', async (req, res) => {
         if (user) {
             if (user.status === 'blocked') return res.status(403).json({ message: 'Suspended.' });
             if (user.authMethod !== 'google') return res.status(400).json({ message: 'Use OTP Login.' });
-         
             return res.json({ success: true, username: user.username, role: user.role });
         }
         user = new User({ username: name, email: email, role: 'citizen', authMethod: 'google' });
@@ -224,66 +208,53 @@ app.post('/api/google-login', async (req, res) => {
     } catch (error) { res.status(500).json({ message: 'Google login failed.' }); }
 });
 
-// --- 3. LGU/ADMIN LOGIN ---
 app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
     const user = await User.findOne({ username, password });
     if (user) {
-        if (user.status === 'blocked') return res.status(403).json({ message: "Account suspended due to multiple policy violations." });
+        if (user.status === 'blocked') return res.status(403).json({ message: "Account suspended." });
         res.json({ success: true, username: user.username, role: user.role });
     } else { res.status(401).json({ message: "Invalid credentials." }); }
 });
 
-// --- 4. COMPLAINTS SYSTEM (Upgraded with AI Bouncer & AI Priority) ---
 app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
     try {
         const { username, barangay, issue, description } = req.body;
         const imageUrl = req.file ? req.file.path : '';
-
-        // 1. Check if user is already blocked
         const user = await User.findOne({ username });
+
         if (user && user.status === 'blocked') {
-            return res.status(403).json({ success: false, message: "Your account is BLOCKED due to multiple policy violations." });
+            return res.status(403).json({ success: false, message: "Your account is BLOCKED." });
         }
 
-        // 2. Call the Gemini AI Bouncer
         if (imageUrl) {
             const isApproved = await scanImageWithAI(imageUrl, issue); 
-            
             if (!isApproved) {
                 if (user) {
                     user.strikes += 1; 
-                    if (user.strikes >= 3) {
-                        user.status = 'blocked';
-                        await user.save();
-                        return res.status(403).json({ success: false, message: "❌ AI Rejected: Photo does not match the chosen category.\nYou have reached 3 strikes. Your account is now BLOCKED." });
-                    }
+                    if (user.strikes >= 3) user.status = 'blocked';
                     await user.save();
-                    return res.status(400).json({ success: false, message: `❌ AI Rejected: Photo does not match the category "${issue}". This is Strike ${user.strikes} of 3.` });
+                    return res.status(400).json({ success: false, message: `❌ AI Rejected: Photo doesn't match category. Strike ${user.strikes}/3.` });
                 }
-                return res.status(400).json({ success: false, message: "❌ AI Rejected: Photo does not depict the chosen complaint." });
+                return res.status(400).json({ success: false, message: "❌ AI Rejected: Photo mismatch." });
             }
         }
 
-        // 🚀 NEW: 3. Call the Priority Analyzer
         let complaintPriority = "MEDIUM";
         if (description) {
             complaintPriority = await analyzePriority(issue, description);
         }
 
-        // 4. If AI approves, save it normally with Priority
         const newComplaint = new Complaint({
             trackingId: 'KAL-' + Math.floor(1000 + Math.random() * 9000),
             citizenName: username, barangay, category: issue, description, imageUrl,
             status: 'Pending',
-            priority: complaintPriority, // 🚩 Priority saved here
-            history: [{ status: 'Pending', note: 'Complaint officially filed by citizen.', updatedBy: username || 'System' }]
+            priority: complaintPriority,
+            history: [{ status: 'Pending', note: 'Complaint officially filed.', updatedBy: username || 'System' }]
         });
         await newComplaint.save();
         res.json({ success: true, message: 'Complaint submitted!' });
-    } catch (error) { 
-        res.status(500).json({ success: false, error: error.message }); 
-    }
+    } catch (error) { res.status(500).json({ success: false, error: error.message }); }
 });
 
 app.get('/api/complaints', async (req, res) => {
@@ -291,58 +262,42 @@ app.get('/api/complaints', async (req, res) => {
     res.json({ complaints }); 
 });
 
-// --- LGU Status Route (Handles Manual Reject & Flag) ---
-// --- LGU Status & Priority Override Route ---
 app.patch('/api/complaints/:id/status', async (req, res) => {
     try {
-        // 🚩 Added 'priority' to the destructured body
         const { status, note, adminName, priority } = req.body;
-        
-        const updateData = { 
-            status: status, 
-            lguNote: note 
-        };
+        const updateData = { status, lguNote: note };
 
-        // 🚀 NEW: If the admin provides a new priority, include it in the update
-        if (priority) {
-            updateData.priority = priority;
-        }
+        if (priority) updateData.priority = priority;
 
-        // Handle Manual Reject & Flag for the 3-Strike System [cite: 54, 55]
         if (status === 'Rejected & Flagged') {
             const complaint = await Complaint.findOne({ trackingId: req.params.id });
             if (complaint) {
                 const user = await User.findOne({ username: complaint.citizenName });
                 if (user) {
                     user.strikes += 1;
-                    if (user.strikes >= 3) user.status = 'blocked'; [cite: 56]
+                    if (user.strikes >= 3) user.status = 'blocked';
                     await user.save();
                 }
             }
         }
 
-        const updatedComplaint = await Complaint.findOneAndUpdate(
+        await Complaint.findOneAndUpdate(
             { trackingId: req.params.id }, 
             { 
-                $set: updateData, // Updates status, note, and priority 
+                $set: updateData, 
                 $push: {
                     history: {
                         status: status,
-                        note: note || (priority ? `Priority manually changed to ${priority}` : 'Status updated'), [cite: 58, 59]
-                        updatedBy: adminName || 'LGU Admin' [cite: 60]
+                        note: note || (priority ? `Priority changed to ${priority}` : 'Status updated'),
+                        updatedBy: adminName || 'LGU Admin'
                     }
                 }
-            },
-            { new: true }
+            }
         );
-
-        res.json({ success: true, complaint: updatedComplaint }); [cite: 61]
-    } catch (error) { 
-        res.status(500).json({ error: "Failed to update complaint details." }); 
-    }
+        res.json({ success: true });
+    } catch (error) { res.status(500).json({ error: "Failed to update status." }); }
 });
 
-// --- 5. SUPERADMIN IAM ---
 app.get('/api/admin/users', async (req, res) => {
     const users = await User.find({ role: { $ne: 'superadmin' } });
     res.json({ users });
@@ -360,34 +315,21 @@ app.patch('/api/admin/users/:id/toggle-block', async (req, res) => {
     if (user) { user.status = user.status === 'blocked' ? 'active' : 'blocked'; await user.save(); res.json({ success: true }); }
 });
 
-// ==========================================
-// SUMBONG-BOT AI ROUTE
-// ==========================================
 app.post('/api/ai-chat', async (req, res) => {
     try {
         const { message, history } = req.body;
         const model = genAI.getGenerativeModel({ 
             model: "gemini-2.5-flash",
-            // 🧠 UPGRADED PERSONALITY: Smarter, cleaner, and context-aware
-            systemInstruction: `You are 'Sumbong-Bot', the official AI assistant of Kalapp (Sumbungan ng Bayan). Tone: Empathetic, 
-            polite (uses 'po/opo'), conversational Taglish. 
-            
-            CRITICAL RULES:
-            1. Keep it conversational. If the user just says "Hi" or "Hello", reply with a short, friendly greeting and ask how you can help. DO NOT send long paragraphs for a simple greeting.
-            2. DO NOT use Markdown formatting. Never use asterisks (*) for bolding or italics. 
-            Use plain, clean text only. Use standard line breaks if you need to list things.
-            3. ONLY ask the 4 Ws (Ano, Sino, Saan, Kailan) step-by-step IF the user explicitly states they want to report an issue right now.
-            4. Once you have their details or if they ask how to submit, direct them to use the 'File Complaint' form in the sidebar.`
+            systemInstruction: `You are 'Sumbong-Bot', official AI of Kalapp. Tone: Empathetic, uses 'po/opo', Taglish. 
+            Rules: No Markdown (* or #). Keep it plain text. Ask 4 Ws only if reporting. Direct to form for submission.`
         });
-        
         const chat = model.startChat({ history: history || [] });
         const result = await chat.sendMessage(message);
         res.json({ reply: result.response.text() });
     } catch (error) { 
-        console.error("❌ GEMINI AI ERROR:", error);
+        console.error("❌ AI ERROR:", error);
         res.status(500).json({ error: "AI Error" }); 
     }
 });
 
-// --- Start Server ---
 app.listen(PORT, () => console.log(`🚀 Master Server running on port ${PORT}`));
