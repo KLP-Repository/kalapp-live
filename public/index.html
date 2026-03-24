@@ -75,7 +75,7 @@
         .hero h1 { font-size: 3.5rem; margin: 0 0 20px; font-weight: 800; line-height: 1.1; color: white; }
         .hero p { font-size: 1.25rem; opacity: 0.9; margin-bottom: 40px; color: white; }
 
-        /* ANIMATED GLASS BUTTON  */
+        /* ANIMATED GLASS BUTTON */
         .btn-orange {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -115,7 +115,7 @@
             filter: drop-shadow(0 20px 30px rgba(0,0,0,0.3)); 
         }
 
-        /* --- INFOGRAPHIC FLOW DESIGN [cite: 147-150] --- */
+        /* --- FEATURES SECTION --- */
         .features { 
             display: flex;
             flex-direction: column; 
@@ -158,7 +158,7 @@
         .card-2 .feature-icon-box { background: #8b5cf6; }
         .card-3 .feature-icon-box { background: #ec4899; }
 
-        /* --- RESPONSIVE FIX  --- */
+        /* --- RESPONSIVE FIX --- */
         @media (max-width: 768px) {
             .hero { flex-direction: column; text-align: center; padding-top: 120px; }
             .hero h1 { font-size: 2.2rem; }
@@ -168,7 +168,7 @@
             .feature-icon-box { order: -1; margin: 0 auto; }
         }
 
-        /* --- CHATBOX [cite: 170-189] --- */
+        /* --- CHATBOX --- */
         #chatbot-toggle { 
             position: fixed; bottom: 30px; right: 30px; 
             width: 85px; height: 85px; 
@@ -214,7 +214,7 @@
     <section class="hero">
         <div class="hero-content">
             <h1>Empowering the Community</h1>
-            <p>Ang Citywide Centralized Barangay Complaint Center. Organized, secure, at binuo para sa real-time resolution.</p>
+            <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
             <a href="login.html" class="btn-orange">Access Kalapp Portal</a>
         </div>
         <div class="hero-visual">
@@ -227,7 +227,7 @@
             <div class="feature-number">1</div>
             <div class="feature-info">
                 <h3>Real-Time Tracking</h3>
-                <p>Transparency sa iyong mga kamay. Bawat reklamo ay sinusubaybayan gamit ang unique ID.</p>
+                <p>Transparency at your fingertips. Every complaint is tracked via a unique ID for instant updates.</p>
             </div>
             <div class="feature-icon-box">🔍</div>
         </div>
@@ -235,7 +235,7 @@
             <div class="feature-number">2</div>
             <div class="feature-info">
                 <h3>Admin Efficiency</h3>
-                <p>Ang mga opisyal ay may unified dashboard upang pamahalaan at i-assign ang mga gawain.</p>
+                <p>City officials get a unified dashboard to manage and assign tasks efficiently.</p>
             </div>
             <div class="feature-icon-box">⚙️</div>
         </div>
@@ -243,7 +243,7 @@
             <div class="feature-number">3</div>
             <div class="feature-info">
                 <h3>Responsive Govt</h3>
-                <p>Binibigyan ang bawat barangay ng tool para maresolba ang isyu nang mas mabilis.</p>
+                <p>Empowering each barangay with dedicated tools to resolve community issues faster.</p>
             </div>
             <div class="feature-icon-box">🚀</div>
         </div>
@@ -259,7 +259,7 @@
             <button id="close-chat" type="button" style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">✕</button>
         </div>
         <div id="chat-messages">
-            <div class="chat-bubble ai-bubble">Hello! Ako si Sumbong-Bot. May maitutulong ba ako?</div>
+            <div class="chat-bubble ai-bubble">Hello! I am Sumbong-Bot. How can I assist you today?</div>
         </div>
         <div class="chat-input-area">
             <input type="text" id="chat-input" placeholder="Type here..." autocomplete="off">
@@ -274,12 +274,12 @@
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
 
-        // Dark Mode Logic [cite: 199]
+        // Dark Mode Logic
         toggleBtn.addEventListener('click', () => {
             document.body.classList.toggle('dark');
         });
 
-        // Chat Toggle [cite: 199-201]
+        // Chat Toggle
         chatbotToggle.addEventListener('click', () => {
             const isActive = chatbotWindow.classList.toggle('active');
             chatbotToggle.style.opacity = isActive ? '0' : '1';
@@ -290,7 +290,7 @@
             chatbotToggle.style.opacity = '1';
         });
 
-        // Basic Chat Logic [cite: 202]
+        // Basic Chat Logic
         document.getElementById('send-chat').addEventListener('click', () => {
             const input = document.getElementById('chat-input');
             if(input.value.trim() !== "") {
