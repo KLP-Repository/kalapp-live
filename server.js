@@ -55,7 +55,7 @@ const userSchema = new mongoose.Schema({
     authMethod: { type: String, default: 'local' },
     otp: String,
     otpExpires: Date,
-    // 🚩 NEW: 3-Strike System Counter
+    // 🚩 3-Strike System Counter
     strikes: { type: Number, default: 0 }
 });
 
@@ -68,7 +68,7 @@ const complaintSchema = new mongoose.Schema({
     imageUrl: String,
     status: { type: String, default: 'Pending' },
     lguNote: String,
-    // 📊 The Audit Trail Array
+    // 📊 Audit Trail Array
     history: [{
         status: String,
         note: String,
@@ -82,18 +82,17 @@ const User = mongoose.model('User', userSchema);
 const Complaint = mongoose.model('Complaint', complaintSchema);
 
 
-// --- AI IMAGE MODERATOR LOGIC ---
-async function scanImageWithAI(imageUrl) {
+// --- AI IMAGE MODERATOR LOGIC (UPGRADED) ---
+async function scanImageWithAI(imageUrl, category) {
     try {
-        // Fetch the uploaded image from Cloudinary to pass to Gemini
         const response = await fetch(imageUrl);
         const arrayBuffer = await response.arrayBuffer();
         const buffer = Buffer.from(arrayBuffer);
 
         const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
         
-        // The strict instruction for the AI Bouncer
-        const prompt = "You are a strict content moderator for a city complaint system. Look at this image. Does it depict a legitimate community issue such as uncollected garbage, broken infrastructure, potholes, stray animals, hazards, or disturbances? Answer strictly with one word: YES or NO.";
+        // 🧠 The AI now checks if the photo matches the exact category chosen by the user
+        const prompt = `You are a strict content moderator for a city complaint system. The citizen claims this image is evidence of a "${category}". Does the image explicitly show a ${category}? Answer strictly with one word: YES or NO.`;
 
         const imagePart = {
             inlineData: {
@@ -105,7 +104,7 @@ async function scanImageWithAI(imageUrl) {
         const result = await model.generateContent([prompt, imagePart]);
         const text = result.response.text().trim().toUpperCase();
         
-        console.log(`🤖 AI Scan Result: ${text}`);
+        console.log(`🤖 AI Scan Result for [${category}]: ${text}`);
         return text.includes("YES"); 
     } catch (error) {
         console.error("AI Scan Error:", error);
@@ -207,7 +206,7 @@ app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
 
         // 2. Call the Gemini AI Bouncer
         if (imageUrl) {
-            const isApproved = await scanImageWithAI(imageUrl);
+            const isApproved = await scanImageWithAI(imageUrl, issue); // Pass issue category
             
             if (!isApproved) {
                 if (user) {
@@ -215,12 +214,12 @@ app.post('/api/complaints', upload.single('evidence'), async (req, res) => {
                     if (user.strikes >= 3) {
                         user.status = 'blocked';
                         await user.save();
-                        return res.status(403).json({ success: false, message: "❌ AI Rejected: Irrelevant photo. You have reached 3 strikes. Your account is now BLOCKED." });
+                        return res.status(403).json({ success: false, message: "❌ AI Rejected: Photo does not match the chosen category. You have reached 3 strikes. Your account is now BLOCKED." });
                     }
                     await user.save();
-                    return res.status(400).json({ success: false, message: `❌ AI Rejected: Irrelevant photo detected. This is Strike ${user.strikes} of 3.` });
+                    return res.status(400).json({ success: false, message: `❌ AI Rejected: Photo does not match the category "${issue}". This is Strike ${user.strikes} of 3.` });
                 }
-                return res.status(400).json({ success: false, message: "❌ AI Rejected: Photo does not depict a valid complaint." });
+                return res.status(400).json({ success: false, message: "❌ AI Rejected: Photo does not depict the chosen complaint." });
             }
         }
 
@@ -241,7 +240,7 @@ app.get('/api/complaints', async (req, res) => {
     res.json({ complaints }); 
 });
 
-// --- UPDATED: LGU Status Route (Handles Manual Reject & Flag) ---
+// --- LGU Status Route (Handles Manual Reject & Flag) ---
 app.patch('/api/complaints/:id/status', async (req, res) => {
     try {
         const { status, note, adminName } = req.body;

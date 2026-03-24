@@ -210,7 +210,7 @@
             .catch(() => document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error loading history. Check connection.</td></tr>`);
         }
 
-        // --- Submit New Complaint (Upgraded with AI Response Catching) ---
+        // --- Submit New Complaint ---
         document.getElementById('complaint-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const fileInput = document.getElementById('evidence');
@@ -228,14 +228,16 @@
                 const model = EXIF.getTag(this, "Model");
                 const dateTakenStr = EXIF.getTag(this, "DateTimeOriginal");
 
-                // 1. Hardware Check (TEMPORARILY BYPASSED FOR TESTING - comment out 'return' to test downloaded images)
+                // 🔒 RESTORED SHIELD: Blocks screenshots and downloaded images
                 if (!make || !model) {
-                    formMsg.style.color = "var(--color-warning)";
-                    formMsg.innerText = "⚠️ EXIF Missing: Allowed for testing, but will be blocked in production.";
-                    // return; 
+                    formMsg.style.color = "var(--color-danger)";
+                    formMsg.innerText = "❌ Security Check Failed: This appears to be a screenshot or downloaded image. Please take a real photo.";
+                    submitBtn.innerText = "Submit Complaint to LGU"; 
+                    submitBtn.disabled = false;
+                    return; 
                 }
 
-                // 2. Time Window Check (Ensures photo is < 48 hours old)
+                // Time Window Check (Ensures photo is < 48 hours old)
                 if (dateTakenStr) {
                     const dateParts = dateTakenStr.split(" ")[0].split(":");
                     const timeParts = dateTakenStr.split(" ")[1].split(":");
@@ -253,7 +255,7 @@
                 }
 
                 formMsg.style.color = "var(--color-success)";
-                formMsg.innerText = "✅ Authentic Photo Verified! AI scanning in progress...";
+                formMsg.innerText = "✅ Authentic Photo Verified! AI scanning in progress (this may take a few seconds)...";
                 
                 const formData = new FormData();
                 formData.append('username', username);
@@ -267,7 +269,12 @@
                     body: formData
                 })
                 .then(async res => {
-                    // Catch the exact AI Bouncer message from the backend
+                    // 🔧 FIX: Check if the server crashed and returned HTML instead of JSON
+                    const contentType = res.headers.get("content-type");
+                    if (!contentType || !contentType.includes("application/json")) {
+                        throw new Error("Server timeout or crash. The AI might be taking too long.");
+                    }
+                    
                     const data = await res.json();
                     if (!res.ok || !data.success) {
                         throw new Error(data.message || "Upload Failed");
@@ -281,11 +288,9 @@
                     loadMyHistory(); 
                 })
                 .catch((err) => {
-                    // Display the Strike Warning or Block Message
                     formMsg.style.color = "var(--color-danger)";
                     formMsg.innerText = err.message;
 
-                    // If they just hit 3 strikes and got blocked, kick them out
                     if(err.message.includes("BLOCKED")) {
                         setTimeout(() => logout(), 4000);
                     }
