@@ -16,14 +16,15 @@
         --card-border-radius: 2rem; --border-radius-1: 0.4rem; --card-padding: 1.8rem; --box-shadow: 0 2rem 3rem var(--color-light);
       }
       body.dark {
-          --color-background: #181a1e; 
+          --color-background: #181a1e;
           --color-white: #202528; 
           --color-dark: #edeffd;
           --color-light: rgba(0, 0, 0, 0.4); 
           --box-shadow: 0 2rem 3rem var(--color-light);
       }
       .mode-toggle-btn {
-          background: var(--color-light); border: 1px solid var(--color-info-light);
+          background: var(--color-light);
+          border: 1px solid var(--color-info-light);
           color: var(--color-dark);
           padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: all 300ms ease;
           display: flex; align-items: center; justify-content: center;
@@ -167,7 +168,7 @@
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
-                            <tr><td colspan="9" style="text-align:center;">Loading reports...</td></tr>
+                             <tr><td colspan="9" style="text-align:center;">Loading reports...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -198,12 +199,11 @@
 
         // Set LGU Name
         document.getElementById('lgu-name-display').innerText = currentAdminName;
-
         let currentFilteredData = []; 
 
         function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
-            
+            // FIXED: Using backticks for fetch URL
             fetch(`${BACKEND_URL}/api/complaints`)
             .then(res => res.json())
             .then(data => {
@@ -219,7 +219,6 @@
                 document.getElementById('count-pending').innerText = todaysComplaints.filter(c => !c.status || c.status === 'Pending').length;
                 document.getElementById('count-progress').innerText = todaysComplaints.filter(c => c.status === 'In Progress').length;
                 document.getElementById('count-resolved').innerText = todaysComplaints.filter(c => c.status === 'Resolved').length;
-                
                 const tableBody = document.getElementById('dashboard-table-body');
                 tableBody.innerHTML = ''; 
 
@@ -229,24 +228,22 @@
                     return currentStatus === filterValue;
                 });
 
-                // 🚩 NEW: AI Priority Sorting Logic
+                // AI Priority Sorting Logic
                 const priorityWeights = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
-                
                 currentFilteredData.sort((a, b) => {
-                    // Sort by Priority first if they are not yet resolved
                     if (a.status !== 'Resolved' && b.status !== 'Resolved') {
                          const weightA = priorityWeights[a.priority || 'MEDIUM'] || 2;
                          const weightB = priorityWeights[b.priority || 'MEDIUM'] || 2;
                          if (weightA !== weightB) {
-                             return weightB - weightA; // Higher weight goes first
+                             return weightB - weightA; 
                          }
                     }
-                    // If priorities are equal (or resolved), sort by Date (Newest first)
                     return new Date(b.createdAt) - new Date(a.createdAt);
                 });
 
                 if (currentFilteredData.length === 0) {
-                    tableBody.innerHTML = <tr><td colspan="9" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>;
+                    // FIXED: Using backticks for HTML string
+                    tableBody.innerHTML = `<tr><td colspan="9" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>`;
                     return;
                 }
 
@@ -261,41 +258,41 @@
                     const existingNote = complaint.lguNote ? complaint.lguNote : '';
                     const trackingId = complaint.trackingId;
                     
-                    const noteHTML = <input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>;
+                    // FIXED: Wrap HTML inside backticks
+                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Feedback to citizen..." value="${existingNote}" ${isResolved || complaint.status === 'Rejected & Flagged' ? 'disabled' : ''}>`;
                     
                     let actionButtons = '';
                     if (isResolved) {
-                        actionButtons = noteHTML + <button class="action-btn btn-disabled" disabled>Resolved ✓</button>;
+                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Resolved ✓</button>`;
                     } else if (complaint.status === 'Rejected & Flagged') {
-                        actionButtons = noteHTML + <button class="action-btn btn-disabled" disabled>Flagged & Closed</button>;
+                        actionButtons = noteHTML + `<button class="action-btn btn-disabled" disabled>Flagged & Closed</button>`;
                     } else if (complaint.status === 'In Progress') {
-                        actionButtons = noteHTML + <button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>;
+                        actionButtons = noteHTML + `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>`;
                     } else {
                         actionButtons = noteHTML + 
-                        <button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button> +
-                        <button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button> +
-                        <button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>;
+                        `<button class="action-btn btn-in-progress" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button>` +
+                        `<button class="action-btn btn-resolve" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>` +
+                        `<button class="action-btn" style="background: var(--color-danger);" onclick="if(confirm('Flag this as spam? The citizen will receive a policy strike.')) updateStatus('${trackingId}', 'Rejected & Flagged')">Reject & Flag</button>`;
                     }
 
-                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : ${BACKEND_URL}${complaint.imageUrl}) : '';
+                    // FIXED: Wrap URL and template variables inside backticks
+                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
                     
-                    const photoDisplay = complaint.imageUrl ?
-                        <img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')"> : 
-                        <span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>;
-                        
+                    const photoDisplay = complaint.imageUrl ? `<img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')">` : `<span style="color:var(--color-info-dark); font-size: 12px;">No photo</span>`;
+                    
                     const formattedDate = new Date(complaint.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
                     
-                    // 🚩 NEW: Priority Badge Display
+                    // Priority Badge Display
                     let priorityBadge = '';
                     const priorityValue = complaint.priority || 'MEDIUM';
                     if (priorityValue === 'CRITICAL') {
-                        priorityBadge = <span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; animation: pulse-critical 1.5s infinite; display: inline-block; margin-top: 5px;">CRITICAL</span>;
+                        priorityBadge = `<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; animation: pulse-critical 1.5s infinite; display: inline-block; margin-top: 5px;">CRITICAL</span>`;
                     } else if (priorityValue === 'HIGH') {
-                        priorityBadge = <span style="background: #f97316; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">HIGH</span>;
+                        priorityBadge = `<span style="background: #f97316; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">HIGH</span>`;
                     } else if (priorityValue === 'MEDIUM') {
-                        priorityBadge = <span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">MEDIUM</span>;
+                        priorityBadge = `<span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">MEDIUM</span>`;
                     } else {
-                        priorityBadge = <span style="background: #94a3b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">LOW</span>;
+                        priorityBadge = `<span style="background: #94a3b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block; margin-top: 5px;">LOW</span>`;
                     }
 
                     row.innerHTML = `
@@ -316,8 +313,9 @@
         }
 
         function updateStatus(trackingId, newStatus) {
-            const noteValue = document.getElementById(note-${trackingId}).value;
-            
+            // FIXED: Using backticks for getting the element ID
+            const noteValue = document.getElementById(`note-${trackingId}`).value;
+            // FIXED: Using backticks for fetch URL
             fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
                 method: 'PATCH', 
                 headers: { 'Content-Type': 'application/json' },
@@ -330,7 +328,8 @@
             .then(res => res.json())
             .then(data => { 
                 if(data.success) {
-                    alert(Complaint marked as ${newStatus}!);
+                    // FIXED: Using backticks for alert string
+                    alert(`Complaint marked as ${newStatus}!`);
                     loadComplaints(); 
                 } 
             })
@@ -341,20 +340,22 @@
             let csvContent = "Tracking ID,Priority,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note\n";
             currentFilteredData.forEach(c => {
                 const id = c.trackingId; 
-                const priority = "${c.priority || 'MEDIUM'}";
-                const date = "${new Date(c.createdAt).toLocaleDateString()}"; 
-                const user = "${c.citizenName || 'Anonymous'}";
-                const brgy = "${c.barangay || ''}"; 
-                const issue = "${c.category || ''}"; 
-                const desc = "${(c.description || '').replace(/"/g, '""')}"; 
-                const status = "${c.status || 'Pending'}"; 
-                const note = "${(c.lguNote || '').replace(/"/g, '""')}"; 
-                csvContent += ${id},${priority},${date},${user},${brgy},${issue},${desc},${status},${note}\n;
+                const priority = c.priority || 'MEDIUM';
+                const date = new Date(c.createdAt).toLocaleDateString(); 
+                const user = c.citizenName || 'Anonymous';
+                const brgy = c.barangay || ''; 
+                const issue = c.category || ''; 
+                const desc = (c.description || '').replace(/"/g, '""'); 
+                const status = c.status || 'Pending'; 
+                const note = (c.lguNote || '').replace(/"/g, '""'); 
+                // FIXED: String literal format
+                csvContent += `"${id}","${priority}","${date}","${user}","${brgy}","${issue}","${desc}","${status}","${note}"\n`;
             });
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement("a");
             link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv);
+            // FIXED: Filename string literal format
+            link.setAttribute("download", `Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv`);
             link.click();
         }
 
