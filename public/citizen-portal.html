@@ -148,6 +148,9 @@
     </div>
 
     <script>
+        // 🔧 ADDED: The Render Backend URL
+        const BACKEND_URL = 'https://kalapp-system.onrender.com';
+
         // --- Theme Toggler ---
         const themeToggler = document.querySelector("#theme-toggler");
         const savedTheme = localStorage.getItem('kalapp-theme');
@@ -169,7 +172,8 @@
 
         // --- Load History ---
         function loadMyHistory() {
-            fetch('/api/complaints')
+            // 🔧 UPDATED: Fetch using BACKEND_URL
+            fetch(`${BACKEND_URL}/api/complaints`)
             .then(res => res.json())
             .then(data => {
                 const tbody = document.getElementById('history-body');
@@ -244,7 +248,8 @@
                 formData.append('description', document.getElementById('description').value);
                 formData.append('evidence', file); 
 
-                fetch('/api/complaints', {
+                // 🔧 UPDATED: Fetch using BACKEND_URL
+                fetch(`${BACKEND_URL}/api/complaints`, {
                     method: 'POST', 
                     body: formData
                 })
