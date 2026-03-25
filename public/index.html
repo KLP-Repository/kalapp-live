@@ -7,24 +7,34 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* --- LIGHT MODE DEFAULTS --- */
             --color-primary: #ff8c00;
             --color-chat: #2563eb;
-            --text-main: #ffffff;
-            --text-dark: #1e293b;
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-main: #1e293b; /* Dark text for light mode */
+            --text-muted: #475569;
+            --glass-bg: rgba(255, 255, 255, 0.7); /* Frosted white */
+            --glass-border: rgba(255, 255, 255, 0.5);
             --glass-blur: blur(16px);
-            --dark-overlay: rgba(15, 23, 42, 0.85);
+            --bg-overlay: rgba(248, 250, 252, 0.6); /* Light tint over images */
+            --nav-bg: linear-gradient(to bottom, rgba(255,255,255,0.95), transparent);
+            --logo-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         body.dark {
-            --glass-bg: rgba(0, 0, 0, 0.4);
+            /* --- DARK MODE OVERRIDES --- */
+            --text-main: #ffffff; /* White text for dark mode */
+            --text-muted: #cbd5e1;
+            --glass-bg: rgba(15, 23, 42, 0.6); /* Frosted dark slate */
             --glass-border: rgba(255, 255, 255, 0.1);
-            --dark-overlay: rgba(0, 0, 0, 0.9);
+            --bg-overlay: rgba(15, 23, 42, 0.85); /* Dark tint over images */
+            --nav-bg: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            --logo-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: #0f172a; color: var(--text-main); overflow-x: hidden; }
+        
+        /* Set base background color dependent on theme */
+        body { background-color: var(--text-main); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
 
         /* --- MULTI-PARALLAX SYSTEM --- */
         .parallax-wrapper {
@@ -48,40 +58,25 @@
 
         .overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
-            background: var(--dark-overlay); z-index: 1; transition: background 0.3s ease;
+            background: var(--bg-overlay); z-index: 1; transition: background 0.3s ease;
         }
 
         .content-layer { position: relative; z-index: 2; width: 100%; max-width: 1200px; padding: 0 5%; }
-
-        /* --- SCROLL ANIMATION CLASSES --- */
-        .hidden { 
-            opacity: 0; 
-            transition: all 0.8s cubic-bezier(0.5, 0, 0, 1); 
-            will-change: transform, opacity;
-        }
-        .fade-up { transform: translateY(80px); }
-        .fade-down { transform: translateY(-80px); }
-        .fade-left { transform: translateX(-80px); }
-        .fade-right { transform: translateX(80px); }
-        .pop-up { transform: scale(0.8); }
-
-        /* The class added by JS when element is in view */
-        .show { opacity: 1; transform: translate(0) scale(1); }
 
         /* --- NAVIGATION --- */
         nav {
             position: fixed; top: 0; left: 0; right: 0; padding: 1.5rem 5%;
             display: flex; justify-content: space-between; align-items: center;
-            z-index: 1000; background: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
+            z-index: 1000; background: var(--nav-bg); transition: background 0.3s ease;
         }
-        .logo { font-size: 1.8rem; font-weight: 800; color: white; display: flex; align-items: center; gap: 10px; text-shadow: 0 2px 10px rgba(0,0,0,0.5);}
+        .logo { font-size: 1.8rem; font-weight: 800; color: var(--text-main); display: flex; align-items: center; gap: 10px; text-shadow: var(--logo-shadow);}
         .nav-controls { display: flex; gap: 15px; align-items: center; }
         
         #mode-toggle {
             background: var(--glass-bg); backdrop-filter: var(--glass-blur); border: 1px solid var(--glass-border);
-            color: white; padding: 10px; border-radius: 50%; cursor: pointer; transition: 0.3s;
+            color: var(--text-main); padding: 10px; border-radius: 50%; cursor: pointer; transition: 0.3s;
         }
-        #mode-toggle:hover { background: var(--color-primary); border-color: var(--color-primary); transform: rotate(15deg); }
+        #mode-toggle:hover { background: var(--color-primary); border-color: var(--color-primary); transform: rotate(15deg); color: white;}
 
         .btn-login {
             background: var(--color-primary); color: white; text-decoration: none;
@@ -93,33 +88,30 @@
         /* --- GLASSMORPHISM CARDS --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            transition: background 0.3s ease, border 0.3s ease;
         }
 
         /* --- HERO CONTENT --- */
         .hero-text { max-width: 800px; text-align: center; margin: 0 auto; }
-        .hero-text h1 { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; text-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-        .hero-text p { font-size: 1.3rem; margin-bottom: 40px; color: #e2e8f0; }
+        .hero-text h1 { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .hero-text p { font-size: 1.3rem; margin-bottom: 40px; color: var(--text-muted); }
 
         /* --- LONG SCROLL FEATURE SHOWCASES --- */
         .showcase-section { padding: 120px 0; width: 100%; position: relative; z-index: 5; }
-        
-        .showcase-container {
-            max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 60px;
-        }
+        .showcase-container { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 60px; }
         .showcase-container.reverse { flex-direction: row-reverse; }
 
         .showcase-text { flex: 1; }
-        .feature-icon {
-            font-size: 3.5rem; margin-bottom: 20px; display: inline-block;
-            background: linear-gradient(135deg, var(--color-primary), #ffb75e);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .showcase-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: white; font-weight: 800; line-height: 1.2;}
-        .showcase-text p { font-size: 1.1rem; color: #cbd5e1; line-height: 1.7; margin-bottom: 20px;}
+        
+        /* FIXED ICON BUG: Removed background clipping so emojis show normal colors */
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; display: inline-block; }
+        
+        .showcase-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main); font-weight: 800; line-height: 1.2;}
+        .showcase-text p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px;}
 
         .showcase-image-wrapper {
-            flex: 1; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            flex: 1; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             border: 1px solid var(--glass-border); position: relative;
         }
         .showcase-image-wrapper img {
@@ -128,8 +120,59 @@
         }
         .showcase-image-wrapper:hover img { transform: scale(1.08); }
 
-        /* --- FOOTER CALL TO ACTION --- */
-        .cta-section { text-align: center; }
+
+        /* ==========================================
+           🎬 THEMATIC SCROLL ANIMATIONS
+           ========================================== */
+
+        /* 1. Base hidden state for text elements */
+        .anim-text { opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
+        .show .anim-text:nth-child(2) { transition-delay: 0.1s; } /* H2 */
+        .show .anim-text:nth-child(3) { transition-delay: 0.3s; } /* P1 */
+        .show .anim-text:nth-child(4) { transition-delay: 0.5s; } /* P2 */
+
+        /* --- THEME 1: "Tracking" (Slide across) --- */
+        .track-slide { transform: translateX(-60px); }
+        .show .track-slide { opacity: 1; transform: translateX(0); }
+        
+        .show .icon-track { animation: radarSweep 2.5s ease-in-out infinite; }
+        @keyframes radarSweep { 
+            0% { transform: translateX(-15px) rotate(-15deg); } 
+            50% { transform: translateX(15px) rotate(15deg); } 
+            100% { transform: translateX(-15px) rotate(-15deg); } 
+        }
+
+        /* --- THEME 2: "AI Processing" (Jerky robotic pop-ups) --- */
+        .bot-pop { transform: scale(0.8) translateY(30px); }
+        .show .bot-pop { opacity: 1; transform: scale(1) translateY(0); }
+        
+        .show .icon-robot { animation: robotProcess 1.5s steps(4, end) infinite; transform-origin: bottom; }
+        @keyframes robotProcess { 
+            0% { transform: translateY(0) rotate(0); } 
+            25% { transform: translateY(-10px) rotate(-10deg); } 
+            50% { transform: translateY(0) rotate(10deg); } 
+            75% { transform: translateY(-5px) rotate(0); } 
+            100% { transform: translateY(0) rotate(0); } 
+        }
+
+        /* --- THEME 3: "Verified Shield" (Heavy Slam Down) --- */
+        .shield-drop { transform: translateY(-50px); }
+        .show .shield-drop { opacity: 1; transform: translateY(0); }
+        
+        .show .icon-shield { animation: shieldSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: bottom; opacity: 0; }
+        @keyframes shieldSlam { 
+            0% { transform: translateY(-80px) scale(1.5); opacity: 0; } 
+            60% { opacity: 1; transform: translateY(10px) scale(0.9); }
+            100% { transform: translateY(0) scale(1); opacity: 1; } 
+        }
+
+        /* Standard image fades */
+        .hidden-img { opacity: 0; transition: all 1s ease; }
+        .fade-left { transform: translateX(-50px); }
+        .fade-right { transform: translateX(50px); }
+        .fade-up { transform: translateY(50px); }
+        .show .hidden-img { opacity: 1; transform: translate(0); }
+
 
         /* --- CHATBOT UI --- */
         #chatbot-toggle { 
@@ -137,9 +180,9 @@
             border-radius: 50%; background: var(--color-chat); color: white; font-size: 30px;
             border: none; cursor: pointer; z-index: 1000; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
             transition: 0.3s ease; display: flex; align-items: center; justify-content: center;
-            animation: bounce 2s infinite;
         }
         #chatbot-toggle:hover { transform: scale(1.1); background: var(--color-primary); }
+        .pulse-anim { animation: pulse 2s infinite; }
         
         #chatbot-window { 
             position: fixed; bottom: 110px; right: 30px; width: 380px; height: 550px; 
@@ -153,20 +196,20 @@
         .close-btn { background: none; border: none; color: white; cursor: pointer; font-size: 18px; font-weight: bold; transition: 0.2s;}
         .close-btn:hover { transform: scale(1.2); color: var(--color-danger); }
         
-        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: rgba(15, 23, 42, 0.95); }
-        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4;}
+        #chat-messages { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; background: var(--glass-bg); backdrop-filter: var(--glass-blur);}
+        .chat-bubble { max-width: 85%; padding: 12px 16px; border-radius: 18px; font-size: 0.9rem; line-height: 1.4; color: var(--text-main);}
         .user-bubble { background: var(--color-chat); color: white; align-self: flex-end; border-bottom-right-radius: 4px;}
-        .ai-bubble { background: #334155; color: white; align-self: flex-start; border-bottom-left-radius: 4px;}
+        .ai-bubble { background: rgba(128,128,128,0.2); align-self: flex-start; border-bottom-left-radius: 4px;}
         
-        .chat-input-area { padding: 15px; background: #1e293b; display: flex; gap: 10px; }
-        #chat-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: none; background: #334155; color: white; outline: none; }
+        .chat-input-area { padding: 15px; background: var(--glass-bg); display: flex; gap: 10px; border-top: 1px solid var(--glass-border); }
+        #chat-input { flex: 1; padding: 12px 20px; border-radius: 30px; border: 1px solid var(--glass-border); background: transparent; color: var(--text-main); outline: none; }
         #send-chat { background: var(--color-chat); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; transition: 0.2s;}
         #send-chat:hover { background: var(--color-primary); transform: scale(1.05);}
 
         /* --- MOBILE RESPONSIVENESS --- */
         @media screen and (max-width: 768px) {
             .hero-text h1 { font-size: 2.8rem; }
-            nav { padding: 1rem 5%; background: rgba(0,0,0,0.9); }
+            nav { padding: 1rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
             .logo { font-size: 1.3rem; }
             .btn-login { padding: 8px 16px; font-size: 0.9rem; }
             
@@ -182,12 +225,12 @@
             #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 20px; right: 20px;}
         }
 
-        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
     </style>
 </head>
 <body>
 
-    <nav class="hidden fade-down">
+    <nav>
         <div class="logo">
             <img src="logokalapp.png" alt="Logo" style="height: 35px; width: 35px; border-radius: 8px;">
             KALAPP
@@ -201,7 +244,7 @@
     <section class="parallax-wrapper bg-hero">
         <div class="overlay"></div>
         <div class="content-layer">
-            <div class="glass-card hero-text hidden pop-up">
+            <div class="glass-card hero-text hidden-img fade-up scroll-trigger">
                 <h1>Empowering the Community</h1>
                 <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
                 <a href="login.html" class="btn-login" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem; margin-top: 10px;">File a Complaint</a>
@@ -212,14 +255,14 @@
     <section class="parallax-wrapper bg-feat1">
         <div class="overlay"></div>
         <div class="content-layer showcase-section">
-            <div class="showcase-container">
-                <div class="showcase-text glass-card hidden fade-left">
-                    <div class="feature-icon">🔍</div>
-                    <h2>Real-Time Tracking</h2>
-                    <p>Transparency at your fingertips. Follow your report from the moment you hit submit all the way to final resolution.</p>
-                    <p>Every complaint is assigned a unique Tracking ID, ensuring you are never left in the dark about your community's progress. Watch as local officials update the status from 'Pending' to 'Resolved'.</p>
+            <div class="showcase-container scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-track">🔍</div>
+                    <h2 class="anim-text track-slide">Real-Time Tracking</h2>
+                    <p class="anim-text track-slide">Transparency at your fingertips. Follow your report from the moment you hit submit all the way to final resolution.</p>
+                    <p class="anim-text track-slide">Every complaint is assigned a unique Tracking ID, ensuring you are never left in the dark about your community's progress. Watch as local officials update the status from 'Pending' to 'Resolved'.</p>
                 </div>
-                <div class="showcase-image-wrapper hidden fade-right">
+                <div class="showcase-image-wrapper hidden-img fade-right">
                     <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Dashboard Tracking">
                 </div>
             </div>
@@ -229,14 +272,14 @@
     <section class="parallax-wrapper bg-feat2">
         <div class="overlay"></div>
         <div class="content-layer showcase-section">
-            <div class="showcase-container reverse">
-                <div class="showcase-text glass-card hidden fade-right">
-                    <div class="feature-icon">⚡</div>
-                    <h2>AI Prioritization</h2>
-                    <p>Powered by our custom Gemini 2.5 Flash integration, Kalapp doesn't just collect reports; it understands them.</p>
-                    <p>Smart sentiment analysis reads every submission in real-time. Critical life-safety hazards, like exposed wires or deep potholes, are automatically flagged as <strong>CRITICAL</strong> and bumped to the top of the LGU Dashboard for immediate action.</p>
+            <div class="showcase-container reverse scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-robot">🤖</div>
+                    <h2 class="anim-text bot-pop">AI Prioritization</h2>
+                    <p class="anim-text bot-pop">Powered by our custom Gemini 2.5 Flash integration, Kalapp doesn't just collect reports; it understands them.</p>
+                    <p class="anim-text bot-pop">Smart sentiment analysis reads every submission in real-time. Critical life-safety hazards, like exposed wires or deep potholes, are automatically flagged as <strong>CRITICAL</strong> and bumped to the top of the LGU Dashboard for immediate action.</p>
                 </div>
-                <div class="showcase-image-wrapper hidden fade-left">
+                <div class="showcase-image-wrapper hidden-img fade-left">
                     <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop" alt="AI Network">
                 </div>
             </div>
@@ -246,14 +289,14 @@
     <section class="parallax-wrapper bg-feat3">
         <div class="overlay"></div>
         <div class="content-layer showcase-section">
-            <div class="showcase-container">
-                <div class="showcase-text glass-card hidden fade-left">
-                    <div class="feature-icon">🛡️</div>
-                    <h2>Verified Evidence</h2>
-                    <p>End-to-End Security blocks the trolls so your local government can focus on what matters.</p>
-                    <p>By analyzing hidden EXIF metadata, Kalapp actively rejects screenshots, downloaded images, and old photos. Only authentic, live camera photos taken within the last 48 hours make it to the dashboard, ensuring absolute data integrity.</p>
+            <div class="showcase-container scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-shield">🛡️</div>
+                    <h2 class="anim-text shield-drop">Verified Evidence</h2>
+                    <p class="anim-text shield-drop">End-to-End Security blocks the trolls so your local government can focus on what matters.</p>
+                    <p class="anim-text shield-drop">By analyzing hidden EXIF metadata, Kalapp actively rejects screenshots, downloaded images, and old photos. Only authentic, live camera photos taken within the last 48 hours make it to the dashboard, ensuring absolute data integrity.</p>
                 </div>
-                <div class="showcase-image-wrapper hidden fade-right">
+                <div class="showcase-image-wrapper hidden-img fade-right">
                     <img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=1000&auto=format&fit=crop" alt="Security Shield">
                 </div>
             </div>
@@ -262,19 +305,19 @@
 
     <section class="parallax-wrapper bg-cta">
         <div class="overlay"></div>
-        <div class="content-layer cta-section">
-            <div class="glass-card hidden fade-up" style="max-width: 600px; margin: 0 auto; display: inline-block;">
+        <div class="content-layer cta-section scroll-trigger">
+            <div class="glass-card hidden-img fade-up" style="max-width: 600px; margin: 150px auto; display: block; text-align: center;">
                 <h2 style="font-size: 2.5rem; margin-bottom: 15px; font-weight: 800;">A Safer City, Together.</h2>
-                <p style="color: #cbd5e1; margin-bottom: 30px; font-size: 1.1rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
+                <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 1.1rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
                 <a href="login.html" class="btn-login" style="padding: 15px 40px; font-size: 1.1rem;">Access the Portal</a>
-                <div style="margin-top: 40px; font-size: 0.85rem; color: #94a3b8;">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
+                <div style="margin-top: 40px; font-size: 0.85rem; color: var(--text-muted);">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
             </div>
         </div>
     </section>
 
-    <button id="chatbot-toggle" class="hidden pop-up" type="button" title="Chat with Sumbong-Bot">💬</button>
+    <button id="chatbot-toggle" class="pulse-anim" type="button" title="Chat with Sumbong-Bot">💬</button>
 
-    <div id="chatbot-window" class="glass-card" style="padding: 0; border: 1px solid rgba(255,255,255,0.1);">
+    <div id="chatbot-window" class="glass-card" style="padding: 0;">
         <div class="chat-header">
             <span>Sumbong-Bot 🤖</span>
             <button id="close-chat" class="close-btn" type="button">✕</button>
@@ -290,28 +333,27 @@
 
     <script>
         // ==========================================
-        // 1. SCROLL ANIMATION OBSERVER (THE MAGIC)
+        // 1. ADVANCED SCROLL ANIMATION OBSERVER
         // ==========================================
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('show');
                 } else {
-                    // Remove the class when it leaves the screen so it animates AGAIN next time!
                     entry.target.classList.remove('show');
                 }
             });
         }, { 
-            threshold: 0.15 // Triggers when 15% of the element is visible
+            threshold: 0.2 // Triggers when 20% of the section is visible
         });
 
-        // Grab all elements with the 'hidden' class and watch them
-        const hiddenElements = document.querySelectorAll('.hidden');
-        hiddenElements.forEach((el) => observer.observe(el));
+        // We observe the parent container to trigger all child animations simultaneously
+        const triggers = document.querySelectorAll('.scroll-trigger');
+        triggers.forEach((el) => observer.observe(el));
 
 
         // ==========================================
-        // 2. Theme Toggle Logic
+        // 2. THEME TOGGLE LOGIC (FIXED)
         // ==========================================
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
@@ -326,7 +368,7 @@
         }
 
         // ==========================================
-        // 3. AI Chatbot Logic
+        // 3. AI CHATBOT LOGIC
         // ==========================================
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
@@ -340,14 +382,12 @@
         chatbotToggle.addEventListener('click', () => {
             chatbotWindow.classList.add('active');
             chatbotToggle.style.opacity = '0';
-            chatbotToggle.style.transform = 'scale(0.8)';
             chatbotToggle.style.pointerEvents = 'none';
         });
         
         closeChat.addEventListener('click', () => {
             chatbotWindow.classList.remove('active');
             chatbotToggle.style.opacity = '1';
-            chatbotToggle.style.transform = 'scale(1)';
             chatbotToggle.style.pointerEvents = 'auto';
         });
 
@@ -399,4 +439,4 @@
         });
     </script>
 </body>
-</html>git
+</html>
