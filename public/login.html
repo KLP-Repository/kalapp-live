@@ -48,15 +48,15 @@
         --bg-body: #f1f5f9;
         --bg-card: #ffffff;
         --text-main: #0f172a; 
-        --text-muted: #334155; /* Pinadilim para mabasa ang labels */
+        --text-muted: #334155; 
         --orange: #ff8c00;
         --orange-hover: #e67e00;
         --orange-glow: rgba(255, 140, 0, 0.3);
         --input-bg: #ffffff;
-        --input-border: #64748b; /* Pinadilim para makita ang borders ng text box */
+        --input-border: #64748b; /* Darkened for visibility */
         --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
         --facebook-blue: #1877F2;
-        --error-red: #ef4444;
+        --error-red: #b91c1c;
         --success-green: #10b981;
         --dropdown-text: #1e293b;
 
@@ -374,10 +374,16 @@
 
     #error-msg {
         color: var(--error-red);
+        background-color: #fee2e2;
+        padding: 10px;
+        border-radius: 8px;
         font-size: 12px;
-        margin-bottom: 10px;
-        font-weight: 600;
+        margin-bottom: 15px;
+        font-weight: 700;
+        border: 1px solid #fecaca;
+        display: none; 
         min-height: 18px;
+        text-align: center;
     }
 
     #password-hint {
@@ -584,8 +590,20 @@
         const modeToggle = document.getElementById('mode-toggle');
         let currentSignupStep = 1;
 
+        // --- NEW: Limit calendar picker to 18+ only ---
+        window.addEventListener('DOMContentLoaded', () => {
+            const today = new Date();
+            const year18 = today.getFullYear() - 18;
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            const maxDate = `${year18}-${month}-${day}`;
+            document.getElementById('reg-birthdate').setAttribute('max', maxDate);
+        });
+
         function validateAgeRealTime() {
             const birthdateInput = document.getElementById('reg-birthdate').value;
+            const submitBtn = document.getElementById('main-submit-btn');
+            
             if (!birthdateInput) return;
 
             const birthDate = new Date(birthdateInput);
@@ -596,13 +614,17 @@
                 age--;
             }
 
-            if (age < 18 || birthDate.getFullYear() > 2000) {
-                errorMsg.style.color = 'var(--error-red)';
-                errorMsg.innerText = '❌ Dapat ay 18 years old pataas at pinanganak bago o noong taong 2000.';
-                document.getElementById('main-submit-btn').disabled = true;
+            if (age < 18) {
+                errorMsg.style.display = 'block';
+                errorMsg.style.color = '#b91c1c';
+                errorMsg.innerText = '❌ Paumanhin, dapat ay 18 taong gulang pataas para makapag-register.';
+                submitBtn.disabled = true;
+                submitBtn.style.opacity = '0.5';
             } else {
+                errorMsg.style.display = 'none';
                 errorMsg.innerText = '';
-                document.getElementById('main-submit-btn').disabled = false;
+                submitBtn.disabled = false;
+                submitBtn.style.opacity = '1';
             }
         }
 
@@ -618,6 +640,7 @@
         function toggleView(view) {
             document.getElementById('login-section').style.display = view === 'login' ? 'block' : 'none';
             document.getElementById('signup-section').style.display = view === 'signup' ? 'block' : 'none';
+            errorMsg.style.display = 'none';
             errorMsg.innerText = '';
         }
 
@@ -682,7 +705,8 @@
                 else window.location.href = '/citizen-portal.html';
             })
             .catch(err => {
-                errorMsg.style.color = 'var(--error-red)';
+                errorMsg.style.display = 'block';
+                errorMsg.style.color = '#b91c1c';
                 errorMsg.innerText = `❌ ${err.message}`;
                 btn.disabled = false;
                 btn.innerText = "Sign In";
@@ -700,13 +724,15 @@
                 const password = document.getElementById('reg-password').value;
                 const confirmPassword = document.getElementById('reg-confirm-password').value;
                 if (password !== confirmPassword) {
-                    errorMsg.style.color = 'var(--error-red)';
-                    errorMsg.innerText = 'Passwords do not match!';
+                    errorMsg.style.display = 'block';
+                    errorMsg.style.color = '#b91c1c';
+                    errorMsg.innerText = '❌ Passwords do not match!';
                     return;
                 }
 
                 submitBtn.disabled = true;
-                submitBtn.innerText = 'Sending...';
+                submitBtn.innerText = 'Checking...';
+                errorMsg.style.display = 'none';
 
                 fetch('/api/request-otp', {
                     method: 'POST',
@@ -719,9 +745,12 @@
                 })
                 .then(async (res) => {
                     const data = await res.json();
-                    if (res.status === 400) {
+                    if (!res.ok) {
+                        errorMsg.style.display = 'block';
+                        errorMsg.style.backgroundColor = '#fee2e2';
+                        errorMsg.style.color = '#b91c1c';
                         errorMsg.innerText = `❌ ${data.message}`;
-                        throw new Error("Duplicate");
+                        throw new Error(data.message);
                     }
                     return data;
                 })
@@ -730,14 +759,13 @@
                     document.getElementById('otp-section').style.display = 'block';
                     submitBtn.innerText = 'Verify & Create Account';
                     currentSignupStep = 2;
-                    errorMsg.style.color = 'var(--success-green)';
+                    errorMsg.style.display = 'block';
+                    errorMsg.style.backgroundColor = '#d1fae5';
+                    errorMsg.style.color = '#065f46';
+                    errorMsg.style.border = '1px solid #a7f3d0';
                     errorMsg.innerText = '✅ ' + data.message;
                 })
-                .catch(err => {
-                    if (err.message !== "Duplicate") {
-                        errorMsg.innerText = `❌ ${err.message}`;
-                    }
-                })
+                .catch(err => { console.log("Signup error:", err.message); })
                 .finally(() => { submitBtn.disabled = false; });
 
             } else {
@@ -753,6 +781,8 @@
                 .then(safeFetch)
                 .then(data => { window.location.href = '/citizen-portal.html'; })
                 .catch(err => {
+                    errorMsg.style.display = 'block';
+                    errorMsg.style.backgroundColor = '#fee2e2';
                     errorMsg.innerText = `❌ ${err.message}`;
                     submitBtn.disabled = false;
                 });
@@ -769,8 +799,12 @@
                 })
                 .then(safeFetch)
                 .then(res => { window.location.href = '/citizen-portal.html'; })
-                .catch(err => { errorMsg.innerText = "❌ Google Login failed."; });
+                .catch(err => { 
+                    errorMsg.style.display = 'block';
+                    errorMsg.innerText = "❌ Google Login failed."; 
+                });
             } catch (error) {
+                errorMsg.style.display = 'block';
                 errorMsg.style.color = 'var(--error-red)';
                 errorMsg.innerText = "⚠️ Google Login blocked by browser.";
             }
