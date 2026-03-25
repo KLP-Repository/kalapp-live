@@ -7,69 +7,61 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* --- LIGHT MODE DEFAULTS --- */
             --color-primary: #ff8c00;
             --color-chat: #2563eb;
-            --text-main: #1e293b; 
+            --text-main: #1e293b; /* Dark text for light mode */
             --text-muted: #475569;
-            --glass-bg: rgba(255, 255, 255, 0.75); 
+            --glass-bg: rgba(255, 255, 255, 0.7); /* Frosted white */
             --glass-border: rgba(255, 255, 255, 0.5);
-            --glass-blur: blur(20px);
-            --bg-overlay: rgba(248, 250, 252, 0.4); 
+            --glass-blur: blur(16px);
+            --bg-overlay: rgba(248, 250, 252, 0.6); /* Light tint over images */
             --nav-bg: linear-gradient(to bottom, rgba(255,255,255,0.95), transparent);
             --logo-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         body.dark {
-            --text-main: #ffffff; 
+            /* --- DARK MODE OVERRIDES --- */
+            --text-main: #ffffff; /* White text for dark mode */
             --text-muted: #cbd5e1;
-            --glass-bg: rgba(15, 23, 42, 0.65); 
+            --glass-bg: rgba(15, 23, 42, 0.6); /* Frosted dark slate */
             --glass-border: rgba(255, 255, 255, 0.1);
-            --bg-overlay: rgba(15, 23, 42, 0.7); 
+            --bg-overlay: rgba(15, 23, 42, 0.85); /* Dark tint over images */
             --nav-bg: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
             --logo-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
-        body { background-color: var(--text-main); color: var(--text-main); overflow-x: hidden; transition: 0.3s; }
+        
+        /* Set base background color dependent on theme */
+        body { background-color: var(--text-main); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
 
-        /* --- THE DEEP PARALLAX SYSTEM --- */
-        .parallax-section {
+        /* --- MULTI-PARALLAX SYSTEM --- */
+        .parallax-wrapper {
             position: relative;
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
             width: 100vw;
-            min-height: 120vh; /* Extremely long scroll for immersion */
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Contains the floating elements */
-            background-color: #0f172a;
         }
 
-        /* The moving background images */
-        .parallax-bg {
-            position: absolute;
-            top: -20%; left: -5%;
-            width: 110%; height: 140%;
-            object-fit: cover;
-            z-index: 0;
-            /* The JS Engine handles the transform */
-        }
+        /* Unique Backgrounds per Section */
+        .bg-hero { background-image: url('https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=2000&auto=format&fit=crop'); min-height: 100vh;}
+        .bg-feat1 { background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop'); }
+        .bg-feat2 { background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop'); }
+        .bg-feat3 { background-image: url('https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2000&auto=format&fit=crop'); }
+        .bg-cta { background-image: url('https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2000&auto=format&fit=crop'); min-height: 70vh;}
 
         .overlay {
             position: absolute; top: 0; left: 0; right: 0; bottom: 0;
             background: var(--bg-overlay); z-index: 1; transition: background 0.3s ease;
         }
 
-        /* Section Transition Waves (Creates the bleeding effect from the video) */
-        .wave-bottom {
-            position: absolute; bottom: -1px; left: 0; width: 100%;
-            z-index: 10; fill: var(--text-main); /* Adapts to light/dark mode */
-            transform: translateY(1px);
-        }
-
-        .content-layer { 
-            position: relative; z-index: 5; width: 100%; max-width: 1200px; 
-            padding: 0 5%; display: flex; align-items: center; justify-content: center;
-        }
+        .content-layer { position: relative; z-index: 2; width: 100%; max-width: 1200px; padding: 0 5%; }
 
         /* --- NAVIGATION --- */
         nav {
@@ -96,41 +88,48 @@
         /* --- GLASSMORPHISM CARDS --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
-            border: 1px solid var(--glass-border); border-radius: 24px; padding: 50px; box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--glass-border); border-radius: 24px; padding: 40px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
             transition: background 0.3s ease, border 0.3s ease;
         }
 
         /* --- HERO CONTENT --- */
         .hero-text { max-width: 800px; text-align: center; margin: 0 auto; }
-        .hero-text h1 { font-size: 5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
+        .hero-text h1 { font-size: 4.5rem; font-weight: 800; line-height: 1.1; margin-bottom: 20px; }
         .hero-text p { font-size: 1.3rem; margin-bottom: 40px; color: var(--text-muted); }
 
         /* --- LONG SCROLL FEATURE SHOWCASES --- */
-        .showcase-container { width: 100%; display: flex; align-items: center; gap: 80px; }
+        .showcase-section { padding: 120px 0; width: 100%; position: relative; z-index: 5; }
+        .showcase-container { max-width: 1200px; margin: 0 auto; display: flex; align-items: center; gap: 60px; }
         .showcase-container.reverse { flex-direction: row-reverse; }
 
         .showcase-text { flex: 1; }
-        .feature-icon { font-size: 4rem; margin-bottom: 20px; display: inline-block; }
-        .showcase-text h2 { font-size: 3rem; margin-bottom: 20px; color: var(--text-main); font-weight: 800; line-height: 1.1;}
-        .showcase-text p { font-size: 1.2rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px;}
+        
+        /* FIXED ICON BUG: Removed background clipping so emojis show normal colors */
+        .feature-icon { font-size: 3.5rem; margin-bottom: 20px; display: inline-block; }
+        
+        .showcase-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main); font-weight: 800; line-height: 1.2;}
+        .showcase-text p { font-size: 1.1rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 20px;}
 
         .showcase-image-wrapper {
-            flex: 1; border-radius: 24px; overflow: hidden; box-shadow: 0 30px 60px rgba(0,0,0,0.4);
+            flex: 1; border-radius: 24px; overflow: hidden; box-shadow: 0 20px 50px rgba(0,0,0,0.3);
             border: 1px solid var(--glass-border); position: relative;
         }
         .showcase-image-wrapper img {
-            width: 100%; height: 100%; min-height: 500px; object-fit: cover; display: block;
+            width: 100%; height: 100%; min-height: 400px; object-fit: cover; display: block;
+            transition: transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
+        .showcase-image-wrapper:hover img { transform: scale(1.08); }
 
 
         /* ==========================================
            🎬 THEMATIC SCROLL ANIMATIONS
            ========================================== */
 
+        /* 1. Base hidden state for text elements */
         .anim-text { opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .show .anim-text:nth-child(2) { transition-delay: 0.1s; } 
-        .show .anim-text:nth-child(3) { transition-delay: 0.3s; } 
-        .show .anim-text:nth-child(4) { transition-delay: 0.5s; } 
+        .show .anim-text:nth-child(2) { transition-delay: 0.1s; } /* H2 */
+        .show .anim-text:nth-child(3) { transition-delay: 0.3s; } /* P1 */
+        .show .anim-text:nth-child(4) { transition-delay: 0.5s; } /* P2 */
 
         /* --- THEME 1: "Tracking" (Slide across) --- */
         .track-slide { transform: translateX(-60px); }
@@ -169,22 +168,24 @@
 
         /* Standard image fades */
         .hidden-img { opacity: 0; transition: all 1s ease; }
+        .fade-left { transform: translateX(-50px); }
+        .fade-right { transform: translateX(50px); }
         .fade-up { transform: translateY(50px); }
         .show .hidden-img { opacity: 1; transform: translate(0); }
 
 
         /* --- CHATBOT UI --- */
         #chatbot-toggle { 
-            position: fixed; bottom: 30px; right: 30px; width: 75px; height: 75px; 
-            border-radius: 50%; background: var(--color-chat); color: white; font-size: 35px;
-            border: none; cursor: pointer; z-index: 1000; box-shadow: 0 10px 30px rgba(37, 99, 235, 0.6);
+            position: fixed; bottom: 30px; right: 30px; width: 70px; height: 70px; 
+            border-radius: 50%; background: var(--color-chat); color: white; font-size: 30px;
+            border: none; cursor: pointer; z-index: 1000; box-shadow: 0 10px 25px rgba(37, 99, 235, 0.5);
             transition: 0.3s ease; display: flex; align-items: center; justify-content: center;
         }
         #chatbot-toggle:hover { transform: scale(1.1); background: var(--color-primary); }
         .pulse-anim { animation: pulse 2s infinite; }
         
         #chatbot-window { 
-            position: fixed; bottom: 120px; right: 30px; width: 380px; height: 550px; 
+            position: fixed; bottom: 110px; right: 30px; width: 380px; height: 550px; 
             max-width: calc(100vw - 40px); z-index: 1000; overflow: hidden; 
             display: flex; flex-direction: column;
             transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
@@ -207,20 +208,21 @@
 
         /* --- MOBILE RESPONSIVENESS --- */
         @media screen and (max-width: 768px) {
-            .hero-text h1 { font-size: 3rem; }
+            .hero-text h1 { font-size: 2.8rem; }
             nav { padding: 1rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
             .logo { font-size: 1.3rem; }
             .btn-login { padding: 8px 16px; font-size: 0.9rem; }
             
-            .showcase-container, .showcase-container.reverse { flex-direction: column; text-align: center; gap: 40px; }
-            .showcase-text h2 { font-size: 2.2rem; }
+            .parallax-wrapper { background-attachment: scroll; } 
+            
+            .showcase-container, .showcase-container.reverse { 
+                flex-direction: column; text-align: center; gap: 40px;
+            }
+            .showcase-text h2 { font-size: 2rem; }
             .showcase-image-wrapper img { min-height: 300px; }
             
             #chatbot-window { height: 65vh; right: 20px; bottom: 90px; }
-            #chatbot-toggle { width: 60px; height: 60px; font-size: 26px; bottom: 20px; right: 20px;}
-            
-            /* Disable JS parallax on mobile to save battery and prevent jitter */
-            .parallax-layer { transform: none !important; }
+            #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 20px; right: 20px;}
         }
 
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -239,84 +241,76 @@
         </div>
     </nav>
 
-    <section class="parallax-section">
-        <img src="https://images.unsplash.com/photo-1518398046578-8cca57782e17?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.1" alt="City Background">
+    <section class="parallax-wrapper bg-hero">
         <div class="overlay"></div>
-        
-        <div class="content-layer scroll-trigger parallax-layer" data-speed="-0.15">
+        <div class="content-layer scroll-trigger">
             <div class="glass-card hero-text hidden-img fade-up">
                 <h1>Empowering the Community</h1>
                 <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
                 <a href="login.html" class="btn-login" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem; margin-top: 10px;">File a Complaint</a>
             </div>
         </div>
-
-        <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
-        <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.2" style="opacity: 0.3;" alt="Network">
-        
-        <div class="content-layer showcase-container scroll-trigger">
-            <div class="showcase-text glass-card parallax-layer" data-speed="-0.1">
-                <div class="feature-icon icon-track">🔍</div>
-                <h2 class="anim-text track-slide">Real-Time Tracking</h2>
-                <p class="anim-text track-slide">Transparency at your fingertips. Follow your report from the moment you hit submit all the way to final resolution.</p>
-                <p class="anim-text track-slide">Every complaint is assigned a unique Tracking ID, ensuring you are never left in the dark about your community's progress. Watch as local officials update the status from 'Pending' to 'Resolved'.</p>
-            </div>
-            <div class="showcase-image-wrapper hidden-img fade-up parallax-layer" data-speed="0.05">
-                <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Dashboard Tracking">
+    <section class="parallax-wrapper bg-feat1">
+        <div class="overlay"></div>
+        <div class="content-layer showcase-section">
+            <div class="showcase-container scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-track">🔍</div>
+                    <h2 class="anim-text track-slide">Real-Time Tracking</h2>
+                    <p class="anim-text track-slide">Transparency at your fingertips. Follow your report from the moment you hit submit all the way to final resolution.</p>
+                    <p class="anim-text track-slide">Every complaint is assigned a unique Tracking ID, ensuring you are never left in the dark about your community's progress. Watch as local officials update the status from 'Pending' to 'Resolved'.</p>
+                </div>
+                <div class="showcase-image-wrapper hidden-img fade-right">
+                    <img src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?q=80&w=1000&auto=format&fit=crop" alt="Dashboard Tracking">
+                </div>
             </div>
         </div>
-
-        <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,32L80,48C160,64,320,96,480,101.3C640,107,800,85,960,69.3C1120,53,1280,43,1360,37.3L1440,32L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
-        <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.15" style="opacity: 0.3;" alt="AI processing">
-        
-        <div class="content-layer showcase-container reverse scroll-trigger">
-            <div class="showcase-text glass-card parallax-layer" data-speed="-0.12">
-                <div class="feature-icon icon-robot">🤖</div>
-                <h2 class="anim-text bot-pop">AI Prioritization</h2>
-                <p class="anim-text bot-pop">Powered by our custom Gemini 2.5 Flash integration, Kalapp doesn't just collect reports; it understands them.</p>
-                <p class="anim-text bot-pop">Smart sentiment analysis reads every submission in real-time. Critical life-safety hazards, like exposed wires or deep potholes, are automatically flagged as <strong>CRITICAL</strong> and bumped to the top of the LGU Dashboard for immediate action.</p>
-            </div>
-            <div class="showcase-image-wrapper hidden-img fade-up parallax-layer" data-speed="0.08">
-                <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop" alt="AI Network">
+    <section class="parallax-wrapper bg-feat2">
+        <div class="overlay"></div>
+        <div class="content-layer showcase-section">
+            <div class="showcase-container reverse scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-robot">🤖</div>
+                    <h2 class="anim-text bot-pop">AI Prioritization</h2>
+                    <p class="anim-text bot-pop">Powered by our custom Gemini 2.5 Flash integration, Kalapp doesn't just collect reports; it understands them.</p>
+                    <p class="anim-text bot-pop">Smart sentiment analysis reads every submission in real-time. Critical life-safety hazards, like exposed wires or deep potholes, are automatically flagged as <strong>CRITICAL</strong> and bumped to the top of the LGU Dashboard for immediate action.</p>
+                </div>
+                <div class="showcase-image-wrapper hidden-img fade-left">
+                    <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1000&auto=format&fit=crop" alt="AI Network">
+                </div>
             </div>
         </div>
-
-        <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,96L80,85.3C160,75,320,53,480,53C640,53,800,75,960,85.3C1120,96,1280,96,1360,96L1440,96L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
-        <img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.25" style="opacity: 0.3;" alt="Security">
-        
-        <div class="content-layer showcase-container scroll-trigger">
-            <div class="showcase-text glass-card parallax-layer" data-speed="-0.1">
-                <div class="feature-icon icon-shield">🛡️</div>
-                <h2 class="anim-text shield-drop">Verified Evidence</h2>
-                <p class="anim-text shield-drop">End-to-End Security blocks the trolls so your local government can focus on what matters.</p>
-                <p class="anim-text shield-drop">By analyzing hidden EXIF metadata, Kalapp actively rejects screenshots, downloaded images, and old photos. Only authentic, live camera photos taken within the last 48 hours make it to the dashboard, ensuring absolute data integrity.</p>
-            </div>
-            <div class="showcase-image-wrapper hidden-img fade-up parallax-layer" data-speed="0.15">
-                <img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=1000&auto=format&fit=crop" alt="Security Shield">
+    <section class="parallax-wrapper bg-feat3">
+        <div class="overlay"></div>
+        <div class="content-layer showcase-section">
+            <div class="showcase-container scroll-trigger">
+                <div class="showcase-text glass-card">
+                    <div class="feature-icon icon-shield">🛡️</div>
+                    <h2 class="anim-text shield-drop">Verified Evidence</h2>
+                    <p class="anim-text shield-drop">End-to-End Security blocks the trolls so your local government can focus on what matters.</p>
+                    <p class="anim-text shield-drop">By analyzing hidden EXIF metadata, Kalapp actively rejects screenshots, downloaded images, and old photos. Only authentic, live camera photos taken within the last 48 hours make it to the dashboard, ensuring absolute data integrity.</p>
+                </div>
+                <div class="showcase-image-wrapper hidden-img fade-right">
+                    <img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=1000&auto=format&fit=crop" alt="Security Shield">
+                </div>
             </div>
         </div>
-
-        <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,64L80,80C160,96,320,128,480,122.7C640,117,800,75,960,58.7C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main); min-height: 80vh;">
-        <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.1" style="opacity: 0.5;" alt="City">
-        
-        <div class="content-layer scroll-trigger parallax-layer" data-speed="-0.2">
-            <div class="glass-card hidden-img fade-up" style="max-width: 700px; margin: 0 auto; text-align: center;">
-                <h2 style="font-size: 3rem; margin-bottom: 20px; font-weight: 800;">A Safer City, Together.</h2>
-                <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.2rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
-                <a href="login.html" class="btn-login" style="padding: 15px 50px; font-size: 1.2rem;">Access the Portal</a>
-                <div style="margin-top: 50px; font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
+    <section class="parallax-wrapper bg-cta">
+        <div class="overlay"></div>
+        <div class="content-layer cta-section scroll-trigger">
+            <div class="glass-card hidden-img fade-up" style="max-width: 600px; margin: 150px auto; display: block; text-align: center;">
+                <h2 style="font-size: 2.5rem; margin-bottom: 15px; font-weight: 800;">A Safer City, Together.</h2>
+                <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 1.1rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
+                <a href="login.html" class="btn-login" style="padding: 15px 40px; font-size: 1.1rem;">Access the Portal</a>
+                <div style="margin-top: 40px; font-size: 0.85rem; color: var(--text-muted);">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
             </div>
         </div>
     </section>
@@ -339,42 +333,7 @@
 
     <script>
         // ==========================================
-        // 1. THE JAVASCRIPT DEEP PARALLAX ENGINE
-        // ==========================================
-        let ticking = false;
-
-        function updateParallax() {
-            // Only run parallax on desktop to save battery on mobile devices
-            if (window.innerWidth > 768) {
-                const windowCenter = window.innerHeight / 2;
-                
-                document.querySelectorAll('.parallax-layer').forEach(layer => {
-                    const speed = parseFloat(layer.getAttribute('data-speed')) || 0;
-                    const parent = layer.closest('.parallax-section');
-                    
-                    if(parent) {
-                        const rect = parent.getBoundingClientRect();
-                        const parentCenter = rect.top + (rect.height / 2);
-                        // Math: Calculates distance from center of screen and multiplies by speed
-                        const offset = (parentCenter - windowCenter) * speed;
-                        
-                        layer.style.transform = `translateY(${offset}px)`;
-                    }
-                });
-            }
-            ticking = false;
-        }
-
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                // requestAnimationFrame makes it run at silky smooth 60fps
-                window.requestAnimationFrame(updateParallax);
-                ticking = true;
-            }
-        });
-
-        // ==========================================
-        // 2. SCROLL ANIMATION TRIGGER
+        // 1. ADVANCED SCROLL ANIMATION OBSERVER
         // ==========================================
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -384,12 +343,17 @@
                     entry.target.classList.remove('show');
                 }
             });
-        }, { threshold: 0.25 });
+        }, { 
+            threshold: 0.2 // Triggers when 20% of the section is visible
+        });
 
-        document.querySelectorAll('.scroll-trigger').forEach((el) => observer.observe(el));
+        // We observe the parent container to trigger all child animations simultaneously
+        const triggers = document.querySelectorAll('.scroll-trigger');
+        triggers.forEach((el) => observer.observe(el));
+
 
         // ==========================================
-        // 3. THEME & CHAT LOGIC (PRESERVED)
+        // 2. THEME TOGGLE LOGIC (FIXED)
         // ==========================================
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
@@ -398,20 +362,14 @@
         if (toggleBtn) {
             toggleBtn.addEventListener('click', () => {
                 document.body.classList.toggle('dark');
-                localStorage.setItem('kalapp-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-                updateWaveColors(); // Update SVG waves on toggle
+                const isDark = document.body.classList.contains('dark');
+                localStorage.setItem('kalapp-theme', isDark ? 'dark' : 'light');
             });
         }
 
-        function updateWaveColors() {
-            const isDark = document.body.classList.contains('dark');
-            const waveColor = isDark ? '#ffffff' : '#1e293b';
-            document.querySelectorAll('.wave-bottom').forEach(wave => {
-                wave.style.fill = waveColor;
-            });
-        }
-        updateWaveColors();
-
+        // ==========================================
+        // 3. AI CHATBOT LOGIC
+        // ==========================================
         const chatbotToggle = document.getElementById('chatbot-toggle');
         const chatbotWindow = document.getElementById('chatbot-window');
         const closeChat = document.getElementById('close-chat');
@@ -479,9 +437,6 @@
         chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleSendMessage();
         });
-        
-        // Initial setup calls
-        updateParallax();
     </script>
 </body>
 </html>
