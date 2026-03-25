@@ -3,7 +3,6 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kalapp - Secure Access</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
@@ -11,38 +10,34 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     
     <style>
-    
     /* --- PARA SA TABLET (Screens below 1200px) --- */
-@media screen and (max-width: 1200px) {
-    .container {
-        width: 94%;
-        /* Binabawasan ang column para kumasya sa tablet */
-        grid-template-columns: 7rem auto 23rem; 
-    }
-}
-
-/* --- PARA SA MOBILE (Screens below 768px) --- */
-@media screen and (max-width: 768px) {
-    .container {
-        width: 100%;
-        grid-template-columns: 1fr; 
+    @media screen and (max-width: 1200px) {
+        .container {
+            width: 94%;
+            /* Binabawasan ang column para kumasya sa tablet */
+            grid-template-columns: 7rem auto 23rem; 
+        }
     }
 
-    aside {
-        display: none; 
+    /* --- PARA SA MOBILE (Screens below 768px) --- */
+    @media screen and (max-width: 768px) {
+        .container {
+            width: 100%;
+            grid-template-columns: 1fr; 
+        }
+        aside {
+            display: none;
+        }
+        main .insights {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+        .recent-reports {
+            width: 100%;
+            position: relative;
+            margin: 3rem 0 0 0;
+        }
     }
-
-    main .insights {
-        grid-template-columns: 1fr;
-        gap: 0;
-    }
-
-    .recent-reports {
-        width: 100%;
-        position: relative;
-        margin: 3rem 0 0 0;
-    }
-}
 
     :root {
         --bg-body: #f1f5f9;
@@ -53,7 +48,7 @@
         --orange-hover: #e67e00;
         --orange-glow: rgba(255, 140, 0, 0.3);
         --input-bg: #ffffff;
-        --input-border: #64748b; /* Darkened for visibility */
+        --input-border: #64748b;
         --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.15);
         --facebook-blue: #1877F2;
         --error-red: #b91c1c;
@@ -76,7 +71,6 @@
         --card-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
         --orange-glow: rgba(255, 140, 0, 0.5);
         --dropdown-text: #ffffff;
-
         --gradient-1: #0f172a;
         --gradient-2: #1e293b;
         --gradient-3: #111827;
@@ -93,7 +87,6 @@
         transition: background 0.5s ease;
         position: relative;
         overflow: hidden;
-
         /* Animated Gradient Background */
         background: linear-gradient(-45deg, var(--gradient-1), var(--gradient-2), var(--gradient-3), var(--gradient-1));
         background-size: 400% 400%;
@@ -453,7 +446,6 @@
         background-color: #1e293b;
         color: white;
     }
-
     </style>
 </head>
 <body>
@@ -468,6 +460,7 @@
     <div class="login-card">
         <button id="mode-toggle">DARK MODE</button>
         <img src="logokalapp.png" alt="Kalapp Logo" style="width: 60px; height: auto; margin-bottom: 10px;">
+        
         <h1>Kalapp</h1>
         <p class="subtitle">Smart Barangay Complaint System</p>
         
@@ -486,6 +479,7 @@
                         <span class="material-icons-sharp toggle-password" onclick="toggleVisibility('login-password', this)">visibility_off</span>
                     </div>
                 </div>
+              
                 <div style="text-align: right; margin-bottom: 20px;">
                     <span class="toggle-text" style="font-size: 12px; font-weight: 600;" onclick="alert('Coming soon!')">Forgot Password?</span>
                 </div>
@@ -603,7 +597,6 @@
         function validateAgeRealTime() {
             const birthdateInput = document.getElementById('reg-birthdate').value;
             const submitBtn = document.getElementById('main-submit-btn');
-            
             if (!birthdateInput) return;
 
             const birthDate = new Date(birthdateInput);
@@ -740,6 +733,7 @@
                     body: JSON.stringify({
                         email: document.getElementById('reg-email').value,
                         username: document.getElementById('reg-username').value,
+                        password: document.getElementById('reg-password').value, // 🔧 FIX: Password is now sent!
                         birthdate: document.getElementById('reg-birthdate').value
                     })
                 })
@@ -767,7 +761,6 @@
                 })
                 .catch(err => { console.log("Signup error:", err.message); })
                 .finally(() => { submitBtn.disabled = false; });
-
             } else {
                 submitBtn.disabled = true;
                 fetch('/api/verify-otp', {
