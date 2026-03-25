@@ -33,7 +33,6 @@
 
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Poppins', sans-serif; }
         
-        /* Set base background color dependent on theme */
         body { background-color: var(--text-main); color: var(--text-main); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
 
         /* --- MULTI-PARALLAX SYSTEM --- */
@@ -85,6 +84,14 @@
         }
         .btn-login:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6); }
 
+        /* 🔧 FIX: New class for the big buttons so they scale properly */
+        .btn-large {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
+
         /* --- GLASSMORPHISM CARDS --- */
         .glass-card {
             background: var(--glass-bg); backdrop-filter: var(--glass-blur); -webkit-backdrop-filter: var(--glass-blur);
@@ -103,8 +110,6 @@
         .showcase-container.reverse { flex-direction: row-reverse; }
 
         .showcase-text { flex: 1; }
-        
-        /* FIXED ICON BUG: Removed background clipping so emojis show normal colors */
         .feature-icon { font-size: 3.5rem; margin-bottom: 20px; display: inline-block; }
         
         .showcase-text h2 { font-size: 2.5rem; margin-bottom: 20px; color: var(--text-main); font-weight: 800; line-height: 1.2;}
@@ -124,49 +129,29 @@
         /* ==========================================
            🎬 THEMATIC SCROLL ANIMATIONS
            ========================================== */
-
-        /* 1. Base hidden state for text elements */
         .anim-text { opacity: 0; transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94); }
-        .show .anim-text:nth-child(2) { transition-delay: 0.1s; } /* H2 */
-        .show .anim-text:nth-child(3) { transition-delay: 0.3s; } /* P1 */
-        .show .anim-text:nth-child(4) { transition-delay: 0.5s; } /* P2 */
+        .show .anim-text:nth-child(2) { transition-delay: 0.1s; } 
+        .show .anim-text:nth-child(3) { transition-delay: 0.3s; } 
+        .show .anim-text:nth-child(4) { transition-delay: 0.5s; } 
 
-        /* --- THEME 1: "Tracking" (Slide across) --- */
         .track-slide { transform: translateX(-60px); }
         .show .track-slide { opacity: 1; transform: translateX(0); }
         
         .show .icon-track { animation: radarSweep 2.5s ease-in-out infinite; }
-        @keyframes radarSweep { 
-            0% { transform: translateX(-15px) rotate(-15deg); } 
-            50% { transform: translateX(15px) rotate(15deg); } 
-            100% { transform: translateX(-15px) rotate(-15deg); } 
-        }
+        @keyframes radarSweep { 0% { transform: translateX(-15px) rotate(-15deg); } 50% { transform: translateX(15px) rotate(15deg); } 100% { transform: translateX(-15px) rotate(-15deg); } }
 
-        /* --- THEME 2: "AI Processing" (Jerky robotic pop-ups) --- */
         .bot-pop { transform: scale(0.8) translateY(30px); }
         .show .bot-pop { opacity: 1; transform: scale(1) translateY(0); }
         
         .show .icon-robot { animation: robotProcess 1.5s steps(4, end) infinite; transform-origin: bottom; }
-        @keyframes robotProcess { 
-            0% { transform: translateY(0) rotate(0); } 
-            25% { transform: translateY(-10px) rotate(-10deg); } 
-            50% { transform: translateY(0) rotate(10deg); } 
-            75% { transform: translateY(-5px) rotate(0); } 
-            100% { transform: translateY(0) rotate(0); } 
-        }
+        @keyframes robotProcess { 0% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-10px) rotate(-10deg); } 50% { transform: translateY(0) rotate(10deg); } 75% { transform: translateY(-5px) rotate(0); } 100% { transform: translateY(0) rotate(0); } }
 
-        /* --- THEME 3: "Verified Shield" (Heavy Slam Down) --- */
         .shield-drop { transform: translateY(-50px); }
         .show .shield-drop { opacity: 1; transform: translateY(0); }
         
         .show .icon-shield { animation: shieldSlam 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: bottom; opacity: 0; }
-        @keyframes shieldSlam { 
-            0% { transform: translateY(-80px) scale(1.5); opacity: 0; } 
-            60% { opacity: 1; transform: translateY(10px) scale(0.9); }
-            100% { transform: translateY(0) scale(1); opacity: 1; } 
-        }
+        @keyframes shieldSlam { 0% { transform: translateY(-80px) scale(1.5); opacity: 0; } 60% { opacity: 1; transform: translateY(10px) scale(0.9); } 100% { transform: translateY(0) scale(1); opacity: 1; } }
 
-        /* Standard image fades */
         .hidden-img { opacity: 0; transition: all 1s ease; }
         .fade-left { transform: translateX(-50px); }
         .fade-right { transform: translateX(50px); }
@@ -206,23 +191,44 @@
         #send-chat { background: var(--color-chat); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; transition: 0.2s;}
         #send-chat:hover { background: var(--color-primary); transform: scale(1.05);}
 
-        /* --- MOBILE RESPONSIVENESS --- */
+        /* ==========================================
+           📱 MOBILE RESPONSIVENESS OVERRIDES
+           ========================================== */
         @media screen and (max-width: 768px) {
-            .hero-text h1 { font-size: 2.8rem; }
-            nav { padding: 1rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
-            .logo { font-size: 1.3rem; }
-            .btn-login { padding: 8px 16px; font-size: 0.9rem; }
+            /* 🔧 FIX: Better text scaling */
+            .hero-text h1 { font-size: 2.2rem; }
+            .hero-text p { font-size: 1rem; }
+            
+            /* 🔧 FIX: Prevent nav bar crowding */
+            nav { padding: 0.8rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
+            .logo { font-size: 1.1rem; }
+            .nav-controls { gap: 10px; }
+            #mode-toggle { padding: 8px; font-size: 0.9rem; }
+            .btn-login { padding: 8px 12px; font-size: 0.8rem; }
+            
+            /* 🔧 FIX: Force large buttons to fit the screen */
+            .btn-large { 
+                padding: 12px 20px; 
+                font-size: 1rem; 
+                width: 100%; 
+                display: block; 
+                box-sizing: border-box; 
+            }
+
+            /* 🔧 FIX: Reduce padding to prevent horizontal overflow */
+            .glass-card { padding: 25px; } 
             
             .parallax-wrapper { background-attachment: scroll; } 
             
             .showcase-container, .showcase-container.reverse { 
-                flex-direction: column; text-align: center; gap: 40px;
+                flex-direction: column; text-align: center; gap: 30px;
             }
-            .showcase-text h2 { font-size: 2rem; }
-            .showcase-image-wrapper img { min-height: 300px; }
+            .showcase-text h2 { font-size: 1.8rem; }
+            .showcase-image-wrapper img { min-height: 250px; }
             
-            #chatbot-window { height: 65vh; right: 20px; bottom: 90px; }
-            #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 20px; right: 20px;}
+            /* 🔧 FIX: Keep chatbot window neatly within bounds */
+            #chatbot-window { height: 65vh; right: 15px; bottom: 85px; width: calc(100vw - 30px); }
+            #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 15px; right: 15px;}
         }
 
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -247,7 +253,7 @@
             <div class="glass-card hero-text hidden-img fade-up">
                 <h1>Empowering the Community</h1>
                 <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
-                <a href="login.html" class="btn-login" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem; margin-top: 10px;">File a Complaint</a>
+                <a href="login.html" class="btn-login btn-large">File a Complaint</a>
             </div>
         </div>
     </section>
@@ -309,7 +315,7 @@
             <div class="glass-card hidden-img fade-up" style="max-width: 600px; margin: 150px auto; display: block; text-align: center;">
                 <h2 style="font-size: 2.5rem; margin-bottom: 15px; font-weight: 800;">A Safer City, Together.</h2>
                 <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 1.1rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
-                <a href="login.html" class="btn-login" style="padding: 15px 40px; font-size: 1.1rem;">Access the Portal</a>
+                <a href="login.html" class="btn-login btn-large">Access the Portal</a>
                 <div style="margin-top: 40px; font-size: 0.85rem; color: var(--text-muted);">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
             </div>
         </div>
