@@ -7,6 +7,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
+            /* --- LIGHT MODE DEFAULTS --- */
             --color-primary: #ff8c00;
             --color-chat: #2563eb;
             --text-main: #1e293b; 
@@ -20,6 +21,7 @@
         }
 
         body.dark {
+            /* --- DARK MODE OVERRIDES --- */
             --text-main: #ffffff; 
             --text-muted: #cbd5e1;
             --glass-bg: rgba(15, 23, 42, 0.65); 
@@ -35,13 +37,13 @@
         /* --- THE DEEP PARALLAX SYSTEM --- */
         .parallax-section {
             position: relative;
-            width: 100vw;
-            min-height: 120vh; /* Extremely long scroll for immersion */
+            width: 100%; /* 🔧 FIX: Changed from 100vw to 100% to prevent horizontal overflow */
+            min-height: 120vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden; /* Contains the floating elements */
-            background-color: #0f172a;
+            overflow: hidden; 
+            background-color: #0f172a; /* 🔧 FIX: Locked to dark slate so images never look washed out */
         }
 
         /* The moving background images */
@@ -51,7 +53,6 @@
             width: 110%; height: 140%;
             object-fit: cover;
             z-index: 0;
-            /* The JS Engine handles the transform */
         }
 
         .overlay {
@@ -59,11 +60,11 @@
             background: var(--bg-overlay); z-index: 1; transition: background 0.3s ease;
         }
 
-        /* Section Transition Waves (Creates the bleeding effect from the video) */
         .wave-bottom {
             position: absolute; bottom: -1px; left: 0; width: 100%;
-            z-index: 10; fill: var(--text-main); /* Adapts to light/dark mode */
+            z-index: 10; fill: var(--text-main); 
             transform: translateY(1px);
+            transition: fill 0.3s ease;
         }
 
         .content-layer { 
@@ -90,8 +91,17 @@
             background: var(--color-primary); color: white; text-decoration: none;
             padding: 10px 24px; border-radius: 30px; font-weight: 600; transition: 0.3s;
             box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
+            white-space: nowrap; 
         }
         .btn-login:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6); }
+
+        /* 🔧 FIX: Re-added the btn-large class for proper mobile scaling */
+        .btn-large {
+            display: inline-block;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            margin-top: 10px;
+        }
 
         /* --- GLASSMORPHISM CARDS --- */
         .glass-card {
@@ -185,7 +195,7 @@
         
         #chatbot-window { 
             position: fixed; bottom: 120px; right: 30px; width: 380px; height: 550px; 
-            max-width: calc(100vw - 40px); z-index: 1000; overflow: hidden; 
+            max-width: calc(100% - 40px); z-index: 1000; overflow: hidden; 
             display: flex; flex-direction: column;
             transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
@@ -205,21 +215,38 @@
         #send-chat { background: var(--color-chat); color: white; border: none; width: 45px; height: 45px; border-radius: 50%; cursor: pointer; font-weight: bold; transition: 0.2s;}
         #send-chat:hover { background: var(--color-primary); transform: scale(1.05);}
 
-        /* --- MOBILE RESPONSIVENESS --- */
+        /* ==========================================
+           📱 MOBILE RESPONSIVENESS OVERRIDES
+           ========================================== */
         @media screen and (max-width: 768px) {
-            .hero-text h1 { font-size: 3rem; }
-            nav { padding: 1rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
-            .logo { font-size: 1.3rem; }
-            .btn-login { padding: 8px 16px; font-size: 0.9rem; }
+            .hero-text h1 { font-size: 2.2rem; }
+            .hero-text p { font-size: 1rem; }
+
+            nav { padding: 0.8rem 15px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
+            .logo { font-size: 1.1rem; gap: 8px; }
+            .logo img { height: 26px !important; width: 26px !important; }
+            .nav-controls { gap: 8px; }
+            #mode-toggle { padding: 8px; font-size: 0.9rem; }
+            .btn-login { padding: 8px 12px; font-size: 0.8rem; }
             
+            /* 🔧 FIX: Forces the buttons to stay inside the card and scale properly */
+            .btn-large { 
+                padding: 12px 20px; 
+                font-size: 1rem; 
+                width: 100%; 
+                display: block; 
+                box-sizing: border-box; 
+            }
+
+            .glass-card { padding: 25px; } 
+
             .showcase-container, .showcase-container.reverse { flex-direction: column; text-align: center; gap: 40px; }
             .showcase-text h2 { font-size: 2.2rem; }
-            .showcase-image-wrapper img { min-height: 300px; }
+            .showcase-image-wrapper img { min-height: 250px; }
             
-            #chatbot-window { height: 65vh; right: 20px; bottom: 90px; }
-            #chatbot-toggle { width: 60px; height: 60px; font-size: 26px; bottom: 20px; right: 20px;}
+            #chatbot-window { height: 65vh; right: 15px; bottom: 90px; width: calc(100% - 30px);}
+            #chatbot-toggle { width: 60px; height: 60px; font-size: 26px; bottom: 20px; right: 15px; z-index: 1001;}
             
-            /* Disable JS parallax on mobile to save battery and prevent jitter */
             .parallax-layer { transform: none !important; }
         }
 
@@ -247,16 +274,17 @@
             <div class="glass-card hero-text hidden-img fade-up">
                 <h1>Empowering the Community</h1>
                 <p>The Citywide Centralized Barangay Complaint Center. Organized, secure, and built for real-time resolution.</p>
-                <a href="login.html" class="btn-login" style="display: inline-block; padding: 15px 40px; font-size: 1.1rem; margin-top: 10px;">File a Complaint</a>
+                <a href="login.html" class="btn-login btn-large">File a Complaint</a>
             </div>
         </div>
 
         <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,64L80,69.3C160,75,320,85,480,80C640,75,800,53,960,48C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
+    <section class="parallax-section">
         <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.2" style="opacity: 0.3;" alt="Network">
-        
+        <div class="overlay"></div>
+
         <div class="content-layer showcase-container scroll-trigger">
             <div class="showcase-text glass-card parallax-layer" data-speed="-0.1">
                 <div class="feature-icon icon-track">🔍</div>
@@ -272,9 +300,10 @@
         <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,32L80,48C160,64,320,96,480,101.3C640,107,800,85,960,69.3C1120,53,1280,43,1360,37.3L1440,32L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
+    <section class="parallax-section">
         <img src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.15" style="opacity: 0.3;" alt="AI processing">
-        
+        <div class="overlay"></div>
+
         <div class="content-layer showcase-container reverse scroll-trigger">
             <div class="showcase-text glass-card parallax-layer" data-speed="-0.12">
                 <div class="feature-icon icon-robot">🤖</div>
@@ -290,9 +319,10 @@
         <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,96L80,85.3C160,75,320,53,480,53C640,53,800,75,960,85.3C1120,96,1280,96,1360,96L1440,96L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main);">
+    <section class="parallax-section">
         <img src="https://images.unsplash.com/photo-1557597774-9d273605dfa9?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.25" style="opacity: 0.3;" alt="Security">
-        
+        <div class="overlay"></div>
+
         <div class="content-layer showcase-container scroll-trigger">
             <div class="showcase-text glass-card parallax-layer" data-speed="-0.1">
                 <div class="feature-icon icon-shield">🛡️</div>
@@ -308,14 +338,15 @@
         <svg class="wave-bottom" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 120"><path d="M0,64L80,80C160,96,320,128,480,122.7C640,117,800,75,960,58.7C1120,43,1280,53,1360,58.7L1440,64L1440,120L1360,120C1280,120,1120,120,960,120C800,120,640,120,480,120C320,120,160,120,80,120L0,120Z"></path></svg>
     </section>
 
-    <section class="parallax-section" style="background-color: var(--text-main); min-height: 80vh;">
+    <section class="parallax-section" style="min-height: 80vh;">
         <img src="https://images.unsplash.com/photo-1449824913935-59a10b8d2000?q=80&w=2000&auto=format&fit=crop" class="parallax-bg parallax-layer" data-speed="0.1" style="opacity: 0.5;" alt="City">
-        
+        <div class="overlay"></div>
+
         <div class="content-layer scroll-trigger parallax-layer" data-speed="-0.2">
             <div class="glass-card hidden-img fade-up" style="max-width: 700px; margin: 0 auto; text-align: center;">
                 <h2 style="font-size: 3rem; margin-bottom: 20px; font-weight: 800;">A Safer City, Together.</h2>
                 <p style="color: var(--text-muted); margin-bottom: 40px; font-size: 1.2rem;">Connect directly with your Local Government Unit to build a better neighborhood today.</p>
-                <a href="login.html" class="btn-login" style="padding: 15px 50px; font-size: 1.2rem;">Access the Portal</a>
+                <a href="login.html" class="btn-login btn-large">Access the Portal</a>
                 <div style="margin-top: 50px; font-size: 0.9rem; color: var(--text-muted);">&copy; 2026 Kalapp Team | Sumbungan ng Bayan</div>
             </div>
         </div>
@@ -344,7 +375,6 @@
         let ticking = false;
 
         function updateParallax() {
-            // Only run parallax on desktop to save battery on mobile devices
             if (window.innerWidth > 768) {
                 const windowCenter = window.innerHeight / 2;
                 
@@ -355,7 +385,6 @@
                     if(parent) {
                         const rect = parent.getBoundingClientRect();
                         const parentCenter = rect.top + (rect.height / 2);
-                        // Math: Calculates distance from center of screen and multiplies by speed
                         const offset = (parentCenter - windowCenter) * speed;
                         
                         layer.style.transform = `translateY(${offset}px)`;
@@ -367,7 +396,6 @@
 
         window.addEventListener('scroll', () => {
             if (!ticking) {
-                // requestAnimationFrame makes it run at silky smooth 60fps
                 window.requestAnimationFrame(updateParallax);
                 ticking = true;
             }
@@ -389,7 +417,7 @@
         document.querySelectorAll('.scroll-trigger').forEach((el) => observer.observe(el));
 
         // ==========================================
-        // 3. THEME & CHAT LOGIC (PRESERVED)
+        // 3. THEME & CHAT LOGIC
         // ==========================================
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
@@ -399,7 +427,7 @@
             toggleBtn.addEventListener('click', () => {
                 document.body.classList.toggle('dark');
                 localStorage.setItem('kalapp-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
-                updateWaveColors(); // Update SVG waves on toggle
+                updateWaveColors(); 
             });
         }
 
@@ -480,7 +508,6 @@
             if (e.key === 'Enter') handleSendMessage();
         });
         
-        // Initial setup calls
         updateParallax();
     </script>
 </body>
