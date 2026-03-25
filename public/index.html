@@ -10,23 +10,23 @@
             /* --- LIGHT MODE DEFAULTS --- */
             --color-primary: #ff8c00;
             --color-chat: #2563eb;
-            --text-main: #1e293b; 
+            --text-main: #1e293b; /* Dark text for light mode */
             --text-muted: #475569;
-            --glass-bg: rgba(255, 255, 255, 0.7); 
+            --glass-bg: rgba(255, 255, 255, 0.7); /* Frosted white */
             --glass-border: rgba(255, 255, 255, 0.5);
             --glass-blur: blur(16px);
-            --bg-overlay: rgba(248, 250, 252, 0.6); 
+            --bg-overlay: rgba(248, 250, 252, 0.6); /* Light tint over images */
             --nav-bg: linear-gradient(to bottom, rgba(255,255,255,0.95), transparent);
             --logo-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         body.dark {
             /* --- DARK MODE OVERRIDES --- */
-            --text-main: #ffffff; 
+            --text-main: #ffffff; /* White text for dark mode */
             --text-muted: #cbd5e1;
-            --glass-bg: rgba(15, 23, 42, 0.6); 
+            --glass-bg: rgba(15, 23, 42, 0.6); /* Frosted dark slate */
             --glass-border: rgba(255, 255, 255, 0.1);
-            --bg-overlay: rgba(15, 23, 42, 0.85); 
+            --bg-overlay: rgba(15, 23, 42, 0.85); /* Dark tint over images */
             --nav-bg: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent);
             --logo-shadow: 0 2px 10px rgba(0,0,0,0.5);
         }
@@ -42,7 +42,7 @@
             background-position: center;
             background-repeat: no-repeat;
             background-size: cover;
-            width: 100%; /* 🔧 FIX: Changed from 100vw to 100% to prevent horizontal overflow */
+            width: 100vw;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -81,10 +81,10 @@
             background: var(--color-primary); color: white; text-decoration: none;
             padding: 10px 24px; border-radius: 30px; font-weight: 600; transition: 0.3s;
             box-shadow: 0 4px 15px rgba(255, 140, 0, 0.4);
-            white-space: nowrap; /* 🔧 FIX: Ensures text never drops to a second line */
         }
         .btn-login:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(255, 140, 0, 0.6); }
 
+        /* 🔧 FIX: New class for the big buttons so they scale properly */
         .btn-large {
             display: inline-block;
             padding: 15px 40px;
@@ -171,8 +171,7 @@
         
         #chatbot-window { 
             position: fixed; bottom: 110px; right: 30px; width: 380px; height: 550px; 
-            max-width: calc(100% - 40px); /* 🔧 FIX: Changed 100vw to 100% */
-            z-index: 1000; overflow: hidden; 
+            max-width: calc(100vw - 40px); z-index: 1000; overflow: hidden; 
             display: flex; flex-direction: column;
             transform: translateY(20px) scale(0.95); opacity: 0; pointer-events: none; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
         }
@@ -196,30 +195,40 @@
            📱 MOBILE RESPONSIVENESS OVERRIDES
            ========================================== */
         @media screen and (max-width: 768px) {
+            /* 🔧 FIX: Better text scaling */
             .hero-text h1 { font-size: 2.2rem; }
             .hero-text p { font-size: 1rem; }
             
-            /* 🔧 FIX: Tightly packed Nav Bar for small mobile screens */
-            nav { padding: 0.8rem 15px; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
-            .logo { font-size: 1.1rem; gap: 8px; }
-            .logo img { height: 26px !important; width: 26px !important; }
-            .nav-controls { gap: 8px; }
+            /* 🔧 FIX: Prevent nav bar crowding */
+            nav { padding: 0.8rem 5%; background: var(--glass-bg); backdrop-filter: var(--glass-blur); }
+            .logo { font-size: 1.1rem; }
+            .nav-controls { gap: 10px; }
             #mode-toggle { padding: 8px; font-size: 0.9rem; }
             .btn-login { padding: 8px 12px; font-size: 0.8rem; }
             
-            .btn-large { padding: 12px 20px; font-size: 1rem; width: 100%; display: block; box-sizing: border-box; }
+            /* 🔧 FIX: Force large buttons to fit the screen */
+            .btn-large { 
+                padding: 12px 20px; 
+                font-size: 1rem; 
+                width: 100%; 
+                display: block; 
+                box-sizing: border-box; 
+            }
 
+            /* 🔧 FIX: Reduce padding to prevent horizontal overflow */
             .glass-card { padding: 25px; } 
             
-            .parallax-wrapper { background-attachment: scroll; width: 100%; } 
+            .parallax-wrapper { background-attachment: scroll; } 
             
-            .showcase-container, .showcase-container.reverse { flex-direction: column; text-align: center; gap: 30px; }
+            .showcase-container, .showcase-container.reverse { 
+                flex-direction: column; text-align: center; gap: 30px;
+            }
             .showcase-text h2 { font-size: 1.8rem; }
             .showcase-image-wrapper img { min-height: 250px; }
             
-            /* 🔧 FIX: Ensured absolute safe margins for chatbot elements */
-            #chatbot-window { height: 65vh; right: 15px; bottom: 85px; width: calc(100% - 30px); }
-            #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 15px; right: 15px; z-index: 1001;}
+            /* 🔧 FIX: Keep chatbot window neatly within bounds */
+            #chatbot-window { height: 65vh; right: 15px; bottom: 85px; width: calc(100vw - 30px); }
+            #chatbot-toggle { width: 55px; height: 55px; font-size: 24px; bottom: 15px; right: 15px;}
         }
 
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
@@ -341,15 +350,16 @@
                 }
             });
         }, { 
-            threshold: 0.2 
+            threshold: 0.2 // Triggers when 20% of the section is visible
         });
 
+        // We observe the parent container to trigger all child animations simultaneously
         const triggers = document.querySelectorAll('.scroll-trigger');
         triggers.forEach((el) => observer.observe(el));
 
 
         // ==========================================
-        // 2. THEME TOGGLE LOGIC
+        // 2. THEME TOGGLE LOGIC (FIXED)
         // ==========================================
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') document.body.classList.add('dark');
