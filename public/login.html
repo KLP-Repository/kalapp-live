@@ -393,7 +393,7 @@
 
             if (password.length > 0) {
                 hint.style.display = 'block';
-                if (regex.test(password) && password.length >= 8) {
+                if (regex.test(password) && password.length >= 😎 {
                     hint.style.color = 'var(--success-green)';
                     hint.innerText = 'Strong Password! ✓';
                 } else {
@@ -436,7 +436,7 @@
             })
             .catch(err => { 
                 errorMsg.style.color = 'var(--error-red)';
-                errorMsg.innerText = `❌ ${err.message}`;
+                errorMsg.innerText = ❌ ${err.message};
                 btn.disabled = false; btn.innerText = "Sign In";
             });
         });
@@ -453,7 +453,7 @@
                 const username = document.getElementById('reg-username').value;
                 const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_])/;
 
-                if (!regex.test(password) || password.length < 8) {
+                if (!regex.test(password) || password.length < 😎 {
                     errorMsg.style.color = 'var(--error-red)';
                     errorMsg.innerText = 'Please ensure your password meets all requirements.';
                     return;
@@ -487,7 +487,7 @@
                 })
                 .catch(err => {
                     errorMsg.style.color = 'var(--error-red)';
-                    errorMsg.innerText = `❌ ${err.message}`;
+                    errorMsg.innerText = ❌ ${err.message};
                 })
                 .finally(() => {
                     submitBtn.disabled = false;
@@ -517,7 +517,7 @@
                 })
                 .catch(err => {
                     errorMsg.style.color = 'var(--error-red)';
-                    errorMsg.innerText = `❌ ${err.message}`;
+                    errorMsg.innerText = ❌ ${err.message};
                     submitBtn.innerText = 'Verify & Create Account';
                     submitBtn.disabled = false;
                 });
@@ -535,13 +535,13 @@
                 .then(safeFetch)
                 .then(data => {
                     errorMsg.style.color = 'var(--success-green)';
-                    errorMsg.innerText = `✅ Verified via Google as ${data.username}`;
+                    errorMsg.innerText = ✅ Verified via Google as ${data.username};
                     localStorage.setItem('kalapp_username', data.username);
                     setTimeout(() => { window.location.href = '/citizen-portal.html'; }, 1000);
                 })
                 .catch(err => { 
                     errorMsg.style.color = 'var(--error-red)';
-                    errorMsg.innerText = `❌ ${err.message}`; 
+                    errorMsg.innerText = ❌ ${err.message}; 
                 });
             } catch (error) { 
                 errorMsg.style.color = 'var(--error-red)';
