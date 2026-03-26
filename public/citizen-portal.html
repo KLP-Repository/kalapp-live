@@ -1,216 +1,309 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kalapp - Citizen Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/exif-js"></script> 
-    <style>
-        :root {
-            --color-primary: #ff8c00; --color-danger: #ff7782; --color-success: #41f1b6; --color-warning: #ffbb55;
-            --color-white: #fff; --color-info-dark: #7d8da1; --color-info-light: #dce1eb; --color-dark: #363949;
-            --color-light: rgba(132, 139, 200, 0.18); --color-background: #f6f6f9;
-            --card-border-radius: 2rem; --border-radius-1: 0.4rem; --card-padding: 1.8rem; --box-shadow: 0 2rem 3rem var(--color-light);
+!DOCTYPE html
+html lang=en
+head
+    meta charset=UTF-8
+    meta name=viewport content=width=device-width, initial-scale=1.0
+    titleKalapp - Citizen Portaltitle
+    link href=httpsfonts.googleapis.comcss2family=Poppinswght@300;400;500;600;700&display=swap rel=stylesheet
+    link href=httpsfonts.googleapis.comiconfamily=Material+Icons+Sharp rel=stylesheet
+    script src=httpscdn.jsdelivr.netnpmexif-jsscript 
+    style
+        root {
+            --color-primary #ff8c00; --color-danger #ff7782; --color-success #41f1b6; --color-warning #ffbb55;
+            --color-white #fff; --color-info-dark #7d8da1; --color-info-light #dce1eb; --color-dark #363949;
+            --color-light rgba(132, 139, 200, 0.18); --color-background #f6f6f9;
+            --card-border-radius 2rem; --border-radius-1 0.4rem; --card-padding 1.8rem; --box-shadow 0 2rem 3rem var(--color-light);
         }
         .dark-theme {
-            --color-background: #181a1e; --color-white: #202528; --color-dark: #edeffd;
-            --color-light: rgba(0, 0, 0, 0.4); --box-shadow: 0 2rem 3rem var(--color-light);
+            --color-background #181a1e; --color-white #202528; --color-dark #edeffd;
+            --color-light rgba(0, 0, 0, 0.4); --box-shadow 0 2rem 3rem var(--color-light);
         }
-        * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
-        body { font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; background: var(--color-background); overflow-x: hidden; color: var(--color-dark); transition: all 300ms ease; }
-        .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto 23rem; }
-        aside { height: 100vh; }
-        aside .top { display: flex; align-items: center; justify-content: space-between; margin-top: 1.4rem; }
-        aside .logo { display: flex; gap: 0.8rem; align-items: center; font-size: 1.2rem; font-weight: bold;}
-        aside .sidebar { display: flex; flex-direction: column; height: 86vh; position: relative; top: 3rem; }
-        aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-        aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-        aside .sidebar a:last-child { position: absolute; bottom: 2rem; width: 100%; }
-        aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-        aside .sidebar a.active:before { content: ''; width: 6px; height: 100%; background: var(--color-primary); }
-        aside .sidebar a:hover { color: var(--color-primary); }
-        aside .sidebar a:hover span { margin-left: 1rem; }
-        main { margin-top: 1.4rem; }
-        .card { background: var(--color-white); padding: var(--card-padding); border-radius: var(--card-border-radius); margin-top: 1rem; margin-bottom: 2rem; box-shadow: var(--box-shadow); transition: all 300ms ease; }
-        .card:hover { box-shadow: none; }
-        main h1 { margin-bottom: 0.8rem; color: var(--color-dark); }
-        .form-group { margin-bottom: 1.2rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: var(--color-dark);}
-        .form-control { width: 100%; padding: 0.8rem; border-radius: var(--border-radius-1); border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); font-family: 'Poppins', sans-serif; }
-        .form-control:focus { border-color: var(--color-primary); }
-        .btn-submit { background: var(--color-primary); color: white; padding: 0.8rem 2rem; border-radius: var(--border-radius-1); cursor: pointer; font-weight: bold; font-family: 'Poppins', sans-serif; font-size: 1rem; transition: 0.3s; width: 100%; }
-        .btn-submit:hover { background: #e67e00; }
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th { padding: 1rem; color: var(--color-dark); border-bottom: 2px solid var(--color-light);}
-        td { padding: 1rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); }
-        .photo-thumbnail { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; }
-        .status-pending { color: var(--color-danger); font-weight: bold; }
-        .status-inprogress { color: var(--color-warning); font-weight: bold; }
-        .status-resolved { color: var(--color-success); font-weight: bold; }
-        .status-flagged { color: var(--color-danger); font-weight: bold; font-style: italic; }
-        .right { margin-top: 1.4rem; }
-        .right .top { display: flex; justify-content: end; gap: 2rem; }
-        .right .theme-toggler { background: var(--color-light); display: flex; justify-content: space-between; align-items: center; height: 1.6rem; width: 4.2rem; cursor: pointer; border-radius: var(--border-radius-1); }
-        .right .theme-toggler span { font-size: 1.2rem; width: 50%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .right .theme-toggler span.active { background: var(--color-primary); color: white; border-radius: var(--border-radius-1); }
-        .right .profile { display: flex; gap: 2rem; text-align: right; }
-        @media screen and (max-width: 1200px) { .container { grid-template-columns: 7rem auto 23rem; } aside .sidebar h3 { display: none; } aside .sidebar a { width: 5.6rem; } }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <aside>
-            <div class="top">
-                <div class="logo">
-                    <img src="logokalapp.png" alt="Logo" style="width: 40px; height: 40px; border-radius: 8px;"> KAL<span style="color:var(--color-primary)">APP</span></div>
-            </div>
-            <div class="sidebar">
-                <a href="#" class="active"><span class="material-icons-sharp">add_circle_outline</span><h3>File Complaint</h3></a>
-                <a href="#"><span class="material-icons-sharp">history</span><h3>My History</h3></a>
-                <a href="#"><span class="material-icons-sharp">settings</span><h3>Settings</h3></a>
-                <a href="#" onclick="logout()"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
-            </div>
-        </aside>
+         { margin 0; padding 0; outline 0; border 0; text-decoration none; list-style none; box-sizing border-box; }
+        body { font-family 'Poppins', sans-serif; width 100vw; height 100vh; font-size 0.88rem; background var(--color-background); overflow-x hidden; color var(--color-dark); transition all 300ms ease; }
+        .container { display grid; width 96%; margin 0 auto; gap 1.8rem; grid-template-columns 14rem auto 23rem; }
+        aside { height 100vh; }
+        aside .top { display flex; align-items center; justify-content space-between; margin-top 1.4rem; }
+        aside .logo { display flex; gap 0.8rem; align-items center; font-size 1.2rem; font-weight bold;}
+        aside .sidebar { display flex; flex-direction column; height 86vh; position relative; top 3rem; }
+        aside .sidebar a { display flex; color var(--color-info-dark); margin-left 2rem; gap 1rem; align-items center; position relative; height 3.7rem; transition all 300ms ease; }
+        aside .sidebar a span { font-size 1.6rem; transition all 300ms ease; }
+        aside .sidebar alast-child { position absolute; bottom 2rem; width 100%; }
+        aside .sidebar a.active { background var(--color-light); color var(--color-primary); margin-left 0; }
+        aside .sidebar a.activebefore { content ''; width 6px; height 100%; background var(--color-primary); }
+        aside .sidebar ahover { color var(--color-primary); }
+        aside .sidebar ahover span { margin-left 1rem; }
+        
+        main { margin-top 1.4rem; }
+        .card { background var(--color-white); padding var(--card-padding); border-radius var(--card-border-radius); margin-top 1rem; margin-bottom 2rem; box-shadow var(--box-shadow); transition all 300ms ease; }
+        .cardhover { box-shadow none; }
+        main h1 { margin-bottom 0.8rem; color var(--color-dark); }
+        .form-group { margin-bottom 1.2rem; }
+        .form-group label { display block; margin-bottom 0.5rem; font-weight 500; color var(--color-dark);}
+        .form-control { width 100%; padding 0.8rem; border-radius var(--border-radius-1); border 1px solid var(--color-info-light); background var(--color-background); color var(--color-dark); font-family 'Poppins', sans-serif; }
+        .form-controlfocus { border-color var(--color-primary); }
+        .btn-submit { background var(--color-primary); color white; padding 0.8rem 2rem; border-radius var(--border-radius-1); cursor pointer; font-weight bold; font-family 'Poppins', sans-serif; font-size 1rem; transition 0.3s; width 100%; }
+        .btn-submithover { background #e67e00; }
+        
+        table { width 100%; border-collapse collapse; text-align left; }
+        th { padding 1rem; color var(--color-dark); border-bottom 2px solid var(--color-light);}
+        td { padding 1rem; border-bottom 1px solid var(--color-light); color var(--color-dark); }
+        .photo-thumbnail { width 50px; height 50px; border-radius 8px; object-fit cover; }
+        .status-pending { color var(--color-danger); font-weight bold; }
+        .status-inprogress { color var(--color-warning); font-weight bold; }
+        .status-resolved { color var(--color-success); font-weight bold; }
+        .status-flagged { color var(--color-danger); font-weight bold; font-style italic; }
+        
+        .right { margin-top 1.4rem; }
+        .right .top { display flex; flex-direction column; align-items flex-end; gap 1.5rem; }
+        .right .header-actions { display flex; align-items center; gap 1rem; }
+        .right .theme-toggler { background var(--color-light); display flex; justify-content space-between; align-items center; height 1.6rem; width 4.2rem; cursor pointer; border-radius var(--border-radius-1); }
+        .right .theme-toggler span { font-size 1.2rem; width 50%; height 100%; display flex; align-items center; justify-content center; }
+        .right .theme-toggler span.active { background var(--color-primary); color white; border-radius var(--border-radius-1); }
+        .right .profile { display flex; gap 1rem; text-align right; }
+        
+         --- SEARCH BOX STYLE --- 
+        .search-container { width 100%; background var(--color-white); padding 1rem; border-radius var(--border-radius-1); box-shadow var(--box-shadow); }
+        .search-box { display flex; gap 0.5rem; margin-top 0.5rem; }
+        .btn-search { background var(--color-primary); color white; padding 0.5rem; border-radius 5px; cursor pointer; display flex; align-items center; }
 
-        <main>
-            <h1>Submit a Complaint</h1>
-            <div class="card">
-                <form id="complaint-form">
-                    <div class="form-group">
-                        <label>Select Barangay</label>
-                        <select class="form-control" id="barangay" required>
-                            <option value="">-- Choose your Barangay --</option>
-                            <option value="Brgy 1">Barangay 1</option>
-                            <option value="Brgy 2">Barangay 2</option>
-                            <option value="Brgy 3">Barangay 3</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Issue Category</label>
-                        <select class="form-control" id="issue" required>
-                            <option value="">-- Choose Category --</option>
-                            <option value="Uncollected Garbage">Uncollected Garbage</option>
-                            <option value="Broken Streetlight">Broken Streetlight</option>
-                            <option value="Pothole/Road Damage">Pothole/Road Damage</option>
-                            <option value="Noise Disturbance">Noise Disturbance</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Detailed Description</label>
-                        <textarea class="form-control" id="description" rows="3" placeholder="Describe the issue in detail..." required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Upload Photo Evidence (Requires EXIF Location Data)</label>
-                        <input type="file" class="form-control" id="evidence" accept="image/*" required>
-                    </div>
-                    <div id="form-msg" style="margin-bottom: 15px; font-weight: 600; font-size: 13px; text-align: center;"></div>
-                    <button type="submit" class="btn-submit">Submit Complaint to LGU</button>
-                </form>
-            </div>
+         Approved Section Animation 
+        #approved-section { display none; margin-top 2rem; animation fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity 0; transform translateY(10px); } to { opacity 1; transform translateY(0); } }
 
-            <h1>My Previous Complaints</h1>
-            <div class="card" style="padding: 0;">
-                <div style="overflow-x: auto; padding: var(--card-padding);">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Photo</th>
-                                <th>Date & ID</th>
-                                <th>Issue & Location</th>
-                                <th>Status</th>
-                                <th>Feedback from LGU</th>
-                            </tr>
-                        </thead>
-                        <tbody id="history-body">
-                            <tr><td colspan="5" style="text-align:center;">Loading history...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </main>
+        @media screen and (max-width 1200px) { .container { grid-template-columns 7rem auto 23rem; } aside .sidebar h3 { display none; } aside .sidebar a { width 5.6rem; } }
+    style
+head
+body
+    div class=container
+        aside
+            div class=top
+                div class=logo
+                    img src=logokalapp.png alt=Logo style=width 40px; height 40px; border-radius 8px; KALspan style=colorvar(--color-primary)APPspandiv
+            div
+            div class=sidebar
+                a href=# class=activespan class=material-icons-sharpadd_circle_outlinespanh3File Complainth3a
+                a href=#span class=material-icons-sharphistoryspanh3My Historyh3a
+                a href=#span class=material-icons-sharpsettingsspanh3Settingsh3a
+                a href=# onclick=logout()span class=material-icons-sharplogoutspanh3Logouth3a
+            div
+        aside
 
-        <div class="right">
-            <div class="top">
-                <div class="theme-toggler" id="theme-toggler">
-                    <span class="material-icons-sharp active">light_mode</span>
-                    <span class="material-icons-sharp">dark_mode</span>
-                </div>
-                <div class="profile">
-                    <div class="info">
-                        <p>Hey, <b id="citizen-name-display">Citizen</b></p>
-                        <small class="text-muted">Verified Resident</small>
-                    </div>
-                    <div class="profile-photo"><img src="https://via.placeholder.com/40" style="border-radius:50%"></div>
-                </div>
-            </div>
-        </div>
-    </div>
+        main
+            h1Submit a Complainth1
+            div class=card
+                form id=complaint-form
+                    div class=form-group
+                        labelSelect Barangaylabel
+                        select class=form-control id=barangay required
+                            option value=-- Choose your Barangay --option
+                        select
+                    div
+                    div class=form-group
+                        labelIssue Categorylabel
+                        select class=form-control id=issue required
+                            option value=-- Choose Category --option
+                            option value=Uncollected GarbageUncollected Garbageoption
+                            option value=Broken StreetlightBroken Streetlightoption
+                            option value=PotholeRoad DamagePotholeRoad Damageoption
+                            option value=Noise DisturbanceNoise Disturbanceoption
+                        select
+                    div
+                    div class=form-group
+                        labelDetailed Descriptionlabel
+                        textarea class=form-control id=description rows=3 placeholder=Describe the issue in detail... requiredtextarea
+                    div
+                    div class=form-group
+                        labelUpload Photo Evidence (Requires EXIF Location Data)label
+                        input type=file class=form-control id=evidence accept=image required
+                    div
+                    div id=form-msg style=margin-bottom 15px; font-weight 600; font-size 13px; text-align center;div
+                    button type=submit class=btn-submitSubmit Complaint to LGUbutton
+                form
+            div
 
-    <script>
-        const BACKEND_URL = 'https://kalapp-system.onrender.com';
+            div id=approved-section
+                h1 id=approved-titleApproved Complaints in Barangayh1
+                div class=card style=padding 0;
+                    div style=overflow-x auto; padding var(--card-padding);
+                        table
+                            thead
+                                tr
+                                    thPhototh
+                                    thCategoryth
+                                    thComplainantth
+                                    thStatusth
+                                tr
+                            thead
+                            tbody id=approved-bodytbody
+                        table
+                    div
+                div
+            div
 
-        // --- Theme Toggler ---
-        const themeToggler = document.querySelector("#theme-toggler");
+            h1My Previous Complaintsh1
+            div class=card style=padding 0;
+                div style=overflow-x auto; padding var(--card-padding);
+                    table
+                        thead
+                            tr
+                                thPhototh
+                                thDate & IDth
+                                thIssue & Locationth
+                                thStatusth
+                                thFeedback from LGUth
+                            tr
+                        thead
+                        tbody id=history-body
+                            trtd colspan=5 style=text-aligncenter;Loading history...tdtr
+                        tbody
+                    table
+                div
+            div
+        main
+
+        div class=right
+            div class=top
+                div class=header-actions
+                    div class=theme-toggler id=theme-toggler
+                        span class=material-icons-sharp activelight_modespan
+                        span class=material-icons-sharpdark_modespan
+                    div
+                    div class=profile
+                        div class=info
+                            pHey, b id=citizen-name-displayCitizenbp
+                            small class=text-mutedVerified Residentsmall
+                        div
+                        div class=profile-photoimg src=httpsvia.placeholder.com40 style=border-radius50%div
+                    div
+                div
+
+                div class=search-container
+                    h3Search Barangay Activityh3
+                    div class=search-box
+                        input type=text id=search-input class=form-control placeholder=e.g. Barangay 1
+                        button class=btn-search onclick=searchBarangay()span class=material-icons-sharpsearchspanbutton
+                    div
+                    small style=cursorpointer; colorvar(--color-primary); margin-top5px; displayblock; onclick=resetSearch()Show allsmall
+                div
+            div
+        div
+    div
+
+    script
+        const BACKEND_URL = 'httpskalapp-system.onrender.com';
+        const username = localStorage.getItem('kalapp_username')  'Anonymous';
+        document.getElementById('citizen-name-display').innerText = username;
+
+         --- Loop para sa Barangay 1-188 ---
+        const bgySelect = document.getElementById('barangay');
+        for (let i = 1; i = 188; i++) {
+            const opt = document.createElement('option');
+            opt.value = `Barangay ${i}`;
+            opt.textContent = `Barangay ${i}`;
+            bgySelect.appendChild(opt);
+        }
+
+         --- Theme Toggler ---
+        const themeToggler = document.querySelector(#theme-toggler);
         const savedTheme = localStorage.getItem('kalapp-theme');
         if (savedTheme === 'dark') {
             document.body.classList.add('dark-theme');
-            themeToggler.querySelector('span:nth-child(1)').classList.remove('active');
-            themeToggler.querySelector('span:nth-child(2)').classList.add('active');
+            themeToggler.querySelector('spannth-child(1)').classList.remove('active');
+            themeToggler.querySelector('spannth-child(2)').classList.add('active');
         }
-        themeToggler.addEventListener('click', () => {
+        themeToggler.addEventListener('click', () = {
             document.body.classList.toggle('dark-theme');
-            themeToggler.querySelector('span:nth-child(1)').classList.toggle('active');
-            themeToggler.querySelector('span:nth-child(2)').classList.toggle('active');
-            localStorage.setItem('kalapp-theme', document.body.classList.contains('dark-theme') ? 'dark' : 'light');
+            themeToggler.querySelector('spannth-child(1)').classList.toggle('active');
+            themeToggler.querySelector('spannth-child(2)').classList.toggle('active');
+            localStorage.setItem('kalapp-theme', document.body.classList.contains('dark-theme')  'dark'  'light');
         });
 
-        // Get Username from Login
-        const username = localStorage.getItem('kalapp_username') || 'Anonymous';
-        document.getElementById('citizen-name-display').innerText = username;
+         --- Search Barangay for Approved Complaints ---
+        function searchBarangay() {
+            const query = document.getElementById('search-input').value.trim();
+            if(!query) return;
 
-        // --- Load History ---
+            const approvedSection = document.getElementById('approved-section');
+            const approvedBody = document.getElementById('approved-body');
+            const approvedTitle = document.getElementById('approved-title');
+
+            approvedSection.style.display = 'block';
+            approvedBody.innerHTML = `trtd colspan=4 style=text-aligncenter;Searching...tdtr`;
+            approvedTitle.innerText = `Approved Reports ${query}`;
+
+            fetch(`${BACKEND_URL}apicomplaints`)
+            .then(res = res.json())
+            .then(data = {
+                const approved = data.complaints.filter(c = 
+                    c.barangay.toLowerCase().includes(query.toLowerCase()) && 
+                    c.status === 'Resolved'
+                );
+
+                if (approved.length === 0) {
+                    approvedBody.innerHTML = `trtd colspan=4 style=text-aligncenter; padding1rem;No approved complaints found in this area.tdtr`;
+                } else {
+                    approvedBody.innerHTML = '';
+                    approved.forEach(c = {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            tdimg src=${c.imageUrl  'httpsvia.placeholder.com45'} class=photo-thumbnailtd
+                            td${c.category}td
+                            td${c.citizenName}td
+                            td class=status-resolvedRESOLVEDtd
+                        `;
+                        approvedBody.appendChild(row);
+                    });
+                }
+            })
+            .catch(() = approvedBody.innerHTML = `trtd colspan=4 style=text-aligncenter; colorred;Error fetching data.tdtr`);
+        }
+
+         --- Load My Personal History ---
         function loadMyHistory() {
-            fetch(`${BACKEND_URL}/api/complaints`)
-            .then(res => res.json())
-            .then(data => {
-                const tbody = document.getElementById('history-body');
-                
-                const myComplaints = data.complaints.filter(c => c.citizenName === username);
+            const tbody = document.getElementById('history-body');
+            tbody.innerHTML = `trtd colspan=5 style=text-aligncenter;Loading records...tdtr`;
+
+            fetch(`${BACKEND_URL}apicomplaints`)
+            .then(res = res.json())
+            .then(data = {
+                let myComplaints = data.complaints.filter(c = c.citizenName === username);
                 
                 if (myComplaints.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 2rem; color: var(--color-info-dark);">No complaints filed yet. Start by submitting one above!</td></tr>`;
+                    tbody.innerHTML = `trtd colspan=5 style=text-aligncenter; padding 2rem; color var(--color-info-dark);No complaints found.tdtr`;
                     return; 
                 }
                 
                 tbody.innerHTML = ''; 
-                myComplaints.forEach(c => {
+                myComplaints.forEach(c = {
                     const row = document.createElement('tr');
                     let statusClass = 'status-pending';
                     if (c.status === 'In Progress') statusClass = 'status-inprogress';
                     if (c.status === 'Resolved') statusClass = 'status-resolved';
                     if (c.status === 'Rejected & Flagged') statusClass = 'status-flagged';
                     
-                    const photo = c.imageUrl ? `<img src="${c.imageUrl}" class="photo-thumbnail">` : '<span style="color:gray; font-size:12px;">No Photo</span>';
-                    const feedback = c.lguNote ? `<i>"${c.lguNote}"</i>` : 'Waiting for review...';
-                    
-                    const formattedDate = new Date(c.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
+                    const photo = c.imageUrl  `img src=${c.imageUrl} class=photo-thumbnail`  'span style=colorgray; font-size12px;No Photospan';
+                    const feedback = c.lguNote  `i${c.lguNote}i`  'Waiting for review...';
+                    const formattedDate = new Date(c.createdAt).toLocaleDateString('en-PH', { month 'short', day 'numeric', year 'numeric' });
 
                     row.innerHTML = `
-                        <td>${photo}</td>
-                        <td>${formattedDate}<br><small style="font-weight:bold; color:var(--color-primary)">${c.trackingId}</small></td>
-                        <td><strong>${c.category}</strong><br><small>${c.barangay}</small></td>
-                        <td class="${statusClass}">${c.status || 'Pending'}</td>
-                        <td>${feedback}</td>
+                        td${photo}td
+                        td${formattedDate}brsmall style=font-weightbold; colorvar(--color-primary)${c.trackingId}smalltd
+                        tdstrong${c.category}strongbrsmall${c.barangay}smalltd
+                        td class=${statusClass}${c.status  'Pending'}td
+                        td${feedback}td
                     `;
                     tbody.appendChild(row);
                 });
             })
-            .catch(() => document.getElementById('history-body').innerHTML = `<tr><td colspan="5" style="text-align:center; color: red;">Error loading history. Check connection.</td></tr>`);
+            .catch(() = document.getElementById('history-body').innerHTML = `trtd colspan=5 style=text-aligncenter; color red;Error loading history.tdtr`);
         }
 
-        // --- Submit New Complaint ---
+        function resetSearch() {
+            document.getElementById('search-input').value = '';
+            document.getElementById('approved-section').style.display = 'none';
+            loadMyHistory();
+        }
+
         document.getElementById('complaint-form').addEventListener('submit', function(e) {
             e.preventDefault();
             const fileInput = document.getElementById('evidence');
@@ -220,42 +313,23 @@
             if (fileInput.files.length === 0) return;
             const file = fileInput.files[0];
             
-            submitBtn.innerText = "Scanning Security Data & AI...";
-            submitBtn.disabled = true; formMsg.innerText = "";
+            submitBtn.innerText = Scanning Security Data & AI...;
+            submitBtn.disabled = true; formMsg.innerText = ;
 
             EXIF.getData(file, function() {
-                const make = EXIF.getTag(this, "Make");
-                const model = EXIF.getTag(this, "Model");
-                const dateTakenStr = EXIF.getTag(this, "DateTimeOriginal");
+                const make = EXIF.getTag(this, Make);
+                const model = EXIF.getTag(this, Model);
 
-                // 🔒 RESTORED SHIELD: Blocks screenshots and downloaded images
-                if (!make || !model) {
-                    formMsg.style.color = "var(--color-danger)";
-                    formMsg.innerText = "❌ Security Check Failed: This appears to be a screenshot or downloaded image. Please take a real photo.";
-                    submitBtn.innerText = "Submit Complaint to LGU"; 
+                if (!make  !model) {
+                    formMsg.style.color = var(--color-danger);
+                    formMsg.innerText = ❌ Security Check Failed Please take a real photo.;
+                    submitBtn.innerText = Submit Complaint to LGU; 
                     submitBtn.disabled = false;
                     return; 
                 }
 
-                // Time Window Check (Ensures photo is < 48 hours old)
-                if (dateTakenStr) {
-                    const dateParts = dateTakenStr.split(" ")[0].split(":");
-                    const timeParts = dateTakenStr.split(" ")[1].split(":");
-                    const photoDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2], timeParts[0], timeParts[1], timeParts[2]);
-                    
-                    const hoursOld = (new Date() - photoDate) / (1000 * 60 * 60);
-
-                    if (hoursOld > 48) {
-                        formMsg.style.color = "var(--color-danger)";
-                        formMsg.innerText = `❌ Photo too old. Taken ${Math.round(hoursOld)} hours ago. Required: < 48 hours.`;
-                        submitBtn.innerText = "Submit Complaint to LGU"; 
-                        submitBtn.disabled = false;
-                        return;
-                    }
-                }
-
-                formMsg.style.color = "var(--color-success)";
-                formMsg.innerText = "✅ Authentic Photo Verified! AI scanning in progress (this may take a few seconds)...";
+                formMsg.style.color = var(--color-success);
+                formMsg.innerText = ✅ Authentic Photo Verified! AI scanning in progress...;
                 
                 const formData = new FormData();
                 formData.append('username', username);
@@ -264,39 +338,26 @@
                 formData.append('description', document.getElementById('description').value);
                 formData.append('evidence', file); 
 
-                fetch(`${BACKEND_URL}/api/complaints`, {
-                    method: 'POST', 
-                    body: formData
+                fetch(`${BACKEND_URL}apicomplaints`, {
+                    method 'POST', 
+                    body formData
                 })
-                .then(async res => {
-                    // 🔧 FIX: Check if the server crashed and returned HTML instead of JSON
-                    const contentType = res.headers.get("content-type");
-                    if (!contentType || !contentType.includes("application/json")) {
-                        throw new Error("Server timeout or crash. The AI might be taking too long.");
-                    }
-                    
+                .then(async res = {
                     const data = await res.json();
-                    if (!res.ok || !data.success) {
-                        throw new Error(data.message || "Upload Failed");
-                    }
+                    if (!res.ok  !data.success) throw new Error(data.message  Upload Failed);
                     return data;
                 })
-                .then(data => {
-                    formMsg.style.color = "var(--color-success)";
-                    formMsg.innerText = "✅ Complaint Submitted & Verified by AI!";
+                .then(data = {
+                    formMsg.innerText = ✅ Complaint Submitted & Verified by AI!;
                     document.getElementById('complaint-form').reset();
                     loadMyHistory(); 
                 })
-                .catch((err) => {
-                    formMsg.style.color = "var(--color-danger)";
+                .catch((err) = {
+                    formMsg.style.color = var(--color-danger);
                     formMsg.innerText = err.message;
-
-                    if(err.message.includes("BLOCKED")) {
-                        setTimeout(() => logout(), 4000);
-                    }
                 })
-                .finally(() => { 
-                    submitBtn.innerText = "Submit Complaint to LGU"; 
+                .finally(() = { 
+                    submitBtn.innerText = Submit Complaint to LGU; 
                     submitBtn.disabled = false; 
                 });
             });
@@ -304,10 +365,10 @@
 
         function logout() { 
             localStorage.removeItem('kalapp_username'); 
-            window.location.href = '/login.html'; 
+            window.location.href = 'login.html'; 
         }
         
         loadMyHistory();
-    </script>
-</body>
-</html>
+    script
+body
+html
