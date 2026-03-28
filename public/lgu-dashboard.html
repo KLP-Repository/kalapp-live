@@ -53,23 +53,23 @@
 
       /* STATS CARDS [cite: 197-200] */
       .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
-      .insights > div { background: var(--card-bg); border: var(--glass-border); padding: 1.5rem; border-radius: 20px; box-shadow: var(--box-shadow); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-      .insights > div:hover { transform: translateY(-8px); border-color: var(--color-primary); box-shadow: 0 12px 40px rgba(127, 34, 254, 0.2); }
+      .insights > div { background: var(--card-bg); border: var(--glass-border); padding: 1.5rem; border-radius: 20px; box-shadow: var(--box-shadow); transition: 0.3s ease; }
+      .insights > div:hover { transform: translateY(-5px); border-color: var(--color-primary); box-shadow: 0 12px 40px rgba(127, 34, 254, 0.2); }
       .insights h3 { color: var(--color-info-dark); font-size: 0.85rem; margin-top: 1rem; }
       .insights .number { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; letter-spacing: -1px; }
 
       /* --- ENHANCED GRAPH SECTION --- */
-      .graph-section { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+      .graph-section { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-top: 2rem; }
       .graph-card { background: var(--card-bg); border: var(--glass-border); padding: 1.8rem; border-radius: 24px; box-shadow: var(--box-shadow); position: relative; overflow: hidden; }
-      .graph-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--color-dark); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+      .graph-card h2 { font-size: 1rem; margin-bottom: 1.5rem; color: var(--color-info-dark); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
       .graph-card h2::after { content: 'Real-time'; font-size: 0.6rem; background: var(--color-success); color: white; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
-      canvas { width: 100% !important; height: 300px !important; }
+      canvas { width: 100% !important; height: 250px !important; }
 
       /* MODERN TABLE UI [cite: 207-210] */
       .recent-reports { margin-top: 2rem; background: var(--card-bg); border: var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: var(--box-shadow); }
       table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
       table thead th { text-align: left; padding: 1rem; color: var(--color-info-dark); font-size: 0.75rem; text-transform: uppercase; }
-      table tbody tr { background: rgba(255, 255, 255, 0.02); transition: 0.3s; }
+      table tbody tr { background: rgba(255, 255, 255, 0.02); transition: 0.3s; cursor: pointer; }
       table tbody tr:hover { background: rgba(255, 255, 255, 0.05); transform: scale(1.01); }
       table td { padding: 1.2rem 1rem; }
       table td:first-child { border-radius: 15px 0 0 15px; }
@@ -81,11 +81,30 @@
       .status-inprogress { background: rgba(254, 154, 0, 0.1); color: var(--color-warning); }
       .status-resolved { background: rgba(0, 188, 125, 0.1); color: var(--color-success); }
 
-      /* RESPONSIVE CONFIG */
+      /* --- MODAL DESIGN --- */
+      .modal { display: none; position: fixed; z-index: 2000; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(5px); }
+      .modal-content { 
+          background: #18181b; 
+          margin: 5% auto; 
+          padding: 2rem; 
+          width: 90%; 
+          max-width: 600px; 
+          border-radius: 24px; 
+          border: 1px solid rgba(255,255,255,0.1); 
+          position: relative;
+          animation: fadeInUp 0.4s ease;
+      }
+      .close-btn { position: absolute; top: 20px; right: 20px; color: #9f9fa9; cursor: pointer; font-size: 2rem; }
+      #modal-img { width: 100%; border-radius: 15px; margin-top: 1rem; max-height: 300px; object-fit: cover; border: 1px solid rgba(255,255,255,0.1); }
+      .modal-info { margin-top: 1.5rem; }
+      .modal-info h2 { color: var(--color-primary); margin-bottom: 0.5rem; }
+      .modal-info p { color: #9f9fa9; line-height: 1.6; }
+
+      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
       @media screen and (max-width: 1024px) {
           .container { grid-template-columns: 1fr; }
-          aside { display: none; }
-          .insights { grid-template-columns: repeat(2, 1fr); }
+          aside { display: none; } 
           .graph-section { grid-template-columns: 1fr; }
       }
     </style>
@@ -114,7 +133,7 @@
                         <p style="font-weight: 600;">Admin User</p>
                         <small class="text-muted" id="lgu-name-display">LGU Officer</small>
                     </div>
-                    <div class="profile-photo"><img src="https://images.unsplash.com/photo-1740252117013-4fb21771e7ca?q=80&w=100" style="width:45px; border-radius:50%; border:2px solid var(--color-primary);"></div>
+                    <div class="profile-photo"><img src="https://via.placeholder.com/45" style="border-radius:50%; border:2px solid var(--color-primary);"></div>
                 </div>
             </div>
 
@@ -143,11 +162,15 @@
 
             <div class="graph-section">
                 <div class="graph-card">
-                    <h2>Weekly Activity Trend</h2>
+                    <h2>Daily Activity</h2>
+                    <canvas id="activityChart"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h2>Weekly Trend</h2>
                     <canvas id="weeklyChart"></canvas>
                 </div>
                 <div class="graph-card">
-                    <h2>Complaint Categories</h2>
+                    <h2>Case Status</h2>
                     <canvas id="categoryChart"></canvas>
                 </div>
             </div>
@@ -169,7 +192,7 @@
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
-                            <tr><td colspan="6" style="text-align:center; padding:2rem; opacity:0.5;">Loading components...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; padding:2rem; opacity:0.5;">Connecting...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -177,73 +200,63 @@
         </main>
     </div>
 
+    <div id="reportModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" onclick="closeModal()">&times;</span>
+            <div class="modal-info">
+                <h2 id="modal-id">#KAL-0000</h2>
+                <p><strong>Citizen:</strong> <span id="modal-citizen"></span></p>
+                <p><strong>Issue:</strong> <span id="modal-issue"></span></p>
+                <img id="modal-img" src="" alt="Evidence Photo">
+                <p style="margin-top: 1rem;"><strong>Description:</strong></p>
+                <p id="modal-desc"></p>
+                <div id="modal-actions" style="margin-top: 1.5rem; display: flex; gap: 10px;">
+                    </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         const BACKEND_URL = 'https://kalapp-system.onrender.com';
         const currentAdminName = localStorage.getItem('kalapp_username') || 'Official';
         document.getElementById('lgu-name-display').innerText = currentAdminName;
 
-        let weeklyChart, categoryChart;
+        let activityChart, weeklyChart, categoryChart;
 
-        // Custom Plugin para sa Gradient Background ng Line Chart
         function initCharts(stats, categories) {
-            const ctx1 = document.getElementById('weeklyChart').getContext('2d');
-            const ctx2 = document.getElementById('categoryChart').getContext('2d');
+            const ctxActivity = document.getElementById('activityChart').getContext('2d');
+            const ctxWeekly = document.getElementById('weeklyChart').getContext('2d');
+            const ctxCategory = document.getElementById('categoryChart').getContext('2d');
 
-            // Line Chart Gradient
-            const gradientStroke = ctx1.createLinearGradient(0, 230, 0, 50);
-            gradientStroke.addColorStop(1, 'rgba(127, 34, 254, 0.2)');
-            gradientStroke.addColorStop(0.2, 'rgba(127, 34, 254, 0.0)');
-            gradientStroke.addColorStop(0, 'rgba(127, 34, 254, 0)');
-
-            weeklyChart = new Chart(ctx1, {
-                type: 'line',
+            activityChart = new Chart(ctxActivity, {
+                type: 'bar',
                 data: {
-                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
-                    datasets: [{
-                        label: 'Reports',
-                        data: [12, 19, 15, 25, 22, 30, 10],
-                        borderColor: '#7f22fe',
-                        borderWidth: 3,
-                        pointBackgroundColor: '#7f22fe',
-                        pointBorderColor: 'rgba(255,255,255,0.8)',
-                        pointHoverRadius: 6,
-                        tension: 0.4,
-                        fill: true,
-                        backgroundColor: gradientStroke
-                    }]
+                    labels: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+                    datasets: [{ label: 'Reports', data: [12, 19, 13, 25, 22, 18, 10], backgroundColor: '#7f22fe', borderRadius: 5, barThickness: 15 }]
                 },
-                options: {
-                    animation: { duration: 2000, easing: 'easeOutQuart' },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false } },
-                    scales: {
-                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9f9fa9' } },
-                        x: { grid: { display: false }, ticks: { color: '#9f9fa9' } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9f9fa9' } }, x: { grid: { display: false }, ticks: { color: '#9f9fa9' } } } }
             });
 
-            categoryChart = new Chart(ctx2, {
+            const lineGradient = ctxWeekly.createLinearGradient(0, 0, 0, 300);
+            lineGradient.addColorStop(0, 'rgba(127, 34, 254, 0.3)');
+            lineGradient.addColorStop(1, 'rgba(127, 34, 254, 0)');
+
+            weeklyChart = new Chart(ctxWeekly, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{ data: [30, 45, 35, 55, 40, 65], borderColor: '#7f22fe', backgroundColor: lineGradient, fill: true, tension: 0.4, pointRadius: 0 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { display: false }, x: { grid: { display: false }, ticks: { color: '#9f9fa9' } } } }
+            });
+
+            categoryChart = new Chart(ctxCategory, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(categories),
-                    datasets: [{
-                        data: Object.values(categories),
-                        backgroundColor: ['#7f22fe', '#fe9a00', '#00bc7d', '#ff6467'],
-                        borderWidth: 0,
-                        hoverOffset: 15
-                    }]
+                    labels: ['Pending', 'Progress', 'Done'],
+                    datasets: [{ data: [25, 32, 43], backgroundColor: ['#ff6467', '#fe9a00', '#00bc7d'], borderWidth: 0, hoverOffset: 10 }]
                 },
-                options: {
-                    animation: { animateRotate: true, animateScale: true },
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '75%',
-                    plugins: {
-                        legend: { position: 'bottom', labels: { color: '#9f9fa9', padding: 20, font: { family: 'Poppins', size: 11 } } }
-                    }
-                }
+                options: { responsive: true, maintainAspectRatio: false, cutout: '80%', plugins: { legend: { position: 'bottom', labels: { color: '#9f9fa9', font: { size: 10 } } } } }
             });
         }
 
@@ -267,18 +280,43 @@
                 tableBody.innerHTML = '';
                 complaints.filter(c => filterValue === 'All' || c.status === filterValue).slice(0, 8).forEach(c => {
                     const row = document.createElement('tr');
-                    row.style.animation = "fadeIn 0.5s ease forwards";
+                    // GINAWANG CLICKABLE ANG ROW [cite: 272-274]
+                    row.onclick = () => openReportDetails(c);
                     row.innerHTML = `
                         <td style="font-weight:600; color:var(--color-primary);">${c.trackingId}</td>
                         <td>${new Date(c.createdAt).toLocaleDateString()}</td>
                         <td>${c.citizenName || 'Guest'}</td>
                         <td>${c.category}</td>
                         <td><span class="status-pill status-${c.status.toLowerCase().replace(/\s/g, '')}">${c.status}</span></td>
-                        <td><button onclick="updateStatus('${c.trackingId}', 'Resolved')" style="background:var(--color-primary); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.7rem; transition: 0.3s;">Resolve</button></td>
+                        <td><button onclick="event.stopPropagation(); updateStatus('${c.trackingId}', 'Resolved')" style="background:var(--color-primary); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.7rem;">Resolve</button></td>
                     `;
                     tableBody.appendChild(row);
                 });
-            } catch (err) { console.error("Database error:", err); }
+            } catch (err) { console.error(err); }
+        }
+
+        // --- MODAL LOGIC [cite: 248, 286] ---
+        function openReportDetails(complaint) {
+            document.getElementById('modal-id').innerText = complaint.trackingId;
+            document.getElementById('modal-citizen').innerText = complaint.citizenName || 'Anonymous';
+            document.getElementById('modal-issue').innerText = complaint.category;
+            document.getElementById('modal-desc').innerText = complaint.description || 'No description provided.';
+            
+            const img = document.getElementById('modal-img');
+            const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : 'https://via.placeholder.com/400x200?text=No+Photo+Evidence';
+            img.src = fullImageUrl;
+
+            const actionBox = document.getElementById('modal-actions');
+            actionBox.innerHTML = '';
+            if (complaint.status !== 'Resolved') {
+                actionBox.innerHTML = `<button onclick="updateStatus('${complaint.trackingId}', 'Resolved'); closeModal()" style="background:var(--color-success); color:white; padding:10px 20px; border-radius:12px; cursor:pointer; font-weight:600;">Resolve Now</button>`;
+            }
+
+            document.getElementById('reportModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('reportModal').style.display = 'none';
         }
 
         async function updateStatus(id, status) {
