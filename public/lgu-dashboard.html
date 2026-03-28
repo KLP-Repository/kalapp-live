@@ -6,186 +6,170 @@
     <title>Kalapp - LGU Official Dashboard</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
       :root {
-        --color-primary: #ff8c00;
-        --color-danger: #ff7782; --color-success: #41f1b6; --color-warning: #ffbb55;
-        --color-white: #fff; --color-info-dark: #7d8da1; --color-info-light: #dce1eb; --color-dark: #363949;
-        --color-light: rgba(132, 139, 200, 0.18);
-        --color-background: #f6f6f9;
-        --card-border-radius: 2rem; --border-radius-1: 0.4rem; --card-padding: 1.8rem; --box-shadow: 0 2rem 3rem var(--color-light);
+        --color-primary: #7f22fe; /* Violet accent base sa iyong React code */
+        --color-danger: #ff6467; --color-success: #00bc7d; --color-warning: #fe9a00;
+        --color-white: rgba(255, 255, 255, 0.05); /* Premium Glass Base */
+        --color-info-dark: #9f9fa9; --color-dark: #f8fafc;
+        --color-background: #09090b; /* Zinc-950 equivalent */
+        --card-bg: #18181b; /* Zinc-900 equivalent */
+        --glass-border: 1px solid rgba(255, 255, 255, 0.1);
+        --box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
       }
-      body.dark {
-          --color-background: #181a1e;
-          --color-white: #202528; 
-          --color-dark: #edeffd;
-          --color-light: rgba(0, 0, 0, 0.4); 
-          --box-shadow: 0 2rem 3rem var(--color-light);
-      }
-      .mode-toggle-btn {
-          background: var(--color-light); border: 1px solid var(--color-info-light); color: var(--color-dark);
-          padding: 8px 12px; border-radius: 10px; cursor: pointer; font-size: 1.2rem; transition: all 300ms ease;
-          display: flex; align-items: center; justify-content: center;
-      }
-      .mode-toggle-btn:hover { background: var(--color-primary); color: white; transform: scale(1.05); }
+
       * { margin: 0; padding: 0; outline: 0; border: 0; text-decoration: none; list-style: none; box-sizing: border-box; }
-      body { font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; background: var(--color-background); overflow-x: hidden; color: var(--color-dark); transition: all 300ms ease; }
-      .container { display: grid; width: 96%; margin: 0 auto; gap: 1.8rem; grid-template-columns: 14rem auto 23rem; }
-      aside { height: 100vh; }
-      aside .top { display: flex; align-items: center; justify-content: space-between; margin-top: 1.4rem; }
-      aside .logo { display: flex; gap: 0.8rem; align-items: center; }
-      aside .sidebar { display: flex; flex-direction: column; height: 86vh; position: relative; top: 3rem; }
-      aside .sidebar a { display: flex; color: var(--color-info-dark); margin-left: 2rem; gap: 1rem; align-items: center; position: relative; height: 3.7rem; transition: all 300ms ease; }
-      aside .sidebar a span { font-size: 1.6rem; transition: all 300ms ease; }
-      aside .sidebar a:last-child { position: absolute; bottom: 2rem; width: 100%; }
-      aside .sidebar a.active { background: var(--color-light); color: var(--color-primary); margin-left: 0; }
-      aside .sidebar a.active:before { content: ''; width: 6px; height: 100%; background: var(--color-primary); }
-      aside .sidebar a:hover { color: var(--color-primary); }
-      aside .sidebar a:hover span { margin-left: 1rem; }
-      main { margin-top: 1.4rem; }
-      main .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6rem; } 
-      main .insights > div { background: var(--color-white); padding: var(--card-padding); border-radius: var(--card-border-radius); margin-top: 1rem; box-shadow: var(--box-shadow); transition: all 300ms ease; }
-      main .insights > div:hover { box-shadow: none; }
-      main .insights .number { font-size: 2rem; font-weight: 700; margin-top: 0.5rem; }
-      .recent-reports { margin-top: 2rem; }
-      .recent-reports h2 { margin-bottom: 0.8rem; }
-      .controls-bar { display: flex; justify-content: space-between; margin-bottom: 1rem; align-items: center; }
-      .controls-bar select { padding: 0.5rem; border-radius: var(--border-radius-1); background: var(--color-white); color: var(--color-dark); border: 1px solid var(--color-info-light); font-family: 'Poppins', sans-serif;}
-      .btn-download { background: var(--color-primary); color: white; padding: 0.6rem 1.2rem; border-radius: var(--border-radius-1); cursor: pointer; font-family: 'Poppins', sans-serif; font-weight: 500;}
-      
-      /* Table & Row Styling */
-      .recent-reports table { background: var(--color-white); width: 100%; border-radius: var(--card-border-radius); padding: var(--card-padding); text-align: left; box-shadow: var(--box-shadow); transition: all 300ms ease; border-collapse: collapse; overflow: hidden; }
-      .recent-reports table:hover { box-shadow: none; }
-      table th { padding: 1rem; color: var(--color-dark); border-bottom: 2px solid var(--color-light); }
-      table tbody td { padding: 1rem; border-bottom: 1px solid var(--color-light); color: var(--color-dark-variant); vertical-align: top; }
-      
-      /* 🌶️ SPICE: Critical Row Highlight */
-      tr.critical-row {
-          background-color: rgba(239, 68, 68, 0.04);
-      }
-      tr.critical-row td:first-child {
-          border-left: 4px solid #ef4444;
-      }
-      body.dark tr.critical-row {
-          background-color: rgba(239, 68, 68, 0.1);
+
+      body { 
+          font-family: 'Poppins', sans-serif; width: 100vw; height: 100vh; font-size: 0.88rem; 
+          background-color: var(--color-background); color: var(--color-dark); overflow-x: hidden;
+          transition: all 0.3s ease;
       }
 
-      .photo-thumbnail { width: 60px; height: 60px; border-radius: 8px; object-fit: cover; cursor: pointer; transition: transform 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
-      .photo-thumbnail:hover { transform: scale(1.1); }
-      
-      /* Inputs & Buttons Refined */
-      .note-input { width: 100%; padding: 0.5rem; border-radius: var(--border-radius-1); border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); font-family: 'Poppins', sans-serif; margin-bottom: 0.5rem; }
-      .compact-select { padding: 0.2rem; font-size: 0.75rem; border-radius: 4px; border: 1px solid var(--color-info-light); background: var(--color-background); color: var(--color-dark); }
-      
-      .action-btn { padding: 0.4rem 0.6rem; border-radius: 4px; cursor: pointer; color: white; font-weight: 500; font-family: 'Poppins', sans-serif; font-size: 0.75rem; border: none; transition: opacity 0.2s; }
-      .action-btn:hover { opacity: 0.8; }
-      .btn-in-progress { background: var(--color-warning); color: #000; }
-      .btn-resolve { background: var(--color-success); color: #000; }
-      .btn-reject { background: var(--color-danger); }
-      .btn-disabled { background: var(--color-info-dark); cursor: not-allowed; opacity: 0.5; }
-      .btn-tiny { padding: 0.2rem 0.4rem; font-size: 0.65rem; background: var(--color-info-dark); margin-left: 4px; }
-      
-      .action-row { display: flex; gap: 0.4rem; }
-
-      /* Status Texts */
-      .status-text { font-weight: bold; padding: 4px 8px; border-radius: 12px; font-size: 0.8rem; display: inline-block; }
-      .status-pending { color: var(--color-danger); background: rgba(255, 119, 130, 0.1); }
-      .status-inprogress { color: var(--color-warning); background: rgba(255, 187, 85, 0.1); }
-      .status-resolved { color: var(--color-success); background: rgba(65, 241, 182, 0.1); }
-      .status-flagged { color: var(--color-info-dark); background: rgba(125, 141, 161, 0.1); text-decoration: line-through; }
-
-      .modal { display: none; position: fixed; z-index: 1000; padding-top: 5vh; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.85); overflow: auto; }
-      .modal-content { margin: auto; display: block; max-width: 90%; max-height: 85vh; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); object-fit: contain; }
-      .close-modal { position: absolute; top: 20px; right: 40px; color: #f1f1f1; font-size: 45px; font-weight: bold; cursor: pointer; transition: 0.2s; }
-      .close-modal:hover { color: var(--color-danger); }
-      
-      @keyframes pulse-critical {
-          0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-          70% { box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
-          100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      /* --- LAYOUT STRUCTURE --- */
+      .container { 
+          display: grid; 
+          width: 100%; 
+          margin: 0 auto; 
+          grid-template-columns: 16rem auto; 
+          min-height: 100vh;
       }
 
-      @media screen and (max-width: 1200px) { 
-          .container { grid-template-columns: 7rem auto 23rem; } 
-          aside .sidebar h3 { display: none; } 
-          aside .sidebar a { width: 5.6rem; } 
-          main .insights { grid-template-columns: repeat(2, 1fr); } 
+      /* SIDEBAR STYLE [cite: 184-195] */
+      aside { background: var(--card-bg); border-right: var(--glass-border); padding: 2rem 1.5rem; display: flex; flex-direction: column; gap: 2rem; }
+      aside .logo { display: flex; align-items: center; gap: 0.8rem; }
+      aside .logo .icon-box { background: var(--color-primary); padding: 5px; border-radius: 50%; display: flex; }
+      aside .sidebar { display: flex; flex-direction: column; gap: 0.5rem; flex-grow: 1; }
+      aside .sidebar a { display: flex; color: var(--color-info-dark); gap: 1rem; align-items: center; height: 3.5rem; transition: 0.3s ease; border-radius: 12px; padding-left: 1rem; }
+      aside .sidebar a.active { background: rgba(127, 34, 254, 0.15); color: var(--color-primary); font-weight: 600; }
+      aside .sidebar a:hover { color: var(--color-primary); background: rgba(255, 255, 255, 0.03); transform: translateX(5px); }
+
+      /* MAIN CONTENT [cite: 196] */
+      main { padding: 2rem; overflow-y: auto; }
+      .header-area { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+      .profile-info { display: flex; align-items: center; gap: 1rem; text-align: right; }
+      .profile-photo img { width: 45px; border-radius: 50%; border: 2px solid var(--color-primary); }
+
+      /* STATS CARDS [cite: 197-200] */
+      .insights { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5rem; }
+      .insights > div { background: var(--card-bg); border: var(--glass-border); padding: 1.5rem; border-radius: 20px; box-shadow: var(--box-shadow); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+      .insights > div:hover { transform: translateY(-8px); border-color: var(--color-primary); box-shadow: 0 12px 40px rgba(127, 34, 254, 0.2); }
+      .insights h3 { color: var(--color-info-dark); font-size: 0.85rem; margin-top: 1rem; }
+      .insights .number { font-size: 2rem; font-weight: 700; margin-top: 0.3rem; letter-spacing: -1px; }
+
+      /* --- ENHANCED GRAPH SECTION --- */
+      .graph-section { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; margin-top: 2rem; }
+      .graph-card { background: var(--card-bg); border: var(--glass-border); padding: 1.8rem; border-radius: 24px; box-shadow: var(--box-shadow); position: relative; overflow: hidden; }
+      .graph-card h2 { font-size: 1.1rem; margin-bottom: 1.5rem; color: var(--color-dark); font-weight: 600; display: flex; justify-content: space-between; align-items: center; }
+      .graph-card h2::after { content: 'Real-time'; font-size: 0.6rem; background: var(--color-success); color: white; padding: 2px 8px; border-radius: 10px; text-transform: uppercase; }
+      canvas { width: 100% !important; height: 300px !important; }
+
+      /* MODERN TABLE UI [cite: 207-210] */
+      .recent-reports { margin-top: 2rem; background: var(--card-bg); border: var(--glass-border); border-radius: 20px; padding: 1.5rem; box-shadow: var(--box-shadow); }
+      table { width: 100%; border-collapse: separate; border-spacing: 0 10px; }
+      table thead th { text-align: left; padding: 1rem; color: var(--color-info-dark); font-size: 0.75rem; text-transform: uppercase; }
+      table tbody tr { background: rgba(255, 255, 255, 0.02); transition: 0.3s; }
+      table tbody tr:hover { background: rgba(255, 255, 255, 0.05); transform: scale(1.01); }
+      table td { padding: 1.2rem 1rem; }
+      table td:first-child { border-radius: 15px 0 0 15px; }
+      table td:last-child { border-radius: 0 15px 15px 0; }
+
+      /* STATUS BADGES [cite: 218-221] */
+      .status-pill { padding: 6px 14px; border-radius: 10px; font-size: 0.7rem; font-weight: 700; }
+      .status-pending { background: rgba(255, 100, 103, 0.1); color: var(--color-danger); }
+      .status-inprogress { background: rgba(254, 154, 0, 0.1); color: var(--color-warning); }
+      .status-resolved { background: rgba(0, 188, 125, 0.1); color: var(--color-success); }
+
+      /* RESPONSIVE CONFIG */
+      @media screen and (max-width: 1024px) {
+          .container { grid-template-columns: 1fr; }
+          aside { display: none; }
+          .insights { grid-template-columns: repeat(2, 1fr); }
+          .graph-section { grid-template-columns: 1fr; }
       }
     </style>
 </head>
 <body>
     <div class="container">
         <aside>
-            <div class="top">
-                <div class="logo">
-                    <span class="material-icons-sharp" style="color:var(--color-primary); font-size: 2rem;">analytics</span>
-                    <h2 style="font-weight: 800; color: var(--color-dark);">KAL<span style="color:var(--color-primary)">APP</span></h2>
-                </div>
-            </div>
-            <div class="top">
-                <button id="mode-toggle" class="mode-toggle-btn">🌓</button>
-                <div class="profile">
-                    <div class="info">
-                        <p>Hey, <b id="lgu-name-display">Admin</b></p>
-                        <small class="text-muted">LGU Official</small>
-                    </div>
-                    <div class="profile-photo"><img src="https://via.placeholder.com/40" style="border-radius:50%"></div>
-                </div>
+            <div class="logo">
+                <div class="icon-box"><span class="material-icons-sharp" style="color:white; font-size: 1.2rem;">zap</span></div>
+                <h2 style="font-weight: 800; letter-spacing: -1px;">Kalapp</h2>
             </div>
             <div class="sidebar">
-                <a href="#" class="active"><span class="material-icons-sharp">grid_view</span><h3>Dashboard</h3></a>
-                <a href="#" onclick="logout()"><span class="material-icons-sharp">logout</span><h3>Logout</h3></a>
+                <a href="#" class="active"><span class="material-icons-sharp">grid_view</span>Dashboard</a>
+                <a href="#"><span class="material-icons-sharp">bar_chart</span>Analytics</a>
+                <a href="#"><span class="material-icons-sharp">description</span>Reports</a>
+                <a href="#"><span class="material-icons-sharp">people</span>Residents</a>
+                <a href="#" onclick="logout()" style="margin-top: auto;"><span class="material-icons-sharp">logout</span>Logout</a>
             </div>
         </aside>
 
         <main>
-            <h1>LGU Dashboard</h1>
+            <div class="header-area">
+                <h1>LGU Dashboard</h1>
+                <div class="profile-info">
+                    <div class="info">
+                        <p style="font-weight: 600;">Admin User</p>
+                        <small class="text-muted" id="lgu-name-display">LGU Officer</small>
+                    </div>
+                    <div class="profile-photo"><img src="https://images.unsplash.com/photo-1740252117013-4fb21771e7ca?q=80&w=100" style="width:45px; border-radius:50%; border:2px solid var(--color-primary);"></div>
+                </div>
+            </div>
+
             <div class="insights">
                 <div>
-                    <span class="material-icons-sharp" style="background:var(--color-primary); color:white; padding: 0.5rem; border-radius: 50%;">assessment</span>
-                    <h3>Total Today</h3><div class="number" id="count-total">0</div>
+                    <span class="material-icons-sharp" style="color:var(--color-primary); background:rgba(127,34,254,0.1); padding:10px; border-radius:12px;">file_copy</span>
+                    <h3>Total Reports</h3>
+                    <div class="number" id="count-total">0</div>
                 </div>
                 <div>
-                    <span class="material-icons-sharp" style="background:var(--color-danger); color:white; padding: 0.5rem; border-radius: 50%;">pending_actions</span>
-                    <h3>Pending</h3><div class="number" id="count-pending">0</div>
+                    <span class="material-icons-sharp" style="color:var(--color-danger); background:rgba(255,100,103,0.1); padding:10px; border-radius:12px;">emergency_share</span>
+                    <h3>Pending</h3>
+                    <div class="number" id="count-pending">0</div>
                 </div>
                 <div>
-                    <span class="material-icons-sharp" style="background:var(--color-warning); color:white; padding: 0.5rem; border-radius: 50%;">autorenew</span>
-                    <h3>In Progress</h3><div class="number" id="count-progress">0</div>
+                    <span class="material-icons-sharp" style="color:var(--color-warning); background:rgba(254,154,0,0.1); padding:10px; border-radius:12px;">cached</span>
+                    <h3>In Progress</h3>
+                    <div class="number" id="count-progress">0</div>
                 </div>
                 <div>
-                    <span class="material-icons-sharp" style="background:var(--color-success); color:white; padding: 0.5rem; border-radius: 50%;">check_circle</span>
-                    <h3>Resolved</h3><div class="number" id="count-resolved">0</div>
+                    <span class="material-icons-sharp" style="color:var(--color-success); background:rgba(0,188,125,0.1); padding:10px; border-radius:12px;">check_circle</span>
+                    <h3>Resolved</h3>
+                    <div class="number" id="count-resolved">0</div>
+                </div>
+            </div>
+
+            <div class="graph-section">
+                <div class="graph-card">
+                    <h2>Weekly Activity Trend</h2>
+                    <canvas id="weeklyChart"></canvas>
+                </div>
+                <div class="graph-card">
+                    <h2>Complaint Categories</h2>
+                    <canvas id="categoryChart"></canvas>
                 </div>
             </div>
 
             <div class="recent-reports">
-                <div class="controls-bar">
-                    <h2>Recent Complaints</h2>
-                    <div>
-                        <select id="statusFilter" onchange="loadComplaints()">
-                            <option value="All">All Statuses</option>
-                            <option value="Pending">Only Pending</option>
-                            <option value="In Progress">Only In Progress</option>
-                            <option value="Resolved">Only Resolved</option>
-                        </select>
-                        <button class="btn-download" onclick="downloadCSV()">📥 Export CSV</button>
-                    </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                    <h2 style="font-size:1.1rem;">Recent Reports</h2>
+                    <select id="statusFilter" onchange="loadComplaints()" style="background:transparent; color:white; border:var(--glass-border); padding:5px 10px; border-radius:8px; cursor:pointer;">
+                        <option value="All">All Status</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Resolved">Resolved</option>
+                    </select>
                 </div>
                 <div style="overflow-x: auto;">
                     <table>
                         <thead>
                             <tr>
-                                <th>Photo</th>
-                                <th style="min-width: 140px;">ID & Priority</th> 
-                                <th>Details</th>
-                                <th>Description</th>
-                                <th>Status</th>
-                                <th style="min-width: 220px;">Action / Notes</th>
+                                <th>Report ID</th><th>Date</th><th>Citizen</th><th>Issue</th><th>Status</th><th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="dashboard-table-body">
-                             <tr><td colspan="6" style="text-align:center;">Loading reports...</td></tr>
+                            <tr><td colspan="6" style="text-align:center; padding:2rem; opacity:0.5;">Loading components...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -193,253 +177,121 @@
         </main>
     </div>
 
-    <div id="imageModal" class="modal" onclick="closeModal()">
-        <span class="close-modal">&times;</span>
-        <img class="modal-content" id="fullSizeImage">
-    </div>
-
     <script>
         const BACKEND_URL = 'https://kalapp-system.onrender.com';
         const currentAdminName = localStorage.getItem('kalapp_username') || 'Official';
+        document.getElementById('lgu-name-display').innerText = currentAdminName;
 
-        const toggleBtn = document.getElementById('mode-toggle');
-        const savedTheme = localStorage.getItem('kalapp-theme');
-        if (savedTheme === 'dark') document.body.classList.add('dark');
-        
-        if (toggleBtn) {
-            toggleBtn.addEventListener('click', () => {
-                document.body.classList.toggle('dark');
-                localStorage.setItem('kalapp-theme', document.body.classList.contains('dark') ? 'dark' : 'light');
+        let weeklyChart, categoryChart;
+
+        // Custom Plugin para sa Gradient Background ng Line Chart
+        function initCharts(stats, categories) {
+            const ctx1 = document.getElementById('weeklyChart').getContext('2d');
+            const ctx2 = document.getElementById('categoryChart').getContext('2d');
+
+            // Line Chart Gradient
+            const gradientStroke = ctx1.createLinearGradient(0, 230, 0, 50);
+            gradientStroke.addColorStop(1, 'rgba(127, 34, 254, 0.2)');
+            gradientStroke.addColorStop(0.2, 'rgba(127, 34, 254, 0.0)');
+            gradientStroke.addColorStop(0, 'rgba(127, 34, 254, 0)');
+
+            weeklyChart = new Chart(ctx1, {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Reports',
+                        data: [12, 19, 15, 25, 22, 30, 10],
+                        borderColor: '#7f22fe',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#7f22fe',
+                        pointBorderColor: 'rgba(255,255,255,0.8)',
+                        pointHoverRadius: 6,
+                        tension: 0.4,
+                        fill: true,
+                        backgroundColor: gradientStroke
+                    }]
+                },
+                options: {
+                    animation: { duration: 2000, easing: 'easeOutQuart' },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#9f9fa9' } },
+                        x: { grid: { display: false }, ticks: { color: '#9f9fa9' } }
+                    }
+                }
+            });
+
+            categoryChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(categories),
+                    datasets: [{
+                        data: Object.values(categories),
+                        backgroundColor: ['#7f22fe', '#fe9a00', '#00bc7d', '#ff6467'],
+                        borderWidth: 0,
+                        hoverOffset: 15
+                    }]
+                },
+                options: {
+                    animation: { animateRotate: true, animateScale: true },
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '75%',
+                    plugins: {
+                        legend: { position: 'bottom', labels: { color: '#9f9fa9', padding: 20, font: { family: 'Poppins', size: 11 } } }
+                    }
+                }
             });
         }
 
-        document.getElementById('lgu-name-display').innerText = currentAdminName;
-        let currentFilteredData = []; 
-
-        function loadComplaints() {
+        async function loadComplaints() {
             const filterValue = document.getElementById('statusFilter').value;
-            fetch(`${BACKEND_URL}/api/complaints`)
-            .then(res => res.json())
-            .then(data => {
-                const today = new Date();
-                const isToday = (dateString) => {
-                    const d = new Date(dateString);
-                    return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-                };
+            try {
+                const res = await fetch(`${BACKEND_URL}/api/complaints`);
+                const data = await res.json();
+                const complaints = data.complaints;
 
-                const todaysComplaints = data.complaints.filter(c => isToday(c.createdAt));
-                
-                document.getElementById('count-total').innerText = todaysComplaints.length;
-                document.getElementById('count-pending').innerText = todaysComplaints.filter(c => !c.status || c.status === 'Pending').length;
-                document.getElementById('count-progress').innerText = todaysComplaints.filter(c => c.status === 'In Progress').length;
-                document.getElementById('count-resolved').innerText = todaysComplaints.filter(c => c.status === 'Resolved').length;
-                
+                document.getElementById('count-total').innerText = complaints.length;
+                document.getElementById('count-pending').innerText = complaints.filter(c => c.status === 'Pending').length;
+                document.getElementById('count-progress').innerText = complaints.filter(c => c.status === 'In Progress').length;
+                document.getElementById('count-resolved').innerText = complaints.filter(c => c.status === 'Resolved').length;
+
+                const catMap = {};
+                complaints.forEach(c => { if(c.category) catMap[c.category] = (catMap[c.category] || 0) + 1; });
+                if(!categoryChart) initCharts({}, catMap);
+
                 const tableBody = document.getElementById('dashboard-table-body');
-                tableBody.innerHTML = ''; 
-
-                currentFilteredData = data.complaints.filter(c => {
-                    const currentStatus = c.status || 'Pending';
-                    if (filterValue === 'All') return true;
-                    return currentStatus === filterValue;
-                });
-
-                // 🌶️ SPICE: Ultimate Sorting Logic
-                const statusWeights = { 'Pending': 3, 'In Progress': 2, 'Resolved': 1, 'Rejected & Flagged': 0 };
-                const priorityWeights = { 'CRITICAL': 4, 'HIGH': 3, 'MEDIUM': 2, 'LOW': 1 };
-                
-                currentFilteredData.sort((a, b) => {
-                    const statA = statusWeights[a.status || 'Pending'] || 0;
-                    const statB = statusWeights[b.status || 'Pending'] || 0;
-                    
-                    // 1st: Push Pending/In Progress to the top
-                    if (statA !== statB) return statB - statA; 
-
-                    // 2nd: If statuses are the same, sort by Priority
-                    const weightA = priorityWeights[a.priority || 'MEDIUM'] || 2;
-                    const weightB = priorityWeights[b.priority || 'MEDIUM'] || 2;
-                    if (weightA !== weightB) return weightB - weightA;
-
-                    // 3rd: If priorities are the same, sort by Newest Date
-                    return new Date(b.createdAt) - new Date(a.createdAt);
-                });
-
-                if (currentFilteredData.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center;">No ${filterValue !== 'All' ? filterValue.toLowerCase() : ''} complaints found.</td></tr>`;
-                    return;
-                }
-
-                currentFilteredData.forEach(complaint => {
-                    const isResolvedOrFlagged = complaint.status === 'Resolved' || complaint.status === 'Rejected & Flagged';
-                    const priorityValue = complaint.priority || 'MEDIUM';
-                    const isCriticalPending = priorityValue === 'CRITICAL' && !isResolvedOrFlagged;
-                    
+                tableBody.innerHTML = '';
+                complaints.filter(c => filterValue === 'All' || c.status === filterValue).slice(0, 8).forEach(c => {
                     const row = document.createElement('tr');
-                    // Add subtle red highlight to pending critical rows
-                    if (isCriticalPending) row.className = 'critical-row';
-
-                    let statusClass = 'status-pending';
-                    let statusDisplay = complaint.status || 'Pending';
-                    if (complaint.status === 'In Progress') statusClass = 'status-inprogress';
-                    if (complaint.status === 'Resolved') statusClass = 'status-resolved';
-                    if (complaint.status === 'Rejected & Flagged') {
-                        statusClass = 'status-flagged';
-                        statusDisplay = 'Flagged';
-                    }
-
-                    const trackingId = complaint.trackingId;
-                    const existingNote = complaint.lguNote ? complaint.lguNote : '';
-                    
-                    // 🌶️ SPICE: Priority Override moved here, styled cleanly
-                    let priorityBadge = '';
-                    if (priorityValue === 'CRITICAL') priorityBadge = `<span style="background: #ef4444; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; animation: pulse-critical 1.5s infinite; display: inline-block;">CRITICAL</span>`;
-                    else if (priorityValue === 'HIGH') priorityBadge = `<span style="background: #f97316; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block;">HIGH</span>`;
-                    else if (priorityValue === 'MEDIUM') priorityBadge = `<span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block;">MEDIUM</span>`;
-                    else priorityBadge = `<span style="background: #94a3b8; color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; font-weight: bold; display: inline-block;">LOW</span>`;
-
-                    const priorityUI = isResolvedOrFlagged ? 
-                        `<div style="margin-top: 5px;">${priorityBadge}</div>` : 
-                        `<div style="margin-top: 5px; display: flex; align-items: center; gap: 4px;">
-                            ${priorityBadge}
-                            <select id="priority-${trackingId}" class="compact-select" onchange="overridePriority('${trackingId}', '${statusDisplay}')" title="Change Priority">
-                                <option value="" disabled selected>✎ Edit</option>
-                                <option value="CRITICAL">Critical</option>
-                                <option value="HIGH">High</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="LOW">Low</option>
-                            </select>
-                        </div>`;
-
-                    // 🌶️ SPICE: Compact Action Buttons
-                    const noteHTML = `<input type="text" id="note-${trackingId}" class="note-input" placeholder="Add feedback/notes..." value="${existingNote}" ${isResolvedOrFlagged ? 'disabled' : ''}>`;
-                    let actionButtons = '';
-                    
-                    if (isResolvedOrFlagged) {
-                        actionButtons = `<div style="text-align: center; color: var(--color-info-dark); font-size: 0.8rem;"><i>Closed. No further actions available.</i></div>`;
-                    } else if (complaint.status === 'In Progress') {
-                        actionButtons = `
-                            <div class="action-row">
-                                <button class="action-btn btn-resolve" style="flex: 1;" onclick="updateStatus('${trackingId}', 'Resolved')">Mark Resolved ✓</button>
-                            </div>`;
-                    } else {
-                        actionButtons = `
-                            <div class="action-row">
-                                <button class="action-btn btn-in-progress" style="flex: 1;" onclick="updateStatus('${trackingId}', 'In Progress')">Accept</button>
-                                <button class="action-btn btn-resolve" style="flex: 1;" onclick="updateStatus('${trackingId}', 'Resolved')">Resolve</button>
-                                <button class="action-btn btn-reject" onclick="if(confirm('Flag as spam? (Adds 1 strike to user)')) updateStatus('${trackingId}', 'Rejected & Flagged')" title="Reject & Flag">❌</button>
-                            </div>`;
-                    }
-
-                    const fullImageUrl = complaint.imageUrl ? (complaint.imageUrl.startsWith('http') ? complaint.imageUrl : `${BACKEND_URL}${complaint.imageUrl}`) : '';
-                    const photoDisplay = complaint.imageUrl ? `<img src="${fullImageUrl}" class="photo-thumbnail" alt="Evidence" onclick="openModal('${fullImageUrl}')">` : `<div style="width: 60px; height: 60px; background: var(--color-light); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.7rem;">No img</div>`;
-                    
-                    const formattedDate = new Date(complaint.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' });
-
+                    row.style.animation = "fadeIn 0.5s ease forwards";
                     row.innerHTML = `
-                        <td>${photoDisplay}</td>
-                        <td>
-                            <strong>${trackingId}</strong>
-                            ${priorityUI}
-                        </td>
-                        <td style="font-size: 0.8rem;">
-                            <div style="margin-bottom: 4px;"><span class="material-icons-sharp" style="font-size:12px; vertical-align:middle;">event</span> ${formattedDate}</div>
-                            <div style="margin-bottom: 4px;"><strong>${complaint.citizenName || 'Anon'}</strong></div>
-                            <div>${complaint.barangay}</div>
-                        </td>
-                        <td>
-                            <strong>${complaint.category}</strong><br>
-                            <small style="color: var(--color-info-dark);">${complaint.description || 'No description provided.'}</small>
-                        </td>
-                        <td><span class="status-text ${statusClass}">${statusDisplay}</span></td>
-                        <td>
-                            ${noteHTML}
-                            ${actionButtons}
-                        </td>
+                        <td style="font-weight:600; color:var(--color-primary);">${c.trackingId}</td>
+                        <td>${new Date(c.createdAt).toLocaleDateString()}</td>
+                        <td>${c.citizenName || 'Guest'}</td>
+                        <td>${c.category}</td>
+                        <td><span class="status-pill status-${c.status.toLowerCase().replace(/\s/g, '')}">${c.status}</span></td>
+                        <td><button onclick="updateStatus('${c.trackingId}', 'Resolved')" style="background:var(--color-primary); color:white; padding:5px 12px; border-radius:8px; cursor:pointer; font-size:0.7rem; transition: 0.3s;">Resolve</button></td>
                     `;
                     tableBody.appendChild(row);
                 });
-            })
-            .catch(error => console.error('Error fetching complaints:', error));
+            } catch (err) { console.error("Database error:", err); }
         }
 
-        function updateStatus(trackingId, newStatus) {
-            const noteValue = document.getElementById(`note-${trackingId}`).value;
-            fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
-                method: 'PATCH', 
+        async function updateStatus(id, status) {
+            await fetch(`${BACKEND_URL}/api/complaints/${id}/status`, {
+                method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    status: newStatus, 
-                    note: noteValue,
-                    adminName: currentAdminName 
-                })
-            })
-            .then(res => res.json())
-            .then(data => { 
-                if(data.success) {
-                    loadComplaints(); 
-                } 
-            })
-            .catch(err => console.error('Error:', err));
-        }
-
-        function overridePriority(trackingId, currentStatus) {
-            const newPriority = document.getElementById(`priority-${trackingId}`).value;
-            if (!newPriority) return; // Ignore if they didn't actually select one
-            
-            const noteValue = document.getElementById(`note-${trackingId}`).value;
-
-            fetch(`${BACKEND_URL}/api/complaints/${trackingId}/status`, {
-                method: 'PATCH', 
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    status: currentStatus, 
-                    note: noteValue,
-                    priority: newPriority, 
-                    adminName: currentAdminName 
-                })
-            })
-            .then(res => res.json())
-            .then(data => { 
-                if(data.success) {
-                    loadComplaints(); 
-                } 
-            })
-            .catch(err => console.error('Error:', err));
-        }
-
-        function downloadCSV() {
-            let csvContent = "Tracking ID,Priority,Date Submitted,Citizen User,Barangay,Issue,Description,Status,LGU Note\n";
-            currentFilteredData.forEach(c => {
-                const id = c.trackingId; 
-                const priority = c.priority || 'MEDIUM';
-                const date = new Date(c.createdAt).toLocaleDateString(); 
-                const user = c.citizenName || 'Anonymous';
-                const brgy = c.barangay || ''; 
-                const issue = c.category || ''; 
-                const desc = (c.description || '').replace(/"/g, '""'); 
-                const status = c.status || 'Pending'; 
-                const note = (c.lguNote || '').replace(/"/g, '""'); 
-                csvContent += `"${id}","${priority}","${date}","${user}","${brgy}","${issue}","${desc}","${status}","${note}"\n`;
+                body: JSON.stringify({ status, adminName: currentAdminName })
             });
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            link.setAttribute("href", URL.createObjectURL(blob));
-            link.setAttribute("download", `Kalapp_Report_${new Date().toISOString().split('T')[0]}.csv`);
-            link.click();
+            loadComplaints();
         }
 
-        function logout() { 
-            localStorage.removeItem('kalapp_username');
-            window.location.href = '/login.html'; 
-        }
-        
-        function openModal(imageSrc) { 
-            document.getElementById("imageModal").style.display = "block";
-            document.getElementById("fullSizeImage").src = imageSrc; 
-        }
-        function closeModal() { 
-            document.getElementById("imageModal").style.display = "none";
-        }
-        
+        function logout() { localStorage.removeItem('kalapp_username'); window.location.href = '/login.html'; }
+
         loadComplaints();
     </script>
 </body>
